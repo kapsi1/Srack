@@ -10,7 +10,7 @@
 		"prisma:migrate": "prisma migrate dev"
 	},
 	"dependencies": {
-		"@prisma/client": "^7.2.0",
+		"@prisma/client": "^5.7.0",
 		"bcrypt": "^6.0.0",
 		"cors": "^2.8.5",
 		"dotenv": "^17.2.3",
