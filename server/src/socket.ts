@@ -1,4 +1,4 @@
-import { Server, Socket } from "socket.io";
+import type { Server, Socket } from "socket.io";
 import prisma from "./lib/prisma";
 
 // Store io instance locally
@@ -82,7 +82,7 @@ export const setupSocket = (io: Server) => {
   });
 };
 
-export const broadcastMessage = (channelId: string, message: any) => {
+export const broadcastMessage = (channelId: string, message: unknown) => {
   if (ioInstance) {
     ioInstance.to(channelId).emit("new_message", message);
   }

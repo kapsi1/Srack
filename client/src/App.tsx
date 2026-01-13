@@ -14,7 +14,8 @@ import {
     sendMessage,
     type Channel as ApiChannel,
     type Message as ApiMessage,
-    type User as ApiUser 
+    type User as ApiUser,
+    type MessageReaction
 } from "./lib/api";
 
 export type User = ApiUser;
@@ -47,15 +48,6 @@ export interface Channel {
     members?: User[];
 }
 
-
-
-export interface DirectMessage {
-	id: string;
-	userName: string;
-	userAvatar: string;
-	isOnline: boolean;
-	unreadCount?: number;
-}
 
 
 export default function App() {
@@ -256,7 +248,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 	useEffect(() => {
 		if (messagesData) {
 			// Mapping with simple type assertions to fix 'any' warnings
-			const mappedMessages: Message[] = messagesData.map((msg: any) => ({
+			const mappedMessages: Message[] = messagesData.map((msg: ApiMessage) => ({
 				id: msg.id,
 				userId: msg.senderId || msg.sender?.id,
 				userName: msg.sender?.username || "Unknown",
@@ -266,20 +258,20 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 				content: msg.content,
 				timestamp: new Date(msg.createdAt),
 				reactions:
-					msg.reactions?.map((r: any) => ({
+					msg.reactions?.map((r: MessageReaction) => ({
 						emoji: r.emoji,
 						count: 1,
-						users: [r.user?.username].filter(Boolean),
+						users: [r.user?.username].filter((u): u is string => !!u),
 					})) || [],
 			}));
 
 			// Aggregation logic
 			const aggregatedMessages = mappedMessages.map((msg) => {
 				const rawReactions =
-					messagesData.find((m: any) => m.id === msg.id)?.reactions || [];
+					messagesData.find((m: ApiMessage) => m.id === msg.id)?.reactions || [];
 				const agg: Record<string, { count: number; users: string[] }> = {};
 
-				rawReactions.forEach((r: any) => {
+				rawReactions.forEach((r: MessageReaction) => {
 					const reactionEmoji = r.emoji as string;
 					if (!agg[reactionEmoji]) {
 						agg[reactionEmoji] = { count: 0, users: [] };
@@ -306,8 +298,8 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 	// Derived state for props
 	const channels: Channel[] =
 		channelsData
-            ?.filter((c: any) => c.type !== "DM")
-            .map((c: any) => ({
+            ?.filter((c: ApiChannel) => c.type !== "DM")
+            .map((c: ApiChannel) => ({
     			...c,
 	    		unreadCount: unreadCounts[c.id] || 0,
 		    })) || [];
@@ -315,7 +307,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 	const directMessages: DirectMessage[] =
 		usersData?.map((u: User) => {
             const dmChannel = channelsData?.find(
-                (c: any) => c.type === "DM" && c.members?.some((m: any) => m.id === u.id)
+                (c: ApiChannel) => c.type === "DM" && c.members?.some((m: User) => m.id === u.id)
             );
             return {
     			id: u.id,
@@ -335,13 +327,11 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 		// For public channels, we join them all to get unread counts.
 
 		channelsData?.forEach((c: Channel) => {
-			if (c.id !== activeChannel.id) {
-				socket.emit("join_channel", c.id);
-			}
+			socket.emit("join_channel", c.id);
 		});
 		socket.emit("join_channel", activeChannel.id);
 
-		const handleNewMessage = (message: any) => {
+		const handleNewMessage = (message: ApiMessage & { tempId?: string }) => {
 			const newMessage: Message = {
 				id: message.id,
 				userId: message.sender?.id || message.senderId,
@@ -376,7 +366,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 			}
 		};
 
-		const handleReactionAdded = (reaction: any) => {
+		const handleReactionAdded = (reaction: MessageReaction & { message?: { channelId: string } }) => {
 			if (
 				reaction.message?.channelId &&
 				reaction.message.channelId !== activeChannel.id
@@ -435,7 +425,9 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 	// We need a separate effect to join all channels once
 	useEffect(() => {
 		if (socket && channelsData) {
-			channelsData.forEach((c) => socket.emit("join_channel", c.id));
+			channelsData.forEach((c) => {
+				socket.emit("join_channel", c.id);
+			});
 		}
 	}, [socket, channelsData]);
 
