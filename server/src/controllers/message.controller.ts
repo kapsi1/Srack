@@ -4,7 +4,7 @@ import type { AuthRequest } from "../middleware/auth.middleware";
 
 export const getChannelMessages = async (req: AuthRequest, res: Response) => {
 	try {
-		const { channelId } = req.params;
+		const channelId = req.params.channelId as string;
 
 		const messages = await prisma.message.findMany({
 			where: { channelId },

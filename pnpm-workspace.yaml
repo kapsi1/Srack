@@ -1,7 +1,0 @@
-packages:
-  - 'client'
-  - 'server'
-
-onlyBuiltDependencies:
-  - '@swc/core'
-  - esbuild
