@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { Routes, Route, useParams, useNavigate, Navigate } from "react-router-dom";
 import { AuthPage } from "./components/AuthPage";
 import { ChatArea } from "./components/ChatArea";
 import { Sidebar } from "./components/Sidebar";
@@ -56,15 +57,56 @@ export interface DirectMessage {
 	unreadCount?: number;
 }
 
+
 export default function App() {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
 	const [token, setToken] = useState<string | null>(
 		localStorage.getItem("token"),
 	);
 
+    useEffect(() => {
+		const savedToken = localStorage.getItem("token");
+		if (savedToken) {
+             fetchCurrentUser().then(user => {
+                 setCurrentUser(user);
+                 setToken(savedToken);
+             }).catch(() => {
+                 handleLogout();
+             });
+		}
+	}, []);
+
+	const handleLogin = (user: User, token: string) => {
+		setCurrentUser(user);
+		setToken(token);
+		localStorage.setItem("token", token);
+		localStorage.setItem("user", JSON.stringify(user));
+	};
+
+	const handleLogout = () => {
+		setCurrentUser(null);
+		setToken(null);
+		localStorage.removeItem("token");
+		localStorage.removeItem("user");
+	};
+
+	if (!currentUser) {
+		return <AuthPage onLogin={handleLogin} />;
+	}
+
+    return (
+        <Routes>
+            <Route path="/" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
+            <Route path="/channel/:channelName" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
+            <Route path="/user/:userName" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+    );
+}
+
+function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout: () => void, token: string }) {
 	// State for UI
 	const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
-	const [activeView, setActiveView] = useState<"channel" | "dm">("channel");
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 
@@ -114,7 +156,6 @@ export default function App() {
             });
 
             setActiveChannel(channel);
-            setActiveView("channel"); // Or "dm" if we want to treat them distinct in UI
         }
     });
 
@@ -169,37 +210,38 @@ export default function App() {
         // Remove empty onSuccess as we handle updates via socket/optimistic
     });
 
-	useEffect(() => {
-		const savedUser = localStorage.getItem("user");
-        const savedToken = localStorage.getItem("token");
-		if (savedToken) {
-            // Verify with backend
-             fetchCurrentUser().then(user => {
-                 setCurrentUser(user);
-                 setToken(savedToken);
-             }).catch(() => {
-                 handleLogout();
-             });
-		} else if (savedUser && token) {
-			setCurrentUser(JSON.parse(savedUser));
-		}
-	}, []); // Run once on mount
-
-    useEffect(() => {
-        if(savedTokenRef.current !== token) {
-           savedTokenRef.current = token;
-        }
-    }, [token]);
-    const savedTokenRef = { current: token }; // Mock ref to avoid errors in this snippet, actual impl below
-
-	// Set initial active channel
+    const { channelName, userName } = useParams();
+    const navigate = useNavigate();
 
 	// Set initial active channel
 	useEffect(() => {
-		if (channelsData && channelsData.length > 0 && !activeChannel) {
-			setActiveChannel(channelsData[0]);
+		if (channelsData && channelsData.length > 0) {
+            if (channelName) {
+                const found = channelsData.find(c => c.name === channelName);
+                if (found && found.id !== activeChannel?.id) {
+                    setActiveChannel(found);
+                }
+            } else if (userName) {
+                const user = usersData?.find(u => u.username === userName);
+                if (user) {
+                    const dmChannel = channelsData.find(c => c.type === "DM" && c.members?.some(m => m.id === user.id));
+                    if (dmChannel) {
+                        if (dmChannel.id !== activeChannel?.id) {
+                            setActiveChannel(dmChannel);
+                        }
+                    } else {
+                        // Avoid infinite loop if mutation is slow
+                        if (!dmMutation.isPending) {
+                            dmMutation.mutate(user.id);
+                        }
+                    }
+                }
+            } else if (!activeChannel) {
+                // If no channel in URL, go to first channel
+                navigate(`/channel/${channelsData[0].name}`, { replace: true });
+            }
 		}
-	}, [channelsData, activeChannel]);
+	}, [channelsData, usersData, channelName, userName, activeChannel, navigate, dmMutation]);
 
 	// Clear unreads when changing active channel
 	useEffect(() => {
@@ -395,24 +437,6 @@ export default function App() {
 		}
 	}, [socket, channelsData]);
 
-	const handleLogin = (user: User, token: string) => {
-		setCurrentUser(user);
-		setToken(token);
-		localStorage.setItem("token", token);
-		localStorage.setItem("user", JSON.stringify(user));
-	};
-
-	const handleLogout = () => {
-		setCurrentUser(null);
-		setToken(null);
-		localStorage.removeItem("token");
-		localStorage.removeItem("user");
-	};
-
-	if (!currentUser) {
-		return <AuthPage onLogin={handleLogin} />;
-	}
-
 	const handleSendMessage = (content: string) => {
 		if (!currentUser || !activeChannel) return;
 
@@ -432,9 +456,7 @@ export default function App() {
 		});
 	};
 
-    const handleDMSelect = (targetUserId: string) => {
-        dmMutation.mutate(targetUserId);
-    };
+    // dmMutation logic is now handled in useEffect based on userName param
 
 	return (
 		<div className="flex h-screen overflow-hidden">
@@ -442,12 +464,8 @@ export default function App() {
 				channels={channels}
 				directMessages={directMessages}
 				activeChannel={activeChannel || channels[0]} // Fallback or assume conditional rendering for chat
-				onChannelSelect={setActiveChannel}
-				activeView={activeView}
-				onViewChange={setActiveView}
 				currentUser={currentUser}
-				onLogout={handleLogout}
-                onDMSelect={handleDMSelect}
+				onLogout={onLogout}
 			/>
 			{activeChannel ? (
 				<ChatArea

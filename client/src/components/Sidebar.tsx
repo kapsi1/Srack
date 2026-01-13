@@ -10,28 +10,23 @@ import {
 	MoreVertical,
 	Plus,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { Channel, DirectMessage, User } from "../App";
 
 interface SidebarProps {
 	channels: Channel[];
 	directMessages: DirectMessage[];
 	activeChannel: Channel;
-	onChannelSelect: (channel: Channel) => void;
-	activeView: "channel" | "dm";
-	onViewChange: (view: "channel" | "dm") => void;
 	currentUser: User;
 	onLogout: () => void;
-	onDMSelect: (dmId: string) => void;
 }
 
 export function Sidebar({
 	channels,
 	directMessages,
 	activeChannel,
-	onChannelSelect,
 	currentUser,
 	onLogout,
-	onDMSelect,
 }: SidebarProps) {
 	const handleLogout = () => {
 		onLogout();
@@ -85,11 +80,10 @@ export function Sidebar({
 							<Plus className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
 						</button>
 						<div className="mt-1">
-							{channels.map((channel) => (
-								<button
-									type="button"
+							{channels.map((channel: Channel) => (
+								<Link
 									key={channel.id}
-									onClick={() => onChannelSelect(channel)}
+                                    to={`/channel/${channel.name}`}
 									className={`w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group ${
 										activeChannel.id === channel.id ? "bg-[#1164a3]" : ""
 									}`}
@@ -109,7 +103,7 @@ export function Sidebar({
 											</span>
 										</div>
 									)}
-								</button>
+								</Link>
 							))}
 						</div>
 					</div>
@@ -127,13 +121,12 @@ export function Sidebar({
 							<Plus className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
 						</button>
 						<div className="mt-1">
-							{directMessages.map((dm) => {
-                                const isActive = activeChannel?.type === "DM" && activeChannel.members?.some(m => m.id === dm.id);
+							{directMessages.map((dm: DirectMessage) => {
+                                const isActive = activeChannel?.type === "DM" && activeChannel.members?.some((m: User) => m.id === dm.id);
                                 return (
-                                    <button
-                                        type="button"
+                                    <Link
                                         key={dm.id}
-                                        onClick={() => onDMSelect(dm.id)}
+                                        to={`/user/${dm.userName}`}
                                         className={`w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group ${
                                             isActive ? "bg-[#1164a3]" : ""
                                         }`}
@@ -158,7 +151,7 @@ export function Sidebar({
                                                 </span>
                                             </div>
                                         )}
-                                    </button>
+                                    </Link>
                                 );
                             })}
 						</div>
