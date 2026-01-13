@@ -1,4 +1,5 @@
-import axios, { type AxiosError } from "axios";
+import api from "@/lib/api";
+import type { AxiosError } from "axios";
 import { type FormEvent, useState } from "react";
 
 interface User {
@@ -11,8 +12,6 @@ interface User {
 interface AuthPageProps {
 	onLogin: (user: User, token: string) => void;
 }
-
-const API_BASE_URL = "http://localhost:3001";
 
 export function AuthPage({ onLogin }: AuthPageProps) {
 	const [isLogin, setIsLogin] = useState(true);
@@ -28,12 +27,12 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 		setLoading(true);
 
 		try {
-			const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
+			const endpoint = isLogin ? "/auth/login" : "/auth/register";
 			const data = isLogin
 				? { email, password }
 				: { email, username, password };
 
-			const response = await axios.post(`${API_BASE_URL}${endpoint}`, data);
+			const response = await api.post(endpoint, data);
 			const { user, token } = response.data;
 			onLogin(user, token);
 		} catch (err) {
