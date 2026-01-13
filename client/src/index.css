@@ -82,6 +82,44 @@
     --default-mono-font-feature-settings: var(--font-mono--font-feature-settings);
     --default-mono-font-variation-settings: var(--font-mono--font-variation-settings);
   }
+
+  @keyframes sparkle-shimmer {
+    0% { background-position: 200% center; }
+    100% { background-position: -200% center; }
+  }
+
+  @keyframes sparkle-glow {
+    0%, 100% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.2); }
+    50% { text-shadow: 0 0 15px rgba(255, 255, 255, 0.6), 0 0 25px rgba(97, 31, 105, 0.4); }
+  }
+
+  .sparkle-text {
+    background: linear-gradient(
+      90deg, 
+      #ffffff 0%, 
+      #f8f8f8 20%, 
+      #611f69 40%, 
+      #ffffff 50%, 
+      #611f69 60%, 
+      #f8f8f8 80%, 
+      #ffffff 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+    display: inline-block;
+    animation: sparkle-shimmer 4s linear infinite, sparkle-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes sparkle-fade {
+    0%, 100% { opacity: 0; transform: scale(0) rotate(0deg) translateY(0); }
+    50% { opacity: 1; transform: scale(0.6) rotate(15deg) translateY(-5px); }
+  }
+
+  .poop-emoji {
+    animation: sparkle-fade 2s ease-in-out infinite;
+  }
 }
 
 @layer base {
