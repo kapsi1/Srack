@@ -46,6 +46,91 @@ export function MessageInput({ channelName, isDM, onSendMessage }: MessageInputP
 		}, 0);
 	};
 
+	const handleLink = () => {
+		const textarea = textareaRef.current;
+		if (!textarea) return;
+
+		const start = textarea.selectionStart;
+		const end = textarea.selectionEnd;
+		const text = textarea.value;
+
+		const before = text.substring(0, start);
+		const selection = text.substring(start, end) || 'text';
+		const after = text.substring(end);
+
+		const newText = `${before}[${selection}](url)${after}`;
+		setMessage(newText);
+
+		setTimeout(() => {
+			textarea.focus();
+			const urlStart = start + selection.length + 3;
+			textarea.setSelectionRange(urlStart, urlStart + 3);
+		}, 0);
+	};
+
+	const handleList = (type: 'ordered' | 'unordered') => {
+		const textarea = textareaRef.current;
+		if (!textarea) return;
+
+		const start = textarea.selectionStart;
+		const end = textarea.selectionEnd;
+		const text = textarea.value;
+
+		const before = text.substring(0, start);
+		const selection = text.substring(start, end);
+		const after = text.substring(end);
+
+		const lines = (selection || '').split('\n');
+		const formattedLines = lines.map((line, index) => {
+			if (type === 'ordered') {
+				return `${index + 1}. ${line}`;
+			}
+			return `* ${line}`;
+		});
+
+		const replacement = formattedLines.join('\n');
+		const newText = `${before}${replacement}${after}`;
+		setMessage(newText);
+
+		setTimeout(() => {
+			textarea.focus();
+			const newEnd = start + replacement.length;
+			textarea.setSelectionRange(selection ? start : newEnd, newEnd);
+		}, 0);
+	};
+
+	const handleCode = () => {
+		const textarea = textareaRef.current;
+		if (!textarea) return;
+
+		const start = textarea.selectionStart;
+		const end = textarea.selectionEnd;
+		const text = textarea.value;
+
+		const before = text.substring(0, start);
+		const selection = text.substring(start, end);
+		const after = text.substring(end);
+
+		let replacement = '';
+		let selectionOffset = 0;
+
+		if (selection.includes('\n')) {
+			replacement = `\`\`\`\n${selection}\n\`\`\``;
+			selectionOffset = 4;
+		} else {
+			replacement = `\`${selection}\``;
+			selectionOffset = 1;
+		}
+
+		const newText = `${before}${replacement}${after}`;
+		setMessage(newText);
+
+		setTimeout(() => {
+			textarea.focus();
+			textarea.setSelectionRange(start + selectionOffset, start + selectionOffset + selection.length);
+		}, 0);
+	};
+
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		if (message.trim()) {
@@ -92,16 +177,36 @@ export function MessageInput({ channelName, isDM, onSendMessage }: MessageInputP
 							<Strikethrough className="w-4 h-4 text-gray-300" />
 						</button>
 						<div className="w-px h-5 bg-gray-700 mx-1" />
-						<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors">
+						<button
+							type="button"
+							className="p-1.5 hover:bg-gray-700 rounded transition-colors"
+							onClick={handleLink}
+							title="Link"
+						>
 							<Link className="w-4 h-4 text-gray-300" />
 						</button>
-						<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors">
+						<button
+							type="button"
+							className="p-1.5 hover:bg-gray-700 rounded transition-colors"
+							onClick={() => handleList('ordered')}
+							title="Ordered List"
+						>
 							<ListOrdered className="w-4 h-4 text-gray-300" />
 						</button>
-						<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors">
+						<button
+							type="button"
+							className="p-1.5 hover:bg-gray-700 rounded transition-colors"
+							onClick={() => handleList('unordered')}
+							title="Unordered List"
+						>
 							<List className="w-4 h-4 text-gray-300" />
 						</button>
-						<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors">
+						<button
+							type="button"
+							className="p-1.5 hover:bg-gray-700 rounded transition-colors"
+							onClick={handleCode}
+							title="Code"
+						>
 							<Code className="w-4 h-4 text-gray-300" />
 						</button>
 					</div>

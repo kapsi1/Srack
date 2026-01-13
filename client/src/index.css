@@ -1372,3 +1372,111 @@ html {
   syntax: "*";
   inherits: false
 }
+/* Custom List Utilities (Missing from pre-generated Tailwind) */
+.list-disc {
+  list-style-type: disc !important;
+}
+
+.list-decimal {
+  list-style-type: decimal !important;
+}
+
+.ml-6 {
+  margin-left: 1.5rem !important;
+}
+
+.my-2 {
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.space-y-1 > :not(:first-child) {
+  margin-top: 0.25rem !important;
+}
+
+.mb-1 {
+  margin-bottom: 0.25rem !important;
+}
+
+.last\:mb-0:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* --- Markdown Rendering Styles --- */
+.markdown-content {
+  line-height: 1.5;
+}
+
+.markdown-paragraph {
+  margin-bottom: 0.25rem;
+}
+
+.markdown-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-link {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.markdown-link:hover {
+  text-decoration: underline;
+}
+
+.markdown-list-unordered {
+  list-style-type: disc !important;
+  margin-left: 1.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.markdown-list-ordered {
+  list-style-type: decimal !important;
+  margin-left: 1.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.markdown-list-item {
+  margin-top: 0.125rem;
+}
+
+.markdown-code-inline {
+  background-color: #2c2f33;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
+  color: #e6e6e6;
+}
+
+.markdown-code-block {
+  background-color: #2c2f33;
+  padding: 0.75rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  border: 1px solid #374151;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-code-block code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
+  color: #e6e6e6;
+}
+
+.markdown-strong {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.markdown-em {
+  font-style: italic;
+}
+
+.markdown-del {
+  text-decoration: line-through;
+  color: #9ca3af;
+}

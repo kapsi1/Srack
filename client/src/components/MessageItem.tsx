@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/a11y/noStaticElementInteractions: <explanation> */
+/** biome-ignore-all lint/a11y/noStaticElementInteractions: Container handles mouse events for showing actions overlay */
 import {
 	Bookmark,
 	MessageSquare,
@@ -66,24 +66,48 @@ export function MessageItem({
 							</span>
 						</div>
 					)}
-					<div className="text-gray-200">
+					<div className="text-gray-200 markdown-content">
 						<ReactMarkdown
 							remarkPlugins={[remarkGfm]}
 							components={{
-								p: ({ node, ...props }) => <p className="inline" {...props} />,
+								p: ({ node, ...props }) => <p className="markdown-paragraph" {...props} />,
 								a: ({ node, ...props }) => (
 									<a
-										className="text-blue-400 hover:underline"
+										className="markdown-link"
 										target="_blank"
 										rel="noopener noreferrer"
 										{...props}
 									/>
 								),
-								strong: ({ node, ...props }) => (
-									<strong className="font-bold text-white" {...props} />
+								ul: ({ node, ...props }) => (
+									<ul className="markdown-list-unordered" {...props} />
 								),
-								em: ({ node, ...props }) => <em className="italic" {...props} />,
-								del: ({ node, ...props }) => <del className="line-through text-gray-400" {...props} />,
+								ol: ({ node, ...props }) => (
+									<ol className="markdown-list-ordered" {...props} />
+								),
+								li: ({ node, ...props }) => <li className="markdown-list-item" {...props} />,
+								code: ({
+									node,
+									inline,
+									...props
+								}: {
+									node?: unknown;
+									inline?: boolean;
+								} & React.HTMLAttributes<HTMLElement>) =>
+									inline ? (
+										<code className="markdown-code-inline" {...props} />
+									) : (
+										<pre className="markdown-code-block">
+											<code {...props} />
+										</pre>
+									),
+								strong: ({ node, ...props }) => (
+									<strong className="markdown-strong" {...props} />
+								),
+								em: ({ node, ...props }) => <em className="markdown-em" {...props} />,
+								del: ({ node, ...props }) => (
+									<del className="markdown-del" {...props} />
+								),
 							}}
 						>
 							{message.content}
