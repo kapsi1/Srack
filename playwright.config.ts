@@ -4,6 +4,7 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
   reporter: 'list',
+  globalTeardown: require.resolve('./e2e/teardown'),
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',

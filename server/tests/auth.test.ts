@@ -1,30 +1,35 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../src/app';
+import { TEST_PREFIX, cleanupTestData } from './helpers';
 
 describe('Auth Endpoints', () => {
+  afterAll(async () => {
+    await cleanupTestData();
+  });
+
   it('should register a new user', async () => {
     const uniqueSuffix = Date.now();
     const res = await request(app)
       .post('/api/auth/register')
       .send({
-        username: `testuser_${uniqueSuffix}`,
-        email: `test_${uniqueSuffix}@example.com`,
+        username: `${TEST_PREFIX}user_${uniqueSuffix}`,
+        email: `${TEST_PREFIX}user_${uniqueSuffix}@example.com`,
         password: 'password123'
       });
     
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('token');
     expect(res.body.user).toHaveProperty('id');
-    expect(res.body.user.username).toBe(`testuser_${uniqueSuffix}`);
+    expect(res.body.user.username).toBe(`${TEST_PREFIX}user_${uniqueSuffix}`);
   });
 
   it('should login an existing user', async () => {
     // First register a user
-    const uniqueSuffix = Date.now() + 1; // Ensure different from above
+    const uniqueSuffix = Date.now() + 1;
     const userData = {
-      username: `loginuser_${uniqueSuffix}`,
-      email: `login_${uniqueSuffix}@example.com`,
+      username: `${TEST_PREFIX}login_${uniqueSuffix}`,
+      email: `${TEST_PREFIX}login_${uniqueSuffix}@example.com`,
       password: 'password123'
     };
 
@@ -49,8 +54,8 @@ describe('Auth Endpoints', () => {
      // First register a user
      const uniqueSuffix = Date.now() + 2;
      const userData = {
-       username: `wrongpass_${uniqueSuffix}`,
-       email: `wrong_${uniqueSuffix}@example.com`,
+       username: `${TEST_PREFIX}wrongpass_${uniqueSuffix}`,
+       email: `${TEST_PREFIX}wrongpass_${uniqueSuffix}@example.com`,
        password: 'password123'
      };
  

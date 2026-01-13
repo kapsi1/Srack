@@ -1,9 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../src/app';
-import { getAuthToken } from './helpers';
+import { TEST_PREFIX, cleanupTestData, getAuthToken } from './helpers';
 
 describe('Channel Endpoints', () => {
+  afterAll(async () => {
+    await cleanupTestData();
+  });
+
   it('should get all channels', async () => {
     const token = await getAuthToken();
     const res = await request(app)
@@ -16,7 +20,7 @@ describe('Channel Endpoints', () => {
 
   it('should create a new channel', async () => {
     const token = await getAuthToken();
-    const channelName = `test-channel-${Date.now()}`;
+    const channelName = `${TEST_PREFIX}channel-${Date.now()}`;
     
     const res = await request(app)
       .post('/api/channels')
