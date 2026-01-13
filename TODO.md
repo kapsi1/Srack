@@ -38,12 +38,12 @@ This document outlines the tasks required to convert the existing Figma-based Re
     - [x] GET `/api/users` (List users for DMs).
 
 ## Phase 5: Real-time Integration (Socket.io)
-- [ ] Set up Socket.io server logic in `server/`.
-- [ ] Implement "Join Room" logic (joining specific channel rooms).
-- [ ] Implement "Message Sent" event handling (DB save + broadcast).
-- [ ] Implement "Reaction Updated" event handling.
-- [ ] (Frontend) Install `socket.io-client`.
-- [ ] (Frontend) Create a WebSocket provider/context.
+- [x] Set up Socket.io server logic in `server/`.
+- [x] Implement "Join Room" logic (joining specific channel rooms).
+- [x] Implement "Message Sent" event handling (DB save + broadcast).
+- [x] Implement "Reaction Updated" event handling.
+- [x] (Frontend) Install `socket.io-client`.
+- [x] (Frontend) Create a WebSocket provider/context.
 
 ## Phase 6: Frontend Data Integration
 - [ ] Install `axios` and `@tanstack/react-query` for data fetching.

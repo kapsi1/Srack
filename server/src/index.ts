@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.routes";
 import channelRoutes from "./routes/channel.routes";
 import messageRoutes from "./routes/message.routes";
 import userRoutes from "./routes/user.routes";
+import { setupSocket } from "./socket";
 
 dotenv.config();
 
@@ -37,13 +38,7 @@ app.get("/health", async (_req: express.Request, res: express.Response) => {
 	}
 });
 
-io.on("connection", (socket) => {
-	console.log("A user connected:", socket.id);
-
-	socket.on("disconnect", () => {
-		console.log("User disconnected:", socket.id);
-	});
-});
+setupSocket(io);
 
 const PORT = process.env.PORT || 3001;
 

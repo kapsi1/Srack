@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { AuthPage } from './components/AuthPage';
 import { ChatArea } from './components/ChatArea';
 import { Sidebar } from './components/Sidebar';
+import { useSocket } from './context/SocketContext';
 
 export interface User {
 	id: string;
@@ -105,6 +106,9 @@ export default function App() {
 	const [messages, setMessages] = useState<Message[]>(initialMessages);
 	const [activeChannel, setActiveChannel] = useState<Channel>(initialChannels[0]);
 	const [activeView, setActiveView] = useState<'channel' | 'dm'>('channel');
+    
+    // Hooks must be unconditional
+	const { socket } = useSocket();
 
 	useEffect(() => {
 		const savedUser = localStorage.getItem('user');
@@ -112,6 +116,71 @@ export default function App() {
 			setCurrentUser(JSON.parse(savedUser));
 		}
 	}, [token]);
+
+	useEffect(() => {
+		if (!socket || !currentUser) return; // Wait for login
+
+		// Join the new channel
+		socket.emit('join_channel', activeChannel.id);
+
+		const handleNewMessage = (message: any) => {
+			const newMessage: Message = {
+				id: message.id,
+				userId: message.sender?.id || message.senderId,
+				userName: message.sender?.username || 'Unknown',
+				userAvatar: message.sender?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${message.sender?.username || 'Unknown'}`,
+				content: message.content,
+				timestamp: new Date(message.createdAt),
+				reactions: [],
+				threadCount: 0
+			};
+			
+			if (message.channelId === activeChannel.id) {
+				setMessages((prev) => [...prev, newMessage]);
+			}
+		};
+
+		const handleReactionAdded = (reaction: any) => {
+			if (reaction.message?.channelId && reaction.message.channelId !== activeChannel.id) return;
+
+			setMessages((prevMessages) =>
+				prevMessages.map((msg) => {
+					if (msg.id === reaction.messageId) {
+						const reactions = msg.reactions || [];
+						const existingReactionIndex = reactions.findIndex((r) => r.emoji === reaction.emoji);
+
+						if (existingReactionIndex > -1) {
+							const updatedReactions = [...reactions];
+							const existing = updatedReactions[existingReactionIndex];
+							if (!existing.users.includes(reaction.user.username)) {
+								updatedReactions[existingReactionIndex] = {
+									...existing,
+									count: existing.count + 1,
+									users: [...existing.users, reaction.user.username]
+								};
+							}
+							return { ...msg, reactions: updatedReactions };
+						} else {
+							return {
+								...msg,
+								reactions: [...reactions, { emoji: reaction.emoji, count: 1, users: [reaction.user.username] }]
+							};
+						}
+					}
+					return msg;
+				})
+			);
+		};
+
+		socket.on('new_message', handleNewMessage);
+		socket.on('reaction_added', handleReactionAdded);
+
+		return () => {
+			socket.emit('leave_channel', activeChannel.id);
+			socket.off('new_message', handleNewMessage);
+			socket.off('reaction_added', handleReactionAdded);
+		};
+	}, [socket, activeChannel.id, currentUser]);
 
 	const handleLogin = (user: User, token: string) => {
 		setCurrentUser(user);
@@ -130,43 +199,31 @@ export default function App() {
 	if (!currentUser) {
 		return <AuthPage onLogin={handleLogin} />;
 	}
+    
+    // ... handleSendMessage ... 
+
+
 
 	const handleSendMessage = (content: string) => {
-		const newMessage: Message = {
-			id: Date.now().toString(),
-			userId: currentUser.id,
-			userName: currentUser.username,
-			userAvatar: currentUser.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`,
-			content,
-			timestamp: new Date(),
-		};
-		setMessages([...messages, newMessage]);
+		if (!currentUser || !socket) return;
+		
+		// For now we don't optimistically update, waiting for server echo
+        socket.emit("send_message", {
+            content,
+            channelId: activeChannel.id,
+            senderId: currentUser.id
+        });
 	};
 
 	const handleAddReaction = (messageId: string, emoji: string) => {
-		setMessages(
-			messages.map((msg) => {
-				if (msg.id === messageId) {
-					const reactions = msg.reactions || [];
-					const existingReaction = reactions.find((r) => r.emoji === emoji);
+		if (!currentUser || !socket) return;
 
-					if (existingReaction) {
-						return {
-							...msg,
-							reactions: reactions.map((r) =>
-								r.emoji === emoji ? { ...r, count: r.count + 1, users: [...r.users, currentUser.username] } : r,
-							),
-						};
-					} else {
-						return {
-							...msg,
-							reactions: [...reactions, { emoji, count: 1, users: [currentUser.username] }],
-						};
-					}
-				}
-				return msg;
-			}),
-		);
+        socket.emit("add_reaction", {
+            messageId,
+            emoji,
+            userId: currentUser.id,
+            channelId: activeChannel.id
+        });
 	};
 
 	return (
