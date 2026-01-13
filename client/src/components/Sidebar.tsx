@@ -36,8 +36,8 @@ export function Sidebar({
 	};
 	return (
 		<div className="flex h-screen bg-[#19171d]">
-			{/* Workspace Sidebar */}
-			<div className="w-[70px] bg-[#0d0c0f] flex flex-col items-center py-2 gap-1">
+			{/* Workspace Sidebar - hide for now, don't delete */}
+			{/* <div className="w-[70px] bg-[#0d0c0f] flex flex-col items-center py-2 gap-1">
 				<button
 					type="button"
 					className="w-9 h-9 bg-white rounded-lg mb-2 flex items-center justify-center"
@@ -47,7 +47,7 @@ export function Sidebar({
 				<div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer">
 					<Plus className="w-5 h-5 text-white" />
 				</div>
-			</div>
+			</div> */}
 
 			{/* Main Sidebar */}
 			<div className="w-[260px] flex flex-col text-white">

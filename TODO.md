@@ -53,7 +53,6 @@ This document outlines the tasks required to convert the existing Figma-based Re
 - [x] Implement unread counts logic.
 
 ## Phase 7: Polish & Advanced Features
-- [ ] **File Uploads**: Support for images in chat (requires S3/Uploadthing or similar).
 - [ ] **Direct Messages**: Logic for 1-to-1 rooms.
 - [ ] **Optimistic Updates**: Use React Query to show messages instantly before DB confirmation.
 - [ ] **Persistent Auth**: Refresh token logic or session management.
