@@ -2,6 +2,7 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import prisma from './lib/prisma';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -18,8 +19,13 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
-app.get('/health', (req: express.Request, res: express.Response) => {
-  res.json({ status: 'ok' });
+app.get('/health', async (_req: express.Request, res: express.Response) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'ok', database: 'connected' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', database: 'disconnected', error });
+  }
 });
 
 io.on('connection', (socket) => {

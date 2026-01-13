@@ -9,15 +9,15 @@ This document outlines the tasks required to convert the existing Figma-based Re
 - [x] Set up shared TypeScript configuration.
 
 ## Phase 2: Database & Backend Foundation
-- [ ] Initialize Express server in `server/`.
-- [ ] Install dependencies: `express`, `cors`, `dotenv`, `prisma`, `@prisma/client`, `socket.io`.
-- [ ] Initialize Prisma with PostgreSQL provider.
-- [ ] Define Database Schema:
-    - [ ] `User` model (id, email, password, username, avatar).
-    - [ ] `Channel` model (id, name, isPrivate).
-    - [ ] `Message` model (id, content, senderId, channelId, createdAt).
-    - [ ] `Reaction` model (id, emoji, messageId, userId).
-- [ ] Run initial migrations to set up the DB.
+- [x] Initialize Express server in `server/`.
+- [x] Install dependencies: `express`, `cors`, `dotenv`, `prisma`, `@prisma/client`, `socket.io`.
+- [x] Initialize Prisma with PostgreSQL provider.
+- [x] Define Database Schema:
+    - [x] `User` model (id, email, password, username, avatar).
+    - [x] `Channel` model (id, name, isPrivate).
+    - [x] `Message` model (id, content, senderId, channelId, createdAt).
+    - [x] `Reaction` model (id, emoji, messageId, userId).
+- [x] Run initial migrations to set up the DB.
 
 ## Phase 3: Authentication & Identity
 - [ ] Implement User Registration/Login API (REST).
