@@ -46,11 +46,11 @@ This document outlines the tasks required to convert the existing Figma-based Re
 - [x] (Frontend) Create a WebSocket provider/context.
 
 ## Phase 6: Frontend Data Integration
-- [ ] Install `axios` and `@tanstack/react-query` for data fetching.
-- [ ] Replace `initialChannels` static state with API calls.
-- [ ] Replace `initialMessages` with real data from the selected channel.
-- [ ] Connect `onSendMessage` and `onAddReaction` hooks to Socket.io events.
-- [ ] Implement unread counts logic.
+- [x] Install `axios` and `@tanstack/react-query` for data fetching.
+- [x] Replace `initialChannels` static state with API calls.
+- [x] Replace `initialMessages` with real data from the selected channel.
+- [x] Connect `onSendMessage` and `onAddReaction` hooks to Socket.io events.
+- [x] Implement unread counts logic.
 
 ## Phase 7: Polish & Advanced Features
 - [ ] **File Uploads**: Support for images in chat (requires S3/Uploadthing or similar).
