@@ -14,30 +14,6 @@ interface AuthPageProps {
 
 const API_BASE_URL = 'http://localhost:3001';
 
-const Poops = () => {
-	const poops = Array.from({ length: 3 });
-	return (
-		<span className="relative inline-block">
-			<span className="sparkle-text">Srack</span>
-			{poops.map((_, i) => (
-				<span
-					key={`poop-${i}-${Math.random()}`}
-					className="absolute poop-emoji pointer-events-none"
-					style={{
-						top: `${Math.random() * 100 - 20}%`,
-						left: `${Math.random() * 140 - 20}%`,
-						fontSize: '0.6em',
-						animationDelay: `${Math.random() * 2}s`,
-						animationDuration: `${1.5 + Math.random()}s`,
-					}}
-				>
-					💩
-				</span>
-			))}
-		</span>
-	);
-};
-
 export function AuthPage({ onLogin }: AuthPageProps) {
 	const [isLogin, setIsLogin] = useState(true);
 	const [username, setUsername] = useState('');
@@ -83,7 +59,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 					<h1 className="text-3xl font-bold text-white mb-2">
 						{isLogin ? (
 							<>
-								Welcome to <Poops />
+								Welcome to <span className="sparkle-text">Srack</span>
 							</>
 						) : (
 							'Create your account'
