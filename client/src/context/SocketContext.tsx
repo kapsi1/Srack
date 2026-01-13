@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import type React from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { io } from "socket.io-client";
+import type { Socket } from "socket.io-client";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -18,8 +20,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // In production, this should be an env var
-    const socketInstance = io("http://localhost:3001");
+    const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3001";
+    console.log('Final SOCKET_URL configured as:', SOCKET_URL);
+    const socketInstance = io(SOCKET_URL);
 
     socketInstance.on("connect", () => {
       setIsConnected(true);

@@ -50,6 +50,7 @@ export const register = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response) => {
+	console.log(`[Auth] Login attempt for email: ${req.body.email}`);
 	try {
 		const { email, password } = req.body;
 
@@ -58,6 +59,7 @@ export const login = async (req: Request, res: Response) => {
 		});
 
 		if (!user) {
+			console.log(`[Auth] User not found: ${email}`);
 			return res.status(401).json({ error: "Invalid credentials" });
 		}
 
