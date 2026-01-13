@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Routes, Route, useParams, useNavigate, Navigate } from "react-router-dom";
 import { AuthPage } from "./components/AuthPage";
 import { ChatArea } from "./components/ChatArea";
@@ -63,6 +63,22 @@ export default function App() {
 	const [token, setToken] = useState<string | null>(
 		localStorage.getItem("token"),
 	);
+	const navigate = useNavigate();
+
+	const handleLogout = useCallback(() => {
+		setCurrentUser(null);
+		setToken(null);
+		localStorage.removeItem("token");
+		localStorage.removeItem("user");
+		navigate("/", { replace: true });
+	}, [navigate]);
+
+	const handleLogin = (user: User, token: string) => {
+		setCurrentUser(user);
+		setToken(token);
+		localStorage.setItem("token", token);
+		localStorage.setItem("user", JSON.stringify(user));
+	};
 
     useEffect(() => {
 		const savedToken = localStorage.getItem("token");
@@ -74,21 +90,7 @@ export default function App() {
                  handleLogout();
              });
 		}
-	}, []);
-
-	const handleLogin = (user: User, token: string) => {
-		setCurrentUser(user);
-		setToken(token);
-		localStorage.setItem("token", token);
-		localStorage.setItem("user", JSON.stringify(user));
-	};
-
-	const handleLogout = () => {
-		setCurrentUser(null);
-		setToken(null);
-		localStorage.removeItem("token");
-		localStorage.removeItem("user");
-	};
+	}, [handleLogout]);
 
 	if (!currentUser) {
 		return <AuthPage onLogin={handleLogin} />;
