@@ -10,7 +10,7 @@ import {
 	MoreVertical,
 	Plus,
 } from 'lucide-react';
-import type { Channel, DirectMessage } from '../App';
+import type { Channel, DirectMessage, User } from '../App';
 
 interface SidebarProps {
 	channels: Channel[];
@@ -19,9 +19,10 @@ interface SidebarProps {
 	onChannelSelect: (channel: Channel) => void;
 	activeView: 'channel' | 'dm';
 	onViewChange: (view: 'channel' | 'dm') => void;
+	currentUser: User;
 }
 
-export function Sidebar({ channels, directMessages, activeChannel, onChannelSelect }: SidebarProps) {
+export function Sidebar({ channels, directMessages, activeChannel, onChannelSelect, currentUser }: SidebarProps) {
 	return (
 		<div className="flex h-screen bg-[#19171d]">
 			{/* Workspace Sidebar */}
@@ -135,13 +136,13 @@ export function Sidebar({ channels, directMessages, activeChannel, onChannelSele
 					<div className="flex items-center gap-2">
 						<div className="relative">
 							<img
-								src="https://api.dicebear.com/7.x/avataaars/svg?seed=Current"
-								alt="You"
+								src={currentUser.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`}
+								alt={currentUser.username}
 								className="w-7 h-7 rounded"
 							/>
 							<div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#19171d] rounded-full" />
 						</div>
-						<span className="text-sm">You</span>
+						<span className="text-sm">{currentUser.username}</span>
 					</div>
 					<Bell className="w-4 h-4" />
 				</div>

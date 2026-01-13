@@ -178,6 +178,7 @@ export default function App() {
 				onChannelSelect={setActiveChannel}
 				activeView={activeView}
 				onViewChange={setActiveView}
+				currentUser={currentUser}
 			/>
 			<ChatArea
 				channel={activeChannel}
