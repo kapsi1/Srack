@@ -35,9 +35,11 @@ export const getChannelMessages = async (req: AuthRequest, res: Response) => {
 	}
 };
 
+import { broadcastMessage } from "../socket";
+
 export const createMessage = async (req: AuthRequest, res: Response) => {
 	try {
-		const { content, channelId } = req.body;
+		const { content, channelId, tempId } = req.body;
 		const userId = req.userId;
 
 		if (!content || !channelId || !userId) {
@@ -61,6 +63,8 @@ export const createMessage = async (req: AuthRequest, res: Response) => {
 				reactions: true,
 			},
 		});
+
+		broadcastMessage(channelId, { ...message, tempId });
 
 		res.status(201).json(message);
 	} catch (_error) {

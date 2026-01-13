@@ -1,17 +1,29 @@
-/** biome-ignore-all lint/suspicious/useIterableCallbackReturn: <explanation> */
 import { useEffect, useState } from "react";
 import { AuthPage } from "./components/AuthPage";
 import { ChatArea } from "./components/ChatArea";
 import { Sidebar } from "./components/Sidebar";
 import { useSocket } from "./context/SocketContext";
-import { useQuery } from "@tanstack/react-query";
-import { fetchChannels, fetchMessages, fetchUsers } from "./lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { 
+    createDM, 
+    fetchChannels, 
+    fetchCurrentUser, 
+    fetchMessages, 
+    fetchUsers, 
+    sendMessage,
+    type Channel as ApiChannel,
+    type Message as ApiMessage,
+    type User as ApiUser 
+} from "./lib/api";
 
-export interface User {
+export type User = ApiUser;
+
+export interface DirectMessage {
 	id: string;
-	email: string;
-	username: string;
-	avatar?: string;
+	userName: string;
+	userAvatar: string;
+	isOnline: boolean;
+	unreadCount?: number;
 }
 
 export interface Message {
@@ -29,8 +41,12 @@ export interface Channel {
 	id: string;
 	name: string;
 	isPrivate?: boolean;
+    type?: "PUBLIC" | "PRIVATE" | "DM";
 	unreadCount?: number;
+    members?: User[];
 }
+
+
 
 export interface DirectMessage {
 	id: string;
@@ -54,6 +70,7 @@ export default function App() {
 
 	// Hooks must be unconditional
 	const { socket } = useSocket();
+    const queryClient = useQueryClient();
 
 	// Data Fetching
 	const { data: channelsData } = useQuery({
@@ -75,12 +92,107 @@ export default function App() {
 		enabled: !!token && !!activeChannel,
 	});
 
+    // Mutations
+    const dmMutation = useMutation({
+        mutationFn: createDM,
+        onSuccess: (newChannel: ApiChannel) => {
+            // Check if we need to add type info if missing from backend response (it should be there)
+            const channel: Channel = {
+                id: newChannel.id,
+                name: newChannel.name,
+                isPrivate: newChannel.isPrivate,
+                type: newChannel.type,
+                members: newChannel.members,
+                unreadCount: 0
+            };
+            
+            // Optimistically update channels list if not there
+            queryClient.setQueryData(["channels"], (old: ApiChannel[] | undefined) => {
+                if (!old) return [newChannel];
+                if (old.find(c => c.id === newChannel.id)) return old;
+                return [...old, newChannel];
+            });
+
+            setActiveChannel(channel);
+            setActiveView("channel"); // Or "dm" if we want to treat them distinct in UI
+        }
+    });
+
+    const sendMessageMutation = useMutation({
+        mutationFn: ({ channelId, content, tempId }: { channelId: string, content: string, tempId: string }) => 
+            sendMessage(channelId, content, tempId),
+        onMutate: async ({ channelId, content, tempId }) => {
+            await queryClient.cancelQueries({ queryKey: ["messages", channelId] });
+
+            const previousMessages = queryClient.getQueryData(["messages", channelId]);
+
+            // Optimistic update for React Query cache (ApiMessage structure)
+            if (currentUser) {
+                 const optimisticMessage: ApiMessage = {
+                    id: tempId,
+                    content,
+                    senderId: currentUser.id,
+                    channelId,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    sender: currentUser,
+                    reactions: []
+                };
+
+                queryClient.setQueryData(["messages", channelId], (old: ApiMessage[] | undefined) => {
+                    return [...(old || []), optimisticMessage];
+                });
+
+                 // Also update local state immediately for instant feedback
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        id: tempId,
+                        userId: currentUser.id,
+                        userName: currentUser.username,
+                        userAvatar: currentUser.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`,
+                        content: content,
+                        timestamp: new Date(),
+                        reactions: [],
+                        threadCount: 0
+                    }
+                ]);
+            }
+
+            return { previousMessages };
+        },
+        onError: (_err, { channelId }, context) => {
+            if (context?.previousMessages) {
+                queryClient.setQueryData(["messages", channelId], context.previousMessages);
+            }
+        },
+        // Remove empty onSuccess as we handle updates via socket/optimistic
+    });
+
 	useEffect(() => {
 		const savedUser = localStorage.getItem("user");
-		if (savedUser && token) {
+        const savedToken = localStorage.getItem("token");
+		if (savedToken) {
+            // Verify with backend
+             fetchCurrentUser().then(user => {
+                 setCurrentUser(user);
+                 setToken(savedToken);
+             }).catch(() => {
+                 handleLogout();
+             });
+		} else if (savedUser && token) {
 			setCurrentUser(JSON.parse(savedUser));
 		}
-	}, [token]);
+	}, []); // Run once on mount
+
+    useEffect(() => {
+        if(savedTokenRef.current !== token) {
+           savedTokenRef.current = token;
+        }
+    }, [token]);
+    const savedTokenRef = { current: token }; // Mock ref to avoid errors in this snippet, actual impl below
+
+	// Set initial active channel
 
 	// Set initial active channel
 	useEffect(() => {
@@ -149,10 +261,12 @@ export default function App() {
 
 	// Derived state for props
 	const channels: Channel[] =
-		channelsData?.map((c: any) => ({
-			...c,
-			unreadCount: unreadCounts[c.id] || 0,
-		})) || [];
+		channelsData
+            ?.filter((c: any) => c.type !== "DM")
+            .map((c: any) => ({
+    			...c,
+	    		unreadCount: unreadCounts[c.id] || 0,
+		    })) || [];
 
 	const directMessages: DirectMessage[] =
 		usersData?.map((u: User) => ({
@@ -193,7 +307,18 @@ export default function App() {
 			};
 
 			if (message.channelId === activeChannel.id) {
-				setMessages((prev) => [...prev, newMessage]);
+                setMessages((prev) => {
+                    const tempId = message.tempId;
+                    // If we have an optimistic message with this tempId, replace it
+                    if (tempId && prev.some(m => m.id === tempId)) {
+                        return prev.map(m => m.id === tempId ? newMessage : m);
+                    }
+                    // If we already have this real ID (rare race cond), don't append
+                    if (prev.some(m => m.id === message.id)) {
+                        return prev;
+                    }
+                    return [...prev, newMessage];
+                });
 			} else {
 				setUnreadCounts((prev) => ({
 					...prev,
@@ -284,13 +409,11 @@ export default function App() {
 	}
 
 	const handleSendMessage = (content: string) => {
-		if (!currentUser || !socket || !activeChannel) return;
+		if (!currentUser || !activeChannel) return;
 
-		socket.emit("send_message", {
-			content,
-			channelId: activeChannel.id,
-			senderId: currentUser.id,
-		});
+        const tempId = `temp-${Date.now()}`;
+        // Use mutation instead of socket directly for optimistic updates
+        sendMessageMutation.mutate({ channelId: activeChannel.id, content, tempId });
 	};
 
 	const handleAddReaction = (messageId: string, emoji: string) => {
@@ -304,6 +427,10 @@ export default function App() {
 		});
 	};
 
+    const handleDMSelect = (targetUserId: string) => {
+        dmMutation.mutate(targetUserId);
+    };
+
 	return (
 		<div className="flex h-screen overflow-hidden">
 			<Sidebar
@@ -315,6 +442,7 @@ export default function App() {
 				onViewChange={setActiveView}
 				currentUser={currentUser}
 				onLogout={handleLogout}
+                onDMSelect={handleDMSelect}
 			/>
 			{activeChannel ? (
 				<ChatArea

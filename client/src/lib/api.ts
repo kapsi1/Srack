@@ -25,6 +25,8 @@ export interface Channel {
   id: string;
   name: string;
   isPrivate: boolean;
+  type?: "PUBLIC" | "PRIVATE" | "DM";
+  members?: User[];
   createdAt: string;
   updatedAt: string;
 }
@@ -73,6 +75,16 @@ export const fetchMessages = async (channelId: string): Promise<Message[]> => {
   if (!channelId) return [];
   const response = await api.get(`/channels/${channelId}/messages`);
   return response.data;
+};
+
+export const createDM = async (targetUserId: string): Promise<Channel> => {
+  const response = await api.post("/channels/dm", { targetUserId });
+  return response.data;
+};
+
+export const sendMessage = async (channelId: string, content: string, tempId?: string): Promise<Message> => {
+   const response = await api.post("/messages", { channelId, content, tempId });
+   return response.data;
 };
 
 export default api;

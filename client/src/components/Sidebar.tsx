@@ -21,6 +21,7 @@ interface SidebarProps {
 	onViewChange: (view: "channel" | "dm") => void;
 	currentUser: User;
 	onLogout: () => void;
+	onDMSelect: (dmId: string) => void;
 }
 
 export function Sidebar({
@@ -30,6 +31,7 @@ export function Sidebar({
 	onChannelSelect,
 	currentUser,
 	onLogout,
+	onDMSelect,
 }: SidebarProps) {
 	const handleLogout = () => {
 		onLogout();
@@ -125,34 +127,40 @@ export function Sidebar({
 							<Plus className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
 						</button>
 						<div className="mt-1">
-							{directMessages.map((dm) => (
-								<button
-									type="button"
-									key={dm.id}
-									className="w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group"
-								>
-									<div className="flex items-center gap-1.5">
-										<div className="relative">
-											<img
-												src={dm.userAvatar}
-												alt={dm.userName}
-												className="w-5 h-5 rounded"
-											/>
-											{dm.isOnline && (
-												<div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-[#19171d] rounded-full" />
-											)}
-										</div>
-										<span className="text-sm">{dm.userName}</span>
-									</div>
-									{(dm.unreadCount || 0) > 0 && (
-										<div className="w-5 h-5 bg-white rounded flex items-center justify-center">
-											<span className="text-xs text-[#19171d]">
-												{dm.unreadCount}
-											</span>
-										</div>
-									)}
-								</button>
-							))}
+							{directMessages.map((dm) => {
+                                const isActive = activeChannel?.type === "DM" && activeChannel.members?.some(m => m.id === dm.id);
+                                return (
+                                    <button
+                                        type="button"
+                                        key={dm.id}
+                                        onClick={() => onDMSelect(dm.id)}
+                                        className={`w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group ${
+                                            isActive ? "bg-[#1164a3]" : ""
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-1.5">
+                                            <div className="relative">
+                                                <img
+                                                    src={dm.userAvatar}
+                                                    alt={dm.userName}
+                                                    className="w-5 h-5 rounded"
+                                                />
+                                                {dm.isOnline && (
+                                                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-[#19171d] rounded-full" />
+                                                )}
+                                            </div>
+                                            <span className="text-sm">{dm.userName}</span>
+                                        </div>
+                                        {(dm.unreadCount || 0) > 0 && (
+                                            <div className="w-5 h-5 bg-white rounded flex items-center justify-center">
+                                                <span className="text-xs text-[#19171d]">
+                                                    {dm.unreadCount}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            })}
 						</div>
 					</div>
 				</div>
