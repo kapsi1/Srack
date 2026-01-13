@@ -20,6 +20,6 @@ test('register and login flow', async ({ page }) => {
   await page.locator('.lucide-log-out').first().click();
 
   // Should be back to login
-  await expect(page.getByText('Welcome to Srack')).toBeVisible();
+  await expect(page.getByText('Welcome to Snack')).toBeVisible();
 });
 

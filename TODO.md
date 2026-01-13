@@ -1,4 +1,4 @@
-# Srack Full-Stack Transformation TODO
+# Snack Full-Stack Transformation TODO
 
 This document outlines the tasks required to convert the existing Figma-based React frontend into a full-stack application using **Node/Express, PostgreSQL (Prisma), and Socket.io**.
 

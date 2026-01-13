@@ -54,12 +54,12 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 				{/* Header */}
 				<div className="text-center mb-8">
 					<div className="bg-[#611f69] mb-4 rounded-xl flex items-center justify-center h-48 overflow-hidden">
-						<span style={{ fontSize: '100px', transform: 'translateY(-8px)' }}>💩</span>
+						<span style={{ fontSize: '100px', transform: 'translateY(-8px)' }}>🥨</span>
 					</div>
 					<h1 className="text-3xl font-bold text-white mb-2">
 						{isLogin ? (
 							<>
-								Welcome to <span className="sparkle-text">Srack</span>
+								Welcome to <span className="sparkle-text">Snack</span>
 							</>
 						) : (
 							'Create your account'
