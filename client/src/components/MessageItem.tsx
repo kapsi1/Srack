@@ -93,7 +93,7 @@ export function MessageItem({
 					)}
 
 					{/* Thread Count */}
-					{message.threadCount && message.threadCount > 0 && (
+					{(message.threadCount || 0) > 0 && (
 						<button
 							type="button"
 							className="flex items-center gap-2 mt-1 text-sm text-blue-400 hover:underline"

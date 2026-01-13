@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { Message } from '../App';
 import { MessageItem } from './MessageItem';
 
@@ -7,6 +8,13 @@ interface MessageListProps {
 }
 
 export function MessageList({ messages, onAddReaction }: MessageListProps) {
+	const bottomRef = useRef<HTMLDivElement>(null);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to scroll on every message update
+	useEffect(() => {
+		bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+	}, [messages]);
+
 	return (
 		<div className="flex-1 overflow-y-auto">
 			{/* Channel Intro */}
@@ -32,9 +40,15 @@ export function MessageList({ messages, onAddReaction }: MessageListProps) {
 						message.timestamp.getTime() - prevMessage.timestamp.getTime() > 5 * 60 * 1000;
 
 					return (
-						<MessageItem key={message.id} message={message} showAvatar={showAvatar} onAddReaction={onAddReaction} />
+						<MessageItem
+							key={message.id}
+							message={message}
+							showAvatar={showAvatar}
+							onAddReaction={onAddReaction}
+						/>
 					);
 				})}
+				<div ref={bottomRef} />
 			</div>
 		</div>
 	);

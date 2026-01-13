@@ -100,7 +100,7 @@ export function Sidebar({
 										)}
 										<span className="text-sm">{channel.name}</span>
 									</div>
-									{channel.unreadCount && (
+									{(channel.unreadCount || 0) > 0 && (
 										<div className="w-5 h-5 bg-white rounded flex items-center justify-center">
 											<span className="text-xs text-[#5a2a4e]">
 												{channel.unreadCount}
@@ -144,7 +144,7 @@ export function Sidebar({
 										</div>
 										<span className="text-sm">{dm.userName}</span>
 									</div>
-									{dm.unreadCount && (
+									{(dm.unreadCount || 0) > 0 && (
 										<div className="w-5 h-5 bg-white rounded flex items-center justify-center">
 											<span className="text-xs text-[#19171d]">
 												{dm.unreadCount}
