@@ -1,33 +1,47 @@
 import {
 	AtSign,
-	Bell,
 	Bookmark,
 	ChevronDown,
 	Hash,
 	Lock,
+	LogOut,
 	type LucideIcon,
 	MessageSquare,
 	MoreVertical,
 	Plus,
-} from 'lucide-react';
-import type { Channel, DirectMessage, User } from '../App';
+} from "lucide-react";
+import type { Channel, DirectMessage, User } from "../App";
 
 interface SidebarProps {
 	channels: Channel[];
 	directMessages: DirectMessage[];
 	activeChannel: Channel;
 	onChannelSelect: (channel: Channel) => void;
-	activeView: 'channel' | 'dm';
-	onViewChange: (view: 'channel' | 'dm') => void;
+	activeView: "channel" | "dm";
+	onViewChange: (view: "channel" | "dm") => void;
 	currentUser: User;
+	onLogout: () => void;
 }
 
-export function Sidebar({ channels, directMessages, activeChannel, onChannelSelect, currentUser }: SidebarProps) {
+export function Sidebar({
+	channels,
+	directMessages,
+	activeChannel,
+	onChannelSelect,
+	currentUser,
+	onLogout,
+}: SidebarProps) {
+	const handleLogout = () => {
+		onLogout();
+	};
 	return (
 		<div className="flex h-screen bg-[#19171d]">
 			{/* Workspace Sidebar */}
 			<div className="w-[70px] bg-[#0d0c0f] flex flex-col items-center py-2 gap-1">
-				<button type="button" className="w-9 h-9 bg-white rounded-lg mb-2 flex items-center justify-center">
+				<button
+					type="button"
+					className="w-9 h-9 bg-white rounded-lg mb-2 flex items-center justify-center"
+				>
 					<span>W</span>
 				</button>
 				<div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer">
@@ -75,16 +89,22 @@ export function Sidebar({ channels, directMessages, activeChannel, onChannelSele
 									key={channel.id}
 									onClick={() => onChannelSelect(channel)}
 									className={`w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group ${
-										activeChannel.id === channel.id ? 'bg-[#1164a3]' : ''
+										activeChannel.id === channel.id ? "bg-[#1164a3]" : ""
 									}`}
 								>
 									<div className="flex items-center gap-1.5">
-										{channel.isPrivate ? <Lock className="w-3.5 h-3.5" /> : <Hash className="w-3.5 h-3.5" />}
+										{channel.isPrivate ? (
+											<Lock className="w-3.5 h-3.5" />
+										) : (
+											<Hash className="w-3.5 h-3.5" />
+										)}
 										<span className="text-sm">{channel.name}</span>
 									</div>
 									{channel.unreadCount && (
 										<div className="w-5 h-5 bg-white rounded flex items-center justify-center">
-											<span className="text-xs text-[#5a2a4e]">{channel.unreadCount}</span>
+											<span className="text-xs text-[#5a2a4e]">
+												{channel.unreadCount}
+											</span>
 										</div>
 									)}
 								</button>
@@ -113,7 +133,11 @@ export function Sidebar({ channels, directMessages, activeChannel, onChannelSele
 								>
 									<div className="flex items-center gap-1.5">
 										<div className="relative">
-											<img src={dm.userAvatar} alt={dm.userName} className="w-5 h-5 rounded" />
+											<img
+												src={dm.userAvatar}
+												alt={dm.userName}
+												className="w-5 h-5 rounded"
+											/>
 											{dm.isOnline && (
 												<div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-[#19171d] rounded-full" />
 											)}
@@ -122,7 +146,9 @@ export function Sidebar({ channels, directMessages, activeChannel, onChannelSele
 									</div>
 									{dm.unreadCount && (
 										<div className="w-5 h-5 bg-white rounded flex items-center justify-center">
-											<span className="text-xs text-[#19171d]">{dm.unreadCount}</span>
+											<span className="text-xs text-[#19171d]">
+												{dm.unreadCount}
+											</span>
 										</div>
 									)}
 								</button>
@@ -136,7 +162,10 @@ export function Sidebar({ channels, directMessages, activeChannel, onChannelSele
 					<div className="flex items-center gap-2">
 						<div className="relative">
 							<img
-								src={currentUser.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`}
+								src={
+									currentUser.avatar ||
+									`https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`
+								}
 								alt={currentUser.username}
 								className="w-7 h-7 rounded"
 							/>
@@ -144,14 +173,22 @@ export function Sidebar({ channels, directMessages, activeChannel, onChannelSele
 						</div>
 						<span className="text-sm">{currentUser.username}</span>
 					</div>
-					<Bell className="w-4 h-4" />
+					<div className="p-2 cursor-pointer hover:bg-gray-800 transition-colors rounded">
+						<LogOut className="w-4 h-4" onClick={handleLogout} />
+					</div>
 				</div>
 			</div>
 		</div>
 	);
 }
 
-function SidebarItem({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
+function SidebarItem({
+	icon: Icon,
+	label,
+}: {
+	icon: LucideIcon;
+	label: string;
+}) {
 	return (
 		<button
 			type="button"

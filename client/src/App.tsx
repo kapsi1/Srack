@@ -120,7 +120,7 @@ export default function App() {
 		localStorage.setItem('user', JSON.stringify(user));
 	};
 
-	const _handleLogout = () => {
+	const handleLogout = () => {
 		setCurrentUser(null);
 		setToken(null);
 		localStorage.removeItem('token');
@@ -179,6 +179,7 @@ export default function App() {
 				activeView={activeView}
 				onViewChange={setActiveView}
 				currentUser={currentUser}
+				onLogout={handleLogout}
 			/>
 			<ChatArea
 				channel={activeChannel}
