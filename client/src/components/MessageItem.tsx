@@ -1,6 +1,13 @@
-import { useState } from 'react';
-import { Smile, MessageSquare, Share, MoreVertical, Bookmark } from 'lucide-react';
-import type { Message } from '../App';
+/** biome-ignore-all lint/a11y/noStaticElementInteractions: <explanation> */
+import {
+	Bookmark,
+	MessageSquare,
+	MoreVertical,
+	Share,
+	Smile,
+} from "lucide-react";
+import { useState } from "react";
+import type { Message } from "../App";
 
 interface MessageItemProps {
 	message: Message;
@@ -8,16 +15,20 @@ interface MessageItemProps {
 	onAddReaction: (messageId: string, emoji: string) => void;
 }
 
-const commonEmojis = ['👍', '😄', '🎉', '❤️', '🚀', '👀'];
+const commonEmojis = ["👍", "😄", "🎉", "❤️", "🚀", "👀"];
 
-export function MessageItem({ message, showAvatar, onAddReaction }: MessageItemProps) {
+export function MessageItem({
+	message,
+	showAvatar,
+	onAddReaction,
+}: MessageItemProps) {
 	const [showActions, setShowActions] = useState(false);
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
 	const formatTime = (date: Date) => {
-		return date.toLocaleTimeString('en-US', {
-			hour: 'numeric',
-			minute: '2-digit',
+		return date.toLocaleTimeString("en-US", {
+			hour: "numeric",
+			minute: "2-digit",
 			hour12: true,
 		});
 	};
@@ -34,7 +45,13 @@ export function MessageItem({ message, showAvatar, onAddReaction }: MessageItemP
 			<div className="flex gap-2">
 				{/* Avatar */}
 				<div className="w-9 flex-shrink-0">
-					{showAvatar && <img src={message.userAvatar} alt={message.userName} className="w-9 h-9 rounded" />}
+					{showAvatar && (
+						<img
+							src={message.userAvatar}
+							alt={message.userName}
+							className="w-9 h-9 rounded"
+						/>
+					)}
 				</div>
 
 				{/* Message Content */}
@@ -42,7 +59,9 @@ export function MessageItem({ message, showAvatar, onAddReaction }: MessageItemP
 					{showAvatar && (
 						<div className="flex items-baseline gap-2 mb-0.5">
 							<span className="text-white">{message.userName}</span>
-							<span className="text-xs text-gray-500">{formatTime(message.timestamp)}</span>
+							<span className="text-xs text-gray-500">
+								{formatTime(message.timestamp)}
+							</span>
 						</div>
 					)}
 					<div className="text-gray-200">{message.content}</div>
@@ -50,17 +69,21 @@ export function MessageItem({ message, showAvatar, onAddReaction }: MessageItemP
 					{/* Reactions */}
 					{message.reactions && message.reactions.length > 0 && (
 						<div className="flex flex-wrap gap-1 mt-1">
-							{message.reactions.map((reaction, idx) => (
+							{message.reactions.map((reaction) => (
 								<button
-									key={idx}
+									type="button"
+									key={reaction.emoji}
 									className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#222529] border border-gray-700 rounded hover:border-blue-500 transition-colors text-sm"
 									onClick={() => onAddReaction(message.id, reaction.emoji)}
 								>
 									<span>{reaction.emoji}</span>
-									<span className="text-xs text-gray-300">{reaction.count}</span>
+									<span className="text-xs text-gray-300">
+										{reaction.count}
+									</span>
 								</button>
 							))}
 							<button
+								type="button"
 								className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#222529] border border-gray-700 rounded hover:border-blue-500 transition-colors text-sm"
 								onClick={() => setShowEmojiPicker(!showEmojiPicker)}
 							>
@@ -71,10 +94,14 @@ export function MessageItem({ message, showAvatar, onAddReaction }: MessageItemP
 
 					{/* Thread Count */}
 					{message.threadCount && message.threadCount > 0 && (
-						<button className="flex items-center gap-2 mt-1 text-sm text-blue-400 hover:underline">
+						<button
+							type="button"
+							className="flex items-center gap-2 mt-1 text-sm text-blue-400 hover:underline"
+						>
 							<MessageSquare className="w-4 h-4" />
 							<span>
-								{message.threadCount} {message.threadCount === 1 ? 'reply' : 'replies'}
+								{message.threadCount}{" "}
+								{message.threadCount === 1 ? "reply" : "replies"}
 							</span>
 						</button>
 					)}
@@ -85,22 +112,35 @@ export function MessageItem({ message, showAvatar, onAddReaction }: MessageItemP
 			{showActions && (
 				<div className="absolute top-0 right-4 transform -translate-y-2 bg-[#222529] border border-gray-700 rounded-lg shadow-lg flex items-center">
 					<button
+						type="button"
 						className="p-1.5 hover:bg-gray-700 rounded transition-colors relative"
 						onClick={() => setShowEmojiPicker(!showEmojiPicker)}
 					>
 						<Smile className="w-4 h-4 text-gray-300" />
 					</button>
-					<button className="p-1.5 hover:bg-gray-700 transition-colors">
+					<button
+						type="button"
+						className="p-1.5 hover:bg-gray-700 transition-colors"
+					>
 						<MessageSquare className="w-4 h-4 text-gray-300" />
 					</button>
-					<button className="p-1.5 hover:bg-gray-700 transition-colors">
+					<button
+						type="button"
+						className="p-1.5 hover:bg-gray-700 transition-colors"
+					>
 						<Share className="w-4 h-4 text-gray-300" />
 					</button>
-					<button className="p-1.5 hover:bg-gray-700 transition-colors">
+					<button
+						type="button"
+						className="p-1.5 hover:bg-gray-700 transition-colors"
+					>
 						<Bookmark className="w-4 h-4 text-gray-300" />
 					</button>
 					<div className="w-px h-5 bg-gray-700" />
-					<button className="p-1.5 hover:bg-gray-700 rounded transition-colors">
+					<button
+						type="button"
+						className="p-1.5 hover:bg-gray-700 rounded transition-colors"
+					>
 						<MoreVertical className="w-4 h-4 text-gray-300" />
 					</button>
 				</div>
@@ -111,6 +151,7 @@ export function MessageItem({ message, showAvatar, onAddReaction }: MessageItemP
 				<div className="absolute top-6 right-4 bg-[#222529] border border-gray-700 rounded-lg shadow-lg p-2 flex gap-1 z-10">
 					{commonEmojis.map((emoji) => (
 						<button
+							type="button"
 							key={emoji}
 							className="w-8 h-8 hover:bg-gray-700 rounded flex items-center justify-center text-lg"
 							onClick={() => {

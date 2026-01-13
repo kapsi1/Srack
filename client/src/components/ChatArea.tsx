@@ -1,7 +1,7 @@
-import { Star, Users, Phone, Video, Info, Search } from 'lucide-react';
-import { MessageList } from './MessageList';
-import { MessageInput } from './MessageInput';
+import { Info, Phone, Search, Star, Users, Video } from 'lucide-react';
 import type { Channel, Message } from '../App';
+import { MessageInput } from './MessageInput';
+import { MessageList } from './MessageList';
 
 interface ChatAreaProps {
 	channel: Channel;

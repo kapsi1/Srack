@@ -1,4 +1,15 @@
-import { Hash, Lock, ChevronDown, Plus, MessageSquare, Bell, Bookmark, AtSign, MoreVertical } from 'lucide-react';
+import {
+	AtSign,
+	Bell,
+	Bookmark,
+	ChevronDown,
+	Hash,
+	Lock,
+	type LucideIcon,
+	MessageSquare,
+	MoreVertical,
+	Plus,
+} from 'lucide-react';
 import type { Channel, DirectMessage } from '../App';
 
 interface SidebarProps {
@@ -15,7 +26,7 @@ export function Sidebar({ channels, directMessages, activeChannel, onChannelSele
 		<div className="flex h-screen bg-[#19171d]">
 			{/* Workspace Sidebar */}
 			<div className="w-[70px] bg-[#0d0c0f] flex flex-col items-center py-2 gap-1">
-				<button className="w-9 h-9 bg-white rounded-lg mb-2 flex items-center justify-center">
+				<button type="button" className="w-9 h-9 bg-white rounded-lg mb-2 flex items-center justify-center">
 					<span>W</span>
 				</button>
 				<div className="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer">
@@ -26,7 +37,10 @@ export function Sidebar({ channels, directMessages, activeChannel, onChannelSele
 			{/* Main Sidebar */}
 			<div className="w-[260px] flex flex-col text-white">
 				{/* Workspace Header */}
-				<button className="h-12 px-4 flex items-center justify-between hover:bg-white/10 transition-colors border-b border-white/10">
+				<button
+					type="button"
+					className="h-12 px-4 flex items-center justify-between hover:bg-white/10 transition-colors border-b border-white/10"
+				>
 					<span>Workspace Name</span>
 					<ChevronDown className="w-4 h-4" />
 				</button>
@@ -43,7 +57,10 @@ export function Sidebar({ channels, directMessages, activeChannel, onChannelSele
 
 					{/* Channels */}
 					<div className="mb-4">
-						<button className="w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group">
+						<button
+							type="button"
+							className="w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group"
+						>
 							<div className="flex items-center gap-1">
 								<ChevronDown className="w-3 h-3" />
 								<span className="text-sm">Channels</span>
@@ -53,6 +70,7 @@ export function Sidebar({ channels, directMessages, activeChannel, onChannelSele
 						<div className="mt-1">
 							{channels.map((channel) => (
 								<button
+									type="button"
 									key={channel.id}
 									onClick={() => onChannelSelect(channel)}
 									className={`w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group ${
@@ -75,7 +93,10 @@ export function Sidebar({ channels, directMessages, activeChannel, onChannelSele
 
 					{/* Direct Messages */}
 					<div>
-						<button className="w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group">
+						<button
+							type="button"
+							className="w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group"
+						>
 							<div className="flex items-center gap-1">
 								<ChevronDown className="w-3 h-3" />
 								<span className="text-sm">Direct messages</span>
@@ -85,6 +106,7 @@ export function Sidebar({ channels, directMessages, activeChannel, onChannelSele
 						<div className="mt-1">
 							{directMessages.map((dm) => (
 								<button
+									type="button"
 									key={dm.id}
 									className="w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group"
 								>
@@ -128,9 +150,12 @@ export function Sidebar({ channels, directMessages, activeChannel, onChannelSele
 	);
 }
 
-function SidebarItem({ icon: Icon, label }: { icon: any; label: string }) {
+function SidebarItem({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
 	return (
-		<button className="w-full px-2 py-1 flex items-center gap-1.5 hover:bg-white/10 transition-colors rounded">
+		<button
+			type="button"
+			className="w-full px-2 py-1 flex items-center gap-1.5 hover:bg-white/10 transition-colors rounded"
+		>
 			<Icon className="w-4 h-4" />
 			<span className="text-sm">{label}</span>
 		</button>

@@ -1,18 +1,18 @@
-import { useState } from 'react';
 import {
-	Bold,
-	Italic,
-	Strikethrough,
-	Link,
-	ListOrdered,
-	List,
-	Code,
-	Smile,
 	AtSign,
-	Send,
-	Paperclip,
+	Bold,
+	Code,
+	Italic,
+	Link,
+	List,
+	ListOrdered,
 	Mic,
+	Paperclip,
+	Send,
+	Smile,
+	Strikethrough,
 } from 'lucide-react';
+import { useState } from 'react';
 
 interface MessageInputProps {
 	channelName: string;

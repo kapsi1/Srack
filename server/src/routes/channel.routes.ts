@@ -1,10 +1,10 @@
-import { Router } from 'express';
-import { getChannels, createChannel } from '../controllers/channel.controller';
-import { authenticate } from '../middleware/auth.middleware';
+import { Router } from "express";
+import { createChannel, getChannels } from "../controllers/channel.controller";
+import { authenticate } from "../middleware/auth.middleware";
 
 const router = Router();
 
-router.get('/', authenticate, getChannels);
-router.post('/', authenticate, createChannel);
+router.get("/", authenticate, getChannels);
+router.post("/", authenticate, createChannel);
 
 export default router;

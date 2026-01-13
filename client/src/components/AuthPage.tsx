@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from "react";
-import axios, { type AxiosError } from "axios";
+import axios, { type AxiosError } from 'axios';
+import { type FormEvent, useState } from 'react';
 
 interface User {
 	id: string;
@@ -12,7 +12,7 @@ interface AuthPageProps {
 	onLogin: (user: User, token: string) => void;
 }
 
-const API_BASE_URL = "http://localhost:3001";
+const API_BASE_URL = 'http://localhost:3001';
 
 const Poops = () => {
 	const poops = Array.from({ length: 3 });
@@ -26,7 +26,7 @@ const Poops = () => {
 					style={{
 						top: `${Math.random() * 100 - 20}%`,
 						left: `${Math.random() * 140 - 20}%`,
-						fontSize: "0.6em",
+						fontSize: '0.6em',
 						animationDelay: `${Math.random() * 2}s`,
 						animationDuration: `${1.5 + Math.random()}s`,
 					}}
@@ -40,30 +40,28 @@ const Poops = () => {
 
 export function AuthPage({ onLogin }: AuthPageProps) {
 	const [isLogin, setIsLogin] = useState(true);
-	const [username, setUsername] = useState("");
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const [error, setError] = useState("");
+	const [username, setUsername] = useState('');
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const [error, setError] = useState('');
 	const [loading, setLoading] = useState(false);
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
-		setError("");
+		setError('');
 		setLoading(true);
 
 		try {
-			const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
-			const data = isLogin
-				? { email, password }
-				: { email, username, password };
+			const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+			const data = isLogin ? { email, password } : { email, username, password };
 
 			const response = await axios.post(`${API_BASE_URL}${endpoint}`, data);
 			const { user, token } = response.data;
 			onLogin(user, token);
 		} catch (err) {
 			const axiosError = err as AxiosError<{ error: string }>;
-			console.error("Auth error:", axiosError);
-			setError(axiosError.response?.data?.error || "Authentication failed. Please try again.");
+			console.error('Auth error:', axiosError);
+			setError(axiosError.response?.data?.error || 'Authentication failed. Please try again.');
 		} finally {
 			setLoading(false);
 		}
@@ -71,7 +69,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 
 	const toggleMode = () => {
 		setIsLogin(!isLogin);
-		setError("");
+		setError('');
 	};
 
 	return (
@@ -79,12 +77,8 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 			<div className="w-full max-w-md">
 				{/* Header */}
 				<div className="text-center mb-8">
-					<div
-						className="bg-[#611f69] mb-4 rounded-xl flex items-center justify-center h-48 overflow-hidden"
-					>
-						<span style={{ fontSize: "100px", transform: "translateY(-8px)" }}>
-							💩
-						</span>
+					<div className="bg-[#611f69] mb-4 rounded-xl flex items-center justify-center h-48 overflow-hidden">
+						<span style={{ fontSize: '100px', transform: 'translateY(-8px)' }}>💩</span>
 					</div>
 					<h1 className="text-3xl font-bold text-white mb-2">
 						{isLogin ? (
@@ -92,7 +86,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 								Welcome to <Poops />
 							</>
 						) : (
-							"Create your account"
+							'Create your account'
 						)}
 					</h1>
 					<div className="text-gray-400">
@@ -100,11 +94,10 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 							<div>
 								Enter your credentials to continue
 								<br />
-								Demo user:{" "}
-								<span className="font-bold">demo@example.com/password123</span>
+								Demo user: <span className="font-bold">demo@example.com/password123</span>
 							</div>
 						) : (
-							"Get started with your new workspace"
+							'Get started with your new workspace'
 						)}
 					</div>
 				</div>
@@ -120,10 +113,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 					<form onSubmit={handleSubmit} className="space-y-5">
 						{!isLogin && (
 							<div>
-								<label
-									htmlFor="username"
-									className="block text-sm font-medium text-gray-300 mb-2"
-								>
+								<label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
 									Username
 								</label>
 								<input
@@ -139,10 +129,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 						)}
 
 						<div>
-							<label
-								htmlFor="email"
-								className="block text-sm font-medium text-gray-300 mb-2"
-							>
+							<label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
 								Email address
 							</label>
 							<input
@@ -157,10 +144,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 						</div>
 
 						<div>
-							<label
-								htmlFor="password"
-								className="block text-sm font-medium text-gray-300 mb-2"
-							>
+							<label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
 								Password
 							</label>
 							<input
@@ -179,20 +163,14 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 							disabled={loading}
 							className="w-full bg-[#611f69] hover:bg-[#4a1850] disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg transition-colors duration-200 font-medium"
 						>
-							{loading ? "Processing..." : (isLogin ? "Sign In" : "Create Account")}
+							{loading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Account'}
 						</button>
 					</form>
 
 					{/* Toggle between login and register */}
 					<div className="mt-6 text-center">
-						<button
-							type="button"
-							onClick={toggleMode}
-							className="text-[#1d9bd1] hover:underline text-sm"
-						>
-							{isLogin
-								? "Don't have an account? Sign up"
-								: "Already have an account? Sign in"}
+						<button type="button" onClick={toggleMode} className="text-[#1d9bd1] hover:underline text-sm">
+							{isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
 						</button>
 					</div>
 				</div>

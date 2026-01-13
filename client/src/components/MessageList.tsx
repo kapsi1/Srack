@@ -1,6 +1,5 @@
-import { useState } from 'react';
-import { MessageItem } from './MessageItem';
 import type { Message } from '../App';
+import { MessageItem } from './MessageItem';
 
 interface MessageListProps {
 	messages: Message[];
