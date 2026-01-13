@@ -1,6 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { ChatArea } from './components/ChatArea';
+import { AuthPage } from './components/AuthPage';
+
+export interface User {
+  id: string;
+  email: string;
+  username: string;
+  avatar?: string;
+}
 
 export interface Message {
   id: string;
@@ -65,49 +73,48 @@ const initialMessages: Message[] = [
     content: 'Looks great! I tested it on my end and everything works smoothly.',
     timestamp: new Date('2025-12-06T09:45:00'),
   },
-  {
-    id: '3',
-    userId: '3',
-    userName: 'Alex Rivera',
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex',
-    content: 'Quick question - did we implement the dark mode toggle? I remember that was part of the requirements.',
-    timestamp: new Date('2025-12-06T10:15:00'),
-    threadCount: 2,
-  },
-  {
-    id: '4',
-    userId: '1',
-    userName: 'Sarah Chen',
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
-    content: 'Yes! It\'s in the settings menu. You can toggle between light and dark themes.',
-    timestamp: new Date('2025-12-06T10:20:00'),
-    reactions: [
-      { emoji: '✅', count: 1, users: ['Alex'] },
-    ],
-  },
-  {
-    id: '5',
-    userId: '4',
-    userName: 'Jamie Lee',
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jamie',
-    content: 'Perfect timing! I\'ll run through the QA checklist this afternoon and report back.',
-    timestamp: new Date('2025-12-06T10:30:00'),
-  },
 ];
 
 export default function App() {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [channels] = useState<Channel[]>(initialChannels);
   const [directMessages] = useState<DirectMessage[]>(initialDMs);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [activeChannel, setActiveChannel] = useState<Channel>(initialChannels[0]);
   const [activeView, setActiveView] = useState<'channel' | 'dm'>('channel');
 
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser && token) {
+      setCurrentUser(JSON.parse(savedUser));
+    }
+  }, [token]);
+
+  const handleLogin = (user: User, token: string) => {
+    setCurrentUser(user);
+    setToken(token);
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+  };
+
+  const _handleLogout = () => {
+    setCurrentUser(null);
+    setToken(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  };
+
+  if (!currentUser) {
+    return <AuthPage onLogin={handleLogin} />;
+  }
+
   const handleSendMessage = (content: string) => {
     const newMessage: Message = {
       id: Date.now().toString(),
-      userId: 'current',
-      userName: 'You',
-      userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Current',
+      userId: currentUser.id,
+      userName: currentUser.username,
+      userAvatar: currentUser.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`,
       content,
       timestamp: new Date(),
     };
@@ -125,14 +132,14 @@ export default function App() {
             ...msg,
             reactions: reactions.map(r => 
               r.emoji === emoji 
-                ? { ...r, count: r.count + 1, users: [...r.users, 'You'] }
+                ? { ...r, count: r.count + 1, users: [...r.users, currentUser.username] }
                 : r
             ),
           };
         } else {
           return {
             ...msg,
-            reactions: [...reactions, { emoji, count: 1, users: ['You'] }],
+            reactions: [...reactions, { emoji, count: 1, users: [currentUser.username] }],
           };
         }
       }

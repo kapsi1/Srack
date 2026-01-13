@@ -20,22 +20,22 @@ This document outlines the tasks required to convert the existing Figma-based Re
 - [x] Run initial migrations to set up the DB.
 
 ## Phase 3: Authentication & Identity
-- [ ] Implement User Registration/Login API (REST).
-- [ ] Set up JWT authentication middleware.
-- [ ] Create "Generate Dummy User" script for development.
-- [ ] (Frontend) Create Login/Register views.
-- [ ] (Frontend) Store JWT in localStorage/Cookies.
+- [x] Implement User Registration/Login API (REST).
+- [x] Set up JWT authentication middleware.
+- [x] Create "Generate Dummy User" script for development.
+- [x] (Frontend) Create Login/Register views.
+- [x] (Frontend) Store JWT in localStorage/Cookies.
 
 ## Phase 4: Core API (REST)
-- [ ] **Channels API**:
-    - [ ] GET `/api/channels` (List all channels).
-    - [ ] POST `/api/channels` (Create a channel).
-- [ ] **Messages API**:
-    - [ ] GET `/api/channels/:id/messages` (Fetch message history for a channel).
-    - [ ] POST `/api/messages` (Optional, if not using sockets for sending).
-- [ ] **Users API**:
-    - [ ] GET `/api/users/me` (Current user profile).
-    - [ ] GET `/api/users` (List users for DMs).
+- [x] **Channels API**:
+    - [x] GET `/api/channels` (List all channels).
+    - [x] POST `/api/channels` (Create a channel).
+- [x] **Messages API**:
+    - [x] GET `/api/channels/:id/messages` (Fetch message history for a channel).
+    - [x] POST `/api/messages` (Optional, if not using sockets for sending).
+- [x] **Users API**:
+    - [x] GET `/api/users/me` (Current user profile).
+    - [x] GET `/api/users` (List users for DMs).
 
 ## Phase 5: Real-time Integration (Socket.io)
 - [ ] Set up Socket.io server logic in `server/`.

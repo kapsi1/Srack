@@ -4,6 +4,10 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import prisma from './lib/prisma';
 import dotenv from 'dotenv';
+import authRoutes from './routes/auth.routes';
+import userRoutes from './routes/user.routes';
+import channelRoutes from './routes/channel.routes';
+import messageRoutes from './routes/message.routes';
 
 dotenv.config();
 
@@ -18,6 +22,11 @@ const io = new Server(server, {
 
 app.use(cors());
 app.use(express.json());
+
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/channels', channelRoutes);
+app.use('/api/messages', messageRoutes);
 
 app.get('/health', async (_req: express.Request, res: express.Response) => {
   try {
