@@ -452,6 +452,7 @@ export default function App() {
 			{activeChannel ? (
 				<ChatArea
 					channel={activeChannel}
+					currentUser={currentUser}
 					messages={messages}
 					onSendMessage={handleSendMessage}
 					onAddReaction={handleAddReaction}

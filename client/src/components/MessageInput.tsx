@@ -16,10 +16,11 @@ import { useRef, useState } from 'react';
 
 interface MessageInputProps {
 	channelName: string;
+	isDM?: boolean;
 	onSendMessage: (content: string) => void;
 }
 
-export function MessageInput({ channelName, onSendMessage }: MessageInputProps) {
+export function MessageInput({ channelName, isDM, onSendMessage }: MessageInputProps) {
 	const [message, setMessage] = useState('');
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -111,7 +112,7 @@ export function MessageInput({ channelName, onSendMessage }: MessageInputProps) 
 						value={message}
 						onChange={(e) => setMessage(e.target.value)}
 						onKeyDown={handleKeyDown}
-						placeholder={`Message #${channelName}`}
+						placeholder={`Message ${isDM ? '@' : '#'}${channelName}`}
 						className="w-full px-3 py-2 resize-none outline-none bg-transparent text-white placeholder-gray-500 font-normal"
 						rows={3}
 					/>

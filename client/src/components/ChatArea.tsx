@@ -1,24 +1,37 @@
-import { Info, Phone, Search, Star, Users, Video } from 'lucide-react';
-import type { Channel, Message } from '../App';
+import { Info, Phone, Search, Star, Users, Video, Hash } from 'lucide-react';
+import type { Channel, Message, User } from '../App';
 import { MessageInput } from './MessageInput';
 import { MessageList } from './MessageList';
 
 interface ChatAreaProps {
 	channel: Channel;
+	currentUser: User;
 	messages: Message[];
 	onSendMessage: (content: string) => void;
 	onAddReaction: (messageId: string, emoji: string) => void;
 }
 
-export function ChatArea({ channel, messages, onSendMessage, onAddReaction }: ChatAreaProps) {
+export function ChatArea({ channel, currentUser, messages, onSendMessage, onAddReaction }: ChatAreaProps) {
+	const isDM = channel.type === 'DM';
+	const otherUser = isDM ? channel.members?.find(m => m.id !== currentUser.id) : null;
+	const displayName = otherUser ? otherUser.username : channel.name;
+
 	return (
 		<div className="flex-1 flex flex-col bg-[#1a1d21]">
 			{/* Channel Header */}
 			<div className="h-12 border-b border-gray-800 px-4 flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<h2 className="flex items-center gap-1.5 text-white">
-						<span>#</span>
-						<span>{channel.name}</span>
+					<h2 className="flex items-center gap-1.5 text-white font-bold">
+						{isDM ? (
+							<img 
+								src={otherUser?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${otherUser?.username}`} 
+								alt={displayName}
+								className="w-5 h-5 rounded"
+							/>
+						) : (
+							<Hash className="w-4 h-4 text-gray-400" />
+						)}
+						<span>{displayName}</span>
 					</h2>
 					<button type="button" className="p-1 hover:bg-gray-800 rounded transition-colors">
 						<Star className="w-4 h-4 text-gray-400" />
@@ -48,7 +61,7 @@ export function ChatArea({ channel, messages, onSendMessage, onAddReaction }: Ch
 			<MessageList messages={messages} onAddReaction={onAddReaction} />
 
 			{/* Message Input */}
-			<MessageInput channelName={channel.name} onSendMessage={onSendMessage} />
+			<MessageInput channelName={displayName} isDM={isDM} onSendMessage={onSendMessage} />
 		</div>
 	);
 }
