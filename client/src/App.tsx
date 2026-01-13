@@ -269,15 +269,20 @@ export default function App() {
 		    })) || [];
 
 	const directMessages: DirectMessage[] =
-		usersData?.map((u: User) => ({
-			id: u.id,
-			userName: u.username,
-			userAvatar:
-				u.avatar ||
-				`https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`,
-			isOnline: false, // No online status API yet
-			unreadCount: 0,
-		})) || [];
+		usersData?.map((u: User) => {
+            const dmChannel = channelsData?.find(
+                (c: any) => c.type === "DM" && c.members?.some((m: any) => m.id === u.id)
+            );
+            return {
+    			id: u.id,
+	    		userName: u.username,
+		    	userAvatar:
+			    	u.avatar ||
+				    `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`,
+    			isOnline: false, // No online status API yet
+	    		unreadCount: dmChannel ? (unreadCounts[dmChannel.id] || 0) : 0,
+		    };
+        }) || [];
 
 	useEffect(() => {
 		if (!socket || !currentUser || !activeChannel) return; // Wait for login and channel
