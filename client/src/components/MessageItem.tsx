@@ -7,6 +7,8 @@ import {
 	Smile,
 } from "lucide-react";
 import { useState } from "react";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import type { Message } from "../App";
 
 interface MessageItemProps {
@@ -64,7 +66,29 @@ export function MessageItem({
 							</span>
 						</div>
 					)}
-					<div className="text-gray-200">{message.content}</div>
+					<div className="text-gray-200">
+						<ReactMarkdown
+							remarkPlugins={[remarkGfm]}
+							components={{
+								p: ({ node, ...props }) => <p className="inline" {...props} />,
+								a: ({ node, ...props }) => (
+									<a
+										className="text-blue-400 hover:underline"
+										target="_blank"
+										rel="noopener noreferrer"
+										{...props}
+									/>
+								),
+								strong: ({ node, ...props }) => (
+									<strong className="font-bold text-white" {...props} />
+								),
+								em: ({ node, ...props }) => <em className="italic" {...props} />,
+								del: ({ node, ...props }) => <del className="line-through text-gray-400" {...props} />,
+							}}
+						>
+							{message.content}
+						</ReactMarkdown>
+					</div>
 
 					{/* Reactions */}
 					{message.reactions && message.reactions.length > 0 && (
