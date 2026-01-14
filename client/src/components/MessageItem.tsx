@@ -2,13 +2,14 @@
 import {
 	Bookmark,
 	MessageSquare,
-	MoreVertical,
 	Share,
 	Smile,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { createPortal } from "react-dom";
+import EmojiPicker, { Theme, type EmojiClickData } from 'emoji-picker-react';
 import type { Message } from "../App";
 
 interface MessageItemProps {
@@ -17,7 +18,6 @@ interface MessageItemProps {
 	onAddReaction: (messageId: string, emoji: string) => void;
 }
 
-const commonEmojis = ["👍", "😄", "🎉", "❤️", "🚀", "👀"];
 
 export function MessageItem({
 	message,
@@ -26,6 +26,51 @@ export function MessageItem({
 }: MessageItemProps) {
 	const [showActions, setShowActions] = useState(false);
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+	const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
+	const pickerRef = useRef<HTMLDivElement>(null);
+	const smileButtonRef = useRef<HTMLButtonElement>(null);
+	const reactionsSmileButtonRef = useRef<HTMLButtonElement>(null);
+
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+				setShowEmojiPicker(false);
+			}
+		};
+
+		if (showEmojiPicker) {
+			document.addEventListener('mousedown', handleClickOutside);
+		}
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [showEmojiPicker]);
+
+	const toggleEmojiPicker = (buttonRef: React.RefObject<HTMLButtonElement | null>) => {
+		if (showEmojiPicker) {
+			setShowEmojiPicker(false);
+			return;
+		}
+
+		if (buttonRef.current) {
+			const rect = buttonRef.current.getBoundingClientRect();
+			// Position the picker above/below the button
+			const top = rect.top + window.scrollY;
+			const left = rect.left + window.scrollX;
+			
+			// Adjust if it would go off screen
+			let pickerTop = top + rect.height + 5;
+			if (pickerTop + 450 > window.innerHeight) {
+				pickerTop = top - 450 - 5;
+			}
+			
+			let pickerLeft = left - 350 + rect.width;
+			if (pickerLeft < 0) pickerLeft = left;
+
+			setPickerPosition({ top: pickerTop, left: pickerLeft });
+			setShowEmojiPicker(true);
+		}
+	};
 
 	const formatTime = (date: Date) => {
 		return date.toLocaleTimeString("en-US", {
@@ -41,7 +86,7 @@ export function MessageItem({
 			onMouseEnter={() => setShowActions(true)}
 			onMouseLeave={() => {
 				setShowActions(false);
-				setShowEmojiPicker(false);
+				// Don't hide emoji picker on mouse leave, let handleClickOutside handle it
 			}}
 		>
 			<div className="flex gap-2">
@@ -130,13 +175,14 @@ export function MessageItem({
 									</span>
 								</button>
 							))}
-							<button
-								type="button"
-								className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#222529] border border-gray-700 rounded hover:border-blue-500 transition-colors text-sm"
-								onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-							>
-								<Smile className="w-3.5 h-3.5 text-gray-400" />
-							</button>
+								<button
+									type="button"
+									ref={reactionsSmileButtonRef}
+									className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#222529] border border-gray-700 rounded hover:border-blue-500 transition-colors text-sm"
+									onClick={() => toggleEmojiPicker(reactionsSmileButtonRef)}
+								>
+									<Smile className="w-3.5 h-3.5 text-gray-400" />
+								</button>
 						</div>
 					)}
 
@@ -161,8 +207,9 @@ export function MessageItem({
 				<div className="absolute top-0 right-4 transform -translate-y-2 bg-[#222529] border border-gray-700 rounded-lg shadow-lg flex items-center">
 					<button
 						type="button"
+						ref={smileButtonRef}
 						className="p-1.5 hover:bg-gray-700 rounded transition-colors relative"
-						onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+						onClick={() => toggleEmojiPicker(smileButtonRef)}
 					>
 						<Smile className="w-4 h-4 text-gray-300" />
 					</button>
@@ -194,23 +241,28 @@ export function MessageItem({
 				</div>
 			)}
 
-			{/* Emoji Picker */}
-			{showEmojiPicker && (
-				<div className="absolute top-6 right-4 bg-[#222529] border border-gray-700 rounded-lg shadow-lg p-2 flex gap-1 z-10">
-					{commonEmojis.map((emoji) => (
-						<button
-							type="button"
-							key={emoji}
-							className="w-8 h-8 hover:bg-gray-700 rounded flex items-center justify-center text-lg"
-							onClick={() => {
-								onAddReaction(message.id, emoji);
-								setShowEmojiPicker(false);
-							}}
-						>
-							{emoji}
-						</button>
-					))}
-				</div>
+			{/* Emoji Picker Portal */}
+			{showEmojiPicker && createPortal(
+				<div 
+					className="fixed z-[9999]" 
+					style={{ 
+						top: `${pickerPosition.top}px`, 
+						left: `${pickerPosition.left}px` 
+					}} 
+					ref={pickerRef}
+				>
+					<EmojiPicker
+						theme={Theme.DARK}
+						onEmojiClick={(emojiData: EmojiClickData) => {
+							onAddReaction(message.id, emojiData.emoji);
+							setShowEmojiPicker(false);
+						}}
+						autoFocusSearch={false}
+						width={350}
+						height={450}
+					/>
+				</div>,
+				document.body
 			)}
 		</div>
 	);

@@ -12,7 +12,9 @@ import {
 	Smile,
 	Strikethrough,
 } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import EmojiPicker, { Theme, type EmojiClickData } from 'emoji-picker-react';
+import { createPortal } from 'react-dom';
 
 interface MessageInputProps {
 	channelName: string;
@@ -22,7 +24,72 @@ interface MessageInputProps {
 
 export function MessageInput({ channelName, isDM, onSendMessage }: MessageInputProps) {
 	const [message, setMessage] = useState('');
+	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+	const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const pickerRef = useRef<HTMLDivElement>(null);
+	const smileButtonRef = useRef<HTMLButtonElement>(null);
+
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+				setShowEmojiPicker(false);
+			}
+		};
+
+		if (showEmojiPicker) {
+			document.addEventListener('mousedown', handleClickOutside);
+		}
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [showEmojiPicker]);
+
+	const toggleEmojiPicker = () => {
+		if (showEmojiPicker) {
+			setShowEmojiPicker(false);
+			return;
+		}
+
+		if (smileButtonRef.current) {
+			const rect = smileButtonRef.current.getBoundingClientRect();
+			// Position the picker above the button by default since input is at bottom
+			let pickerTop = rect.top + window.scrollY - 450 - 5;
+			if (pickerTop < 0) {
+				pickerTop = rect.bottom + window.scrollY + 5;
+			}
+			
+			let pickerLeft = rect.left + window.scrollX;
+			if (pickerLeft + 350 > window.innerWidth) {
+				pickerLeft = window.innerWidth - 350 - 20;
+			}
+
+			setPickerPosition({ top: pickerTop, left: pickerLeft });
+			setShowEmojiPicker(true);
+		}
+	};
+
+	const onEmojiClick = (emojiData: EmojiClickData) => {
+		const textarea = textareaRef.current;
+		if (!textarea) return;
+
+		const start = textarea.selectionStart;
+		const end = textarea.selectionEnd;
+		const text = textarea.value;
+
+		const before = text.substring(0, start);
+		const after = text.substring(end);
+
+		const newText = `${before}${emojiData.emoji}${after}`;
+		setMessage(newText);
+		setShowEmojiPicker(false);
+
+		// Restore cursor
+		setTimeout(() => {
+			textarea.focus();
+			textarea.setSelectionRange(start + emojiData.emoji.length, start + emojiData.emoji.length);
+		}, 0);
+	};
 
 	const handleFormat = (format: string) => {
 		const textarea = textareaRef.current;
@@ -149,7 +216,7 @@ export function MessageInput({ channelName, isDM, onSendMessage }: MessageInputP
 	return (
 		<div className="border-t border-gray-800 p-4">
 			<form onSubmit={handleSubmit}>
-				<div className="border border-gray-700 rounded-lg overflow-hidden focus-within:border-gray-600 transition-colors bg-[#222529]">
+				<div className="border border-gray-700 rounded-lg focus-within:border-gray-600 transition-colors bg-[#222529]">
 					{/* Formatting Toolbar */}
 					<div className="border-b border-gray-700 px-2 py-1 flex items-center gap-1">
 						<button
@@ -231,9 +298,35 @@ export function MessageInput({ channelName, isDM, onSendMessage }: MessageInputP
 							<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors">
 								<Mic className="w-4 h-4 text-gray-300" />
 							</button>
-							<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors">
-								<Smile className="w-4 h-4 text-gray-300" />
-							</button>
+							<div className="relative">
+								<button
+									type="button"
+									ref={smileButtonRef}
+									className="p-1.5 hover:bg-gray-700 rounded transition-colors"
+									onClick={toggleEmojiPicker}
+								>
+									<Smile className="w-4 h-4 text-gray-300" />
+								</button>
+								{showEmojiPicker && createPortal(
+									<div 
+										className="fixed z-[9999]" 
+										style={{ 
+											top: `${pickerPosition.top}px`, 
+											left: `${pickerPosition.left}px` 
+										}} 
+										ref={pickerRef}
+									>
+										<EmojiPicker
+											theme={Theme.DARK}
+											onEmojiClick={onEmojiClick}
+											autoFocusSearch={false}
+											width={350}
+											height={450}
+										/>
+									</div>,
+									document.body
+								)}
+							</div>
 							<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors">
 								<AtSign className="w-4 h-4 text-gray-300" />
 							</button>

@@ -65,7 +65,7 @@ This document outlines the tasks required to convert the existing Figma-based Re
 *Sorted by implementation difficulty (Easiest to Hardest)*
 
 ### Easiest (Frontend & Simple DB State)
-- [ ] **Emoji Picker integration**: Replace basic reaction list with a full emoji picker (e.g., `emoji-picker-react`) in both Message Input and Message Popup.
+- [x] **Emoji Picker integration**: Replace basic reaction list with a full emoji picker (e.g., `emoji-picker-react`) in both Message Input and Message Popup.
 - [ ] **Channel Info / View Members**: Implement the "i" and "Users" icons in the top bar to show channel details and member lists.
 - [ ] **Save Message / Saved Items**: Implement the "Bookmark" functionality. Add a "Saved Items" view in the sidebar to retrieve bookmarked messages.
 - [ ] **Channel Search**: basic search functionality using the "Search" icon in the top bar to filter messages in the current channel.
