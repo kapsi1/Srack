@@ -14,6 +14,8 @@ interface ThreadViewProps {
 	onToggleSave: (messageId: string) => void;
 	onForward?: (message: Message) => void;
 	users?: User[];
+	onDelete?: (messageId: string) => void;
+	currentUser?: User | null;
 }
 
 export function ThreadView({
@@ -25,6 +27,8 @@ export function ThreadView({
 	onToggleSave,
 	onForward,
 	users,
+	onDelete,
+	currentUser,
 }: ThreadViewProps) {
 	return (
 		<div className="w-[350px] flex flex-col border-l border-gray-800 bg-[#1a1d21]">
@@ -51,6 +55,8 @@ export function ThreadView({
 						onAddReaction={onAddReaction}
 						onToggleSave={onToggleSave}
 						onForward={onForward}
+						currentUser={currentUser}
+						onDelete={onDelete}
 					/>
 				</div>
 
@@ -67,6 +73,8 @@ export function ThreadView({
 					onAddReaction={onAddReaction}
 					onToggleSave={onToggleSave}
 					onForward={onForward}
+					currentUser={currentUser}
+					onDelete={onDelete}
 				/>
 			</div>
 

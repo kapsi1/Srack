@@ -27,6 +27,7 @@ import {
 	type MessageReaction,
 	sendMessage,
 	toggleSavedMessage,
+	deleteMessage,
 	type Attachment,
 } from './lib/api';
 
@@ -344,6 +345,13 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 		},
 	});
 
+	const deleteMessageMutation = useMutation({
+		mutationFn: deleteMessage,
+		onSuccess: () => {
+			// Invalidation happens via socket event, but good to have
+		},
+	});
+
 	const { channelName, userName } = useParams();
 	const navigate = useNavigate();
 
@@ -537,9 +545,23 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 		socket.on('new_message', handleNewMessage);
 		socket.on('reaction_added', handleReactionAdded);
 
+		const handleMessageDeleted = ({ messageId, channelId }: { messageId: string; channelId: string }) => {
+			if (channelId === activeChannel.id) {
+				setMessages((prev) => prev.filter((m) => m.id !== messageId));
+			}
+			// Also update thread messages if applicable
+			if (activeThread && activeThread.id === messageId) {
+				setActiveThread(null); // Thread parent deleted
+			}
+			setThreadMessages((prev) => prev.filter((m) => m.id !== messageId));
+		};
+
+		socket.on('message_deleted', handleMessageDeleted);
+
 		return () => {
 			socket.off('new_message', handleNewMessage);
 			socket.off('reaction_added', handleReactionAdded);
+			socket.off('message_deleted', handleMessageDeleted);
 		};
 	}, [socket, activeChannel, currentUser, channelsData, activeThread]); // Added channelsData dependency logic implicitly
 
@@ -582,6 +604,12 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 
 	const handleToggleSave = (messageId: string) => {
 		toggleSaveMutation.mutate(messageId);
+	};
+
+	const handleDeleteMessage = (messageId: string) => {
+		if (window.confirm('Are you sure you want to delete this message?')) {
+			deleteMessageMutation.mutate(messageId);
+		}
 	};
 
 	const isSavedItemsPath = location.pathname === '/saved-items';
@@ -665,6 +693,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 							setActiveThread(msg);
 							setIsRightSidebarOpen(false); // Close info if open
 						}}
+						onDelete={handleDeleteMessage}
 						onForward={handleForwardMessage}
 						users={usersData}
 						isSidebarCollapsed={isSidebarCollapsed}
@@ -689,6 +718,8 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 						onAddReaction={handleAddReaction}
 						onToggleSave={handleToggleSave}
 						users={usersData}
+						onDelete={handleDeleteMessage}
+						currentUser={currentUser}
 					/>
 				)}
 			</div>

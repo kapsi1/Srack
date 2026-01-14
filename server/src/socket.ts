@@ -97,8 +97,15 @@ export const setupSocket = (io: Server) => {
 	});
 };
 
+
 export const broadcastMessage = (channelId: string, message: unknown) => {
 	if (ioInstance) {
 		ioInstance.to(channelId).emit("new_message", message);
+	}
+};
+
+export const broadcastMessageDeleted = (channelId: string, messageId: string) => {
+	if (ioInstance) {
+		ioInstance.to(channelId).emit("message_deleted", { messageId, channelId });
 	}
 };

@@ -1,12 +1,12 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: Container handles mouse events for showing actions overlay */
 
 import EmojiPicker, { type EmojiClickData, Theme } from 'emoji-picker-react';
-import { Bookmark, FileText, MessageSquare, Share, Smile } from 'lucide-react';
+import { Bookmark, FileText, MessageSquare, Share, Smile, Trash } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import type { Message } from '../App';
+import type { Message, User } from '../App';
 
 interface MessageItemProps {
 	message: Message;
@@ -15,6 +15,8 @@ interface MessageItemProps {
 	onToggleSave?: (messageId: string) => void;
 	onReply?: (message: Message) => void;
 	onForward?: (message: Message) => void;
+	onDelete?: (messageId: string) => void;
+	currentUser?: User | null;
 }
 
 export function MessageItem({
@@ -24,6 +26,8 @@ export function MessageItem({
 	onToggleSave,
 	onReply,
 	onForward,
+	onDelete,
+	currentUser,
 }: MessageItemProps) {
 	const [showActions, setShowActions] = useState(false);
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -304,6 +308,16 @@ export function MessageItem({
 					>
 						<Bookmark className={`w-4 h-4 ${message.isSaved ? 'fill-current' : 'text-gray-300'}`} />
 					</button>
+					{currentUser?.id === message.userId && onDelete && (
+						<button
+							type="button"
+							className="p-1.5 hover:bg-gray-700 transition-colors text-red-500 hover:text-red-400"
+							onClick={() => onDelete(message.id)}
+							title="Delete message"
+						>
+							<Trash className="w-4 h-4" />
+						</button>
+					)}
 					{/* <div className="w-px h-5 bg-gray-700" />
 					<button
 						type="button"

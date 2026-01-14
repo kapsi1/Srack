@@ -180,4 +180,8 @@ export const fetchUserActivity = async (): Promise<ActivityItem[]> => {
 	return response.data;
 };
 
+export const deleteMessage = async (messageId: string): Promise<void> => {
+	await api.delete(`/messages/${messageId}`);
+};
+
 export default api;

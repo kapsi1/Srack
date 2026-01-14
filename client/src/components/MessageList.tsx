@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { Message } from '../App';
+import type { Message, User } from '../App';
 import { MessageItem } from './MessageItem';
 
 interface MessageListProps {
@@ -9,9 +9,11 @@ interface MessageListProps {
 	onToggleSave?: (messageId: string) => void;
 	onReply?: (message: Message) => void;
 	onForward?: (message: Message) => void;
+	onDelete?: (messageId: string) => void;
+	currentUser?: User | null;
 }
 
-export function MessageList({ channel, messages, onAddReaction, onToggleSave, onReply, onForward }: MessageListProps) {
+export function MessageList({ channel, messages, onAddReaction, onToggleSave, onReply, onForward, onDelete, currentUser }: MessageListProps) {
 	const bottomRef = useRef<HTMLDivElement>(null);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to scroll on every message update
@@ -54,6 +56,8 @@ export function MessageList({ channel, messages, onAddReaction, onToggleSave, on
 							onToggleSave={onToggleSave}
 							onReply={onReply}
 							onForward={onForward}
+							onDelete={onDelete}
+							currentUser={currentUser}
 						/>
 					);
 				})}

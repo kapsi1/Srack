@@ -18,6 +18,7 @@ interface ChatAreaProps {
 	users?: User[];
 	isSidebarCollapsed: boolean;
 	onToggleSidebar: () => void;
+	onDelete?: (messageId: string) => void;
 }
 
 export function ChatArea({
@@ -33,6 +34,7 @@ export function ChatArea({
 	users,
 	isSidebarCollapsed,
 	onToggleSidebar,
+	onDelete,
 }: ChatAreaProps) {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
@@ -152,6 +154,8 @@ export function ChatArea({
 				onToggleSave={onToggleSave}
 				onReply={onReply}
 				onForward={onForward}
+				onDelete={onDelete}
+				currentUser={currentUser}
 			/>
 
 			{/* Message Input */}
