@@ -88,7 +88,7 @@ export function ForwardMessageModal({
 									id="channel-select"
 									value={selectedChannelId}
 									onChange={(e) => setSelectedChannelId(e.target.value)}
-									className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-white/10 rounded-md bg-white dark:bg-[#111315] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1264a3] focus:border-transparent sm:text-sm appearance-none cursor-pointer"
+									className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-white/10 rounded-md bg-white dark:bg-[#111315] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1264a3] focus:border-transparent sm:text-sm appearance-none"
 									required
 								>
 									<option value="" disabled>

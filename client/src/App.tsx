@@ -156,6 +156,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 	const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
 	const [isCreateChannelModalOpen, setIsCreateChannelModalOpen] = useState(false);
     const [activeThread, setActiveThread] = useState<Message | null>(null);
@@ -593,6 +594,8 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 				currentUser={currentUser}
 				onLogout={onLogout}
                 onAddChannel={() => setIsCreateChannelModalOpen(true)}
+                isCollapsed={isSidebarCollapsed}
+                onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
 			/>
 			<div className="flex-1 flex overflow-hidden">
                 {isSavedItemsPath ? (
@@ -601,17 +604,23 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
                         messages={mapApiMessagesToMessages(savedMessagesData || [])}
                         onAddReaction={handleAddReaction}
                         onToggleSave={handleToggleSave}
+                        isSidebarCollapsed={isSidebarCollapsed}
+                        onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                     />
                 ) : isActivityPath ? (
                     <MentionsReactionsView
                         currentUser={currentUser}
                         onToggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+                        isSidebarCollapsed={isSidebarCollapsed}
+                        onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                     />
                 ) : isThreadsPath ? (
                     <ThreadsListView
                         currentUser={currentUser}
                         onToggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
                         onOpenThread={(msg) => setActiveThread(mapApiMessagesToMessages([msg])[0])}
+                        isSidebarCollapsed={isSidebarCollapsed}
+                        onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                     />
                 ) : activeChannel ? (
 					<ChatArea
@@ -628,6 +637,8 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
                         }}
                         onForward={handleForwardMessage}
                         users={usersData}
+                        isSidebarCollapsed={isSidebarCollapsed}
+                        onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
 					/>
 				) : (
 					<div className="flex-1 flex items-center justify-center bg-gray-900 text-white">

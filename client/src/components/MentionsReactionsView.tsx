@@ -7,11 +7,13 @@ import {
     type MessageReaction,
     type User
 } from "../lib/api";
-import { Menu, MessageSquare, Smile } from "lucide-react";
+import { Menu, MessageSquare, Smile, PanelLeftOpen } from "lucide-react";
 
 interface MentionsReactionsViewProps {
     currentUser: User;
     onToggleRightSidebar?: () => void;
+    isSidebarCollapsed: boolean;
+    onToggleSidebar: () => void;
 }
 
 // Helper to type guard
@@ -19,7 +21,12 @@ function isMessage(data: ApiMessage | MessageReaction): data is ApiMessage {
     return (data as ApiMessage).content !== undefined;
 }
 
-export function MentionsReactionsView({ currentUser, onToggleRightSidebar }: MentionsReactionsViewProps) {
+export function MentionsReactionsView({ 
+    currentUser, 
+    onToggleRightSidebar,
+    isSidebarCollapsed,
+    onToggleSidebar
+}: MentionsReactionsViewProps) {
     const { data: activity, isLoading } = useQuery({
         queryKey: ["user-activity"],
         queryFn: fetchUserActivity,
@@ -45,6 +52,16 @@ export function MentionsReactionsView({ currentUser, onToggleRightSidebar }: Men
             {/* Header */}
             <div className="h-12 border-b border-gray-800 px-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
+                    {isSidebarCollapsed && (
+                        <button
+                            type="button"
+                            onClick={onToggleSidebar}
+                            className="p-2 hover:bg-gray-800 rounded transition-colors text-gray-400"
+                            title="Show sidebar"
+                        >
+                            <PanelLeftOpen className="w-5 h-5" />
+                        </button>
+                    )}
                      <button 
                         type="button"
                         onClick={onToggleRightSidebar}

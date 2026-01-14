@@ -1,4 +1,4 @@
-import { Bookmark } from 'lucide-react';
+import { Bookmark, PanelLeftOpen } from 'lucide-react';
 import type { Message, User } from '../App';
 import { MessageList } from './MessageList';
 
@@ -7,18 +7,32 @@ interface SavedItemsViewProps {
 	messages: Message[];
 	onAddReaction: (messageId: string, emoji: string) => void;
 	onToggleSave: (messageId: string) => void;
+	isSidebarCollapsed: boolean;
+	onToggleSidebar: () => void;
 }
 
 export function SavedItemsView({ 
 	messages, 
 	onAddReaction, 
 	onToggleSave,
+	isSidebarCollapsed,
+	onToggleSidebar,
 }: SavedItemsViewProps) {
 	return (
 		<div className="flex-1 flex flex-col bg-[#1a1d21]">
 			{/* Header */}
 			<div className="h-12 border-b border-gray-800 px-4 flex items-center justify-between">
 				<div className="flex items-center gap-2">
+                    {isSidebarCollapsed && (
+                        <button
+                            type="button"
+                            onClick={onToggleSidebar}
+                            className="p-2 hover:bg-gray-800 rounded transition-colors text-gray-400"
+                            title="Show sidebar"
+                        >
+                            <PanelLeftOpen className="w-5 h-5" />
+                        </button>
+                    )}
                     <Bookmark className="w-5 h-5 text-gray-400" />
                     <h2 className="text-white font-bold">Saved items</h2>
 				</div>

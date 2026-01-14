@@ -1,14 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserThreads, type Message as ApiMessage, type User } from "../lib/api";
-import { MessageSquare, Menu } from "lucide-react";
+import { MessageSquare, Menu, PanelLeftOpen } from "lucide-react";
 
 interface ThreadsListViewProps {
     currentUser: User;
     onToggleRightSidebar?: () => void;
     onOpenThread?: (message: ApiMessage) => void;
+    isSidebarCollapsed: boolean;
+    onToggleSidebar: () => void;
 }
 
-export function ThreadsListView({ currentUser, onToggleRightSidebar, onOpenThread }: ThreadsListViewProps) {
+export function ThreadsListView({ 
+    currentUser, 
+    onToggleRightSidebar, 
+    onOpenThread,
+    isSidebarCollapsed,
+    onToggleSidebar
+}: ThreadsListViewProps) {
     const { data: threads, isLoading } = useQuery({
         queryKey: ["user-threads"],
         queryFn: fetchUserThreads,
@@ -34,6 +42,16 @@ export function ThreadsListView({ currentUser, onToggleRightSidebar, onOpenThrea
              {/* Header */}
              <div className="h-12 border-b border-gray-800 px-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
+                    {isSidebarCollapsed && (
+                        <button
+                            type="button"
+                            onClick={onToggleSidebar}
+                            className="p-2 hover:bg-gray-800 rounded transition-colors text-gray-400"
+                            title="Show sidebar"
+                        >
+                            <PanelLeftOpen className="w-5 h-5" />
+                        </button>
+                    )}
                      <button 
                         type="button"
                         onClick={onToggleRightSidebar}
@@ -61,7 +79,7 @@ export function ThreadsListView({ currentUser, onToggleRightSidebar, onOpenThrea
                              </div>
 
                              <div 
-                                className="p-4 cursor-pointer hover:bg-gray-800/50 transition-colors focus:outline-none focus:bg-gray-800/50" 
+                                className="p-4 hover:bg-gray-800/50 transition-colors focus:outline-none focus:bg-gray-800/50" 
                                 role="button" 
                                 tabIndex={0}
                                 onClick={() => onOpenThread?.(thread)}

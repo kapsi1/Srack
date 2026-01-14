@@ -134,7 +134,7 @@ export function MessageItem({
 								a: ({ node, href, ...props }) => {
 									if (href?.startsWith("/user/")) {
 										return (
-											<span className="text-blue-400 bg-blue-500/10 px-1 rounded font-medium cursor-pointer hover:bg-blue-500/20">
+											<span className="text-blue-400 bg-blue-500/10 px-1 rounded font-medium hover:bg-blue-500/20">
 												{props.children}
 											</span>
 										);
