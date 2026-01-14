@@ -38,7 +38,7 @@ export function CreateChannelModal({
 						Create a channel
 					</h2>
 					<button
-                        type="button"
+						type="button"
 						onClick={onClose}
 						className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors"
 					>
