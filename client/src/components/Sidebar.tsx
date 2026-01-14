@@ -59,7 +59,7 @@ export function Sidebar({
 			<div className="w-[260px] flex flex-col text-white">
 				{/* Workspace Header */}
 				<div className="h-12 px-4 flex items-center justify-between border-b border-white/10">
-					<span className="truncate">Workspace Name</span>
+					<span className="truncate">Snack</span>
 
 					<button
 						type="button"

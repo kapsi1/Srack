@@ -13,8 +13,8 @@ test('register and login flow', async ({ page }) => {
   await page.fill('#password', 'password123');
   await page.getByRole('button', { name: 'Create Account' }).click();
 
-  // Should be logged in and see Workspace Name or Channels
-  await expect(page.getByText('Workspace Name')).toBeVisible({ timeout: 30000 });
+  // Should be logged in and see Snack or Channels
+  await expect(page.getByText('Snack')).toBeVisible({ timeout: 30000 });
   
   // Logout
   await page.locator('.lucide-log-out').first().click();

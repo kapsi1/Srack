@@ -13,7 +13,7 @@ test.describe('Messaging', () => {
         await page.fill('#email', `${TEST_PREFIX}msg_${uniqueId}@example.com`);
         await page.fill('#password', 'password123');
         await page.getByRole('button', { name: 'Create Account' }).click();
-        await expect(page.getByText('Workspace Name')).toBeVisible();
+        await expect(page.getByText('Snack')).toBeVisible();
     });
 
     test('send a message', async ({ page }) => {
