@@ -1,3 +1,4 @@
+import EmojiPicker, { type EmojiClickData, Theme } from 'emoji-picker-react';
 import {
 	AtSign,
 	Bold,
@@ -11,11 +12,10 @@ import {
 	Send,
 	Smile,
 	Strikethrough,
-} from "lucide-react";
-import { useRef, useState, useEffect } from "react";
-import EmojiPicker, { Theme, type EmojiClickData } from "emoji-picker-react";
-import { createPortal } from "react-dom";
-import type { User } from "../App";
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import type { User } from '../App';
 
 interface MessageInputProps {
 	channelName: string;
@@ -25,20 +25,14 @@ interface MessageInputProps {
 	users?: User[];
 }
 
-export function MessageInput({
-	channelName,
-	isDM,
-	onSendMessage,
-	placeholder,
-	users = [],
-}: MessageInputProps) {
-	const [message, setMessage] = useState("");
+export function MessageInput({ channelName, isDM, onSendMessage, placeholder, users = [] }: MessageInputProps) {
+	const [message, setMessage] = useState('');
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 	const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
 
 	// Mention state
 	const [showMentionPicker, setShowMentionPicker] = useState(false);
-	const [mentionQuery, setMentionQuery] = useState("");
+	const [mentionQuery, setMentionQuery] = useState('');
 	const [mentionPosition, setMentionPosition] = useState({ top: 0, left: 0 });
 	const [mentionSelectedIndex, setMentionSelectedIndex] = useState(0);
 
@@ -47,45 +41,29 @@ export function MessageInput({
 	const smileButtonRef = useRef<HTMLButtonElement>(null);
 	const atButtonRef = useRef<HTMLButtonElement>(null);
 
-	const filteredUsers = users
-		.filter((u) =>
-			u.username.toLowerCase().includes(mentionQuery.toLowerCase()),
-		)
-		.slice(0, 5); // Limit to 5 suggestions
+	const filteredUsers = users.filter((u) => u.username.toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 5); // Limit to 5 suggestions
 
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
-			if (
-				pickerRef.current &&
-				!pickerRef.current.contains(event.target as Node)
-			) {
+			if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
 				setShowEmojiPicker(false);
 			}
 			// Close mention picker on click outside (though typing usually handles it)
-			if (
-				showMentionPicker &&
-				textareaRef.current &&
-				!textareaRef.current.contains(event.target as Node)
-			) {
+			if (showMentionPicker && textareaRef.current && !textareaRef.current.contains(event.target as Node)) {
 				// Check if clicking inside the mention portal (omitted for simplicity as it lives in portal)
 				// Actually we need to check if click is NOT in the mention picker
-				const mentionPickerEl = document.getElementById(
-					"mention-picker-portal",
-				);
-				if (
-					mentionPickerEl &&
-					!mentionPickerEl.contains(event.target as Node)
-				) {
+				const mentionPickerEl = document.getElementById('mention-picker-portal');
+				if (mentionPickerEl && !mentionPickerEl.contains(event.target as Node)) {
 					setShowMentionPicker(false);
 				}
 			}
 		};
 
 		if (showEmojiPicker || showMentionPicker) {
-			document.addEventListener("mousedown", handleClickOutside);
+			document.addEventListener('mousedown', handleClickOutside);
 		}
 		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener('mousedown', handleClickOutside);
 		};
 	}, [showEmojiPicker, showMentionPicker]);
 
@@ -116,12 +94,8 @@ export function MessageInput({
 			// Re-using the logic from emoji picker but anchored to bottom-left of textarea for now for simplicity,
 			// or we can try to follow text.
 			// Let's stick to a fixed position above the input for v1 to ensure it doesn't break layout.
-			const pickerTop =
-				rect.top + window.scrollY - filteredUsers.length * 40 - 20;
-			const pickerLeft =
-				rect.left +
-				window.scrollX +
-				((textBeforeCursor.length * 8) % rect.width); // Very rough horizontal approx
+			const pickerTop = rect.top + window.scrollY - filteredUsers.length * 40 - 20;
+			const pickerLeft = rect.left + window.scrollX + ((textBeforeCursor.length * 8) % rect.width); // Very rough horizontal approx
 
 			setMentionPosition({
 				top: pickerTop < 0 ? rect.bottom + window.scrollY : pickerTop,
@@ -174,10 +148,7 @@ export function MessageInput({
 		// Restore cursor
 		setTimeout(() => {
 			textarea.focus();
-			textarea.setSelectionRange(
-				start + emojiData.emoji.length,
-				start + emojiData.emoji.length,
-			);
+			textarea.setSelectionRange(start + emojiData.emoji.length, start + emojiData.emoji.length);
 		}, 0);
 	};
 
@@ -190,7 +161,7 @@ export function MessageInput({
 		const textAfterCursor = message.slice(cursorPosition);
 
 		// Find where the @ started
-		const lastAt = textBeforeCursor.lastIndexOf("@");
+		const lastAt = textBeforeCursor.lastIndexOf('@');
 		const textBeforeAt = textBeforeCursor.slice(0, lastAt);
 
 		const newText = `${textBeforeAt}@${user.username} ${textAfterCursor}`;
@@ -211,7 +182,7 @@ export function MessageInput({
 
 		const start = textarea.selectionStart;
 		const text = textarea.value;
-		const newText = text.slice(0, start) + "@" + text.slice(start);
+		const newText = `${text.slice(0, start)}@${text.slice(start)}`;
 		setMessage(newText);
 
 		setTimeout(() => {
@@ -251,7 +222,7 @@ export function MessageInput({
 		const text = textarea.value;
 
 		const before = text.substring(0, start);
-		const selection = text.substring(start, end) || "text";
+		const selection = text.substring(start, end) || 'text';
 		const after = text.substring(end);
 
 		const newText = `${before}[${selection}](url)${after}`;
@@ -264,7 +235,7 @@ export function MessageInput({
 		}, 0);
 	};
 
-	const handleList = (type: "ordered" | "unordered") => {
+	const handleList = (type: 'ordered' | 'unordered') => {
 		const textarea = textareaRef.current;
 		if (!textarea) return;
 
@@ -276,15 +247,15 @@ export function MessageInput({
 		const selection = text.substring(start, end);
 		const after = text.substring(end);
 
-		const lines = (selection || "").split("\n");
+		const lines = (selection || '').split('\n');
 		const formattedLines = lines.map((line, index) => {
-			if (type === "ordered") {
+			if (type === 'ordered') {
 				return `${index + 1}. ${line}`;
 			}
 			return `* ${line}`;
 		});
 
-		const replacement = formattedLines.join("\n");
+		const replacement = formattedLines.join('\n');
 		const newText = `${before}${replacement}${after}`;
 		setMessage(newText);
 
@@ -307,10 +278,10 @@ export function MessageInput({
 		const selection = text.substring(start, end);
 		const after = text.substring(end);
 
-		let replacement = "";
+		let replacement = '';
 		let selectionOffset = 0;
 
-		if (selection.includes("\n")) {
+		if (selection.includes('\n')) {
 			replacement = `\`\`\`\n${selection}\n\`\`\``;
 			selectionOffset = 4;
 		} else {
@@ -323,10 +294,7 @@ export function MessageInput({
 
 		setTimeout(() => {
 			textarea.focus();
-			textarea.setSelectionRange(
-				start + selectionOffset,
-				start + selectionOffset + selection.length,
-			);
+			textarea.setSelectionRange(start + selectionOffset, start + selectionOffset + selection.length);
 		}, 0);
 	};
 
@@ -334,37 +302,35 @@ export function MessageInput({
 		e.preventDefault();
 		if (message.trim()) {
 			onSendMessage(message);
-			setMessage("");
+			setMessage('');
 		}
 	};
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (showMentionPicker && filteredUsers.length > 0) {
-			if (e.key === "ArrowDown") {
+			if (e.key === 'ArrowDown') {
 				e.preventDefault();
 				setMentionSelectedIndex((prev) => (prev + 1) % filteredUsers.length);
 				return;
 			}
-			if (e.key === "ArrowUp") {
+			if (e.key === 'ArrowUp') {
 				e.preventDefault();
-				setMentionSelectedIndex(
-					(prev) => (prev - 1 + filteredUsers.length) % filteredUsers.length,
-				);
+				setMentionSelectedIndex((prev) => (prev - 1 + filteredUsers.length) % filteredUsers.length);
 				return;
 			}
-			if (e.key === "Enter" || e.key === "Tab") {
+			if (e.key === 'Enter' || e.key === 'Tab') {
 				e.preventDefault();
 				handleMentionSelect(filteredUsers[mentionSelectedIndex]);
 				return;
 			}
-			if (e.key === "Escape") {
+			if (e.key === 'Escape') {
 				e.preventDefault();
 				setShowMentionPicker(false);
 				return;
 			}
 		}
 
-		if (e.key === "Enter" && !e.shiftKey) {
+		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
 			handleSubmit(e);
 		}
@@ -379,7 +345,7 @@ export function MessageInput({
 						<button
 							type="button"
 							className="p-1.5 hover:bg-gray-700 rounded transition-colors"
-							onClick={() => handleFormat("**")}
+							onClick={() => handleFormat('**')}
 							title="Bold"
 						>
 							<Bold className="w-4 h-4 text-gray-300" />
@@ -387,7 +353,7 @@ export function MessageInput({
 						<button
 							type="button"
 							className="p-1.5 hover:bg-gray-700 rounded transition-colors"
-							onClick={() => handleFormat("_")}
+							onClick={() => handleFormat('_')}
 							title="Italic"
 						>
 							<Italic className="w-4 h-4 text-gray-300" />
@@ -395,7 +361,7 @@ export function MessageInput({
 						<button
 							type="button"
 							className="p-1.5 hover:bg-gray-700 rounded transition-colors"
-							onClick={() => handleFormat("~~")}
+							onClick={() => handleFormat('~~')}
 							title="Strikethrough"
 						>
 							<Strikethrough className="w-4 h-4 text-gray-300" />
@@ -412,7 +378,7 @@ export function MessageInput({
 						<button
 							type="button"
 							className="p-1.5 hover:bg-gray-700 rounded transition-colors"
-							onClick={() => handleList("ordered")}
+							onClick={() => handleList('ordered')}
 							title="Ordered List"
 						>
 							<ListOrdered className="w-4 h-4 text-gray-300" />
@@ -420,7 +386,7 @@ export function MessageInput({
 						<button
 							type="button"
 							className="p-1.5 hover:bg-gray-700 rounded transition-colors"
-							onClick={() => handleList("unordered")}
+							onClick={() => handleList('unordered')}
 							title="Unordered List"
 						>
 							<List className="w-4 h-4 text-gray-300" />
@@ -441,9 +407,7 @@ export function MessageInput({
 						value={message}
 						onChange={(e) => setMessage(e.target.value)}
 						onKeyDown={handleKeyDown}
-						placeholder={
-							placeholder || `Message ${isDM ? "@" : "#"}${channelName}`
-						}
+						placeholder={placeholder || `Message ${isDM ? '@' : '#'}${channelName}`}
 						className="w-full px-3 py-2 resize-none outline-none bg-transparent text-white placeholder-gray-500 font-normal"
 						rows={3}
 					/>
@@ -510,17 +474,14 @@ export function MessageInput({
 													key={user.id}
 													className={`w-full text-left px-3 py-2 rounded flex items-center gap-2 ${
 														index === mentionSelectedIndex
-															? "bg-blue-600 text-white"
-															: "hover:bg-gray-800 text-gray-200"
+															? 'bg-blue-600 text-white'
+															: 'hover:bg-gray-800 text-gray-200'
 													}`}
 													onClick={() => handleMentionSelect(user)}
 													onMouseEnter={() => setMentionSelectedIndex(index)}
 												>
 													<img
-														src={
-															user.avatar ||
-															`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
-														}
+														src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
 														alt={user.username}
 														className="w-5 h-5 rounded-full"
 													/>
@@ -534,18 +495,10 @@ export function MessageInput({
 									</div>,
 									document.body,
 								)}
-							<button
-								type="button"
-								className="p-1.5 hover:bg-gray-700 rounded transition-colors"
-								title="Attach file"
-							>
+							<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="Attach file">
 								<Paperclip className="w-4 h-4 text-gray-300" />
 							</button>
-							<button
-								type="button"
-								className="p-1.5 hover:bg-gray-700 rounded transition-colors"
-								title="Record audio"
-							>
+							<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="Record audio">
 								<Mic className="w-4 h-4 text-gray-300" />
 							</button>
 						</div>

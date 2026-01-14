@@ -1,6 +1,6 @@
-import { Bookmark, PanelLeftOpen } from "lucide-react";
-import type { Message, User } from "../App";
-import { MessageList } from "./MessageList";
+import { Bookmark, PanelLeftOpen } from 'lucide-react';
+import type { Message, User } from '../App';
+import { MessageList } from './MessageList';
 
 interface SavedItemsViewProps {
 	currentUser: User;
@@ -45,20 +45,13 @@ export function SavedItemsView({
 						<div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mb-4">
 							<Bookmark className="w-8 h-8" />
 						</div>
-						<h3 className="text-xl font-bold text-white mb-2">
-							Nothing saved yet
-						</h3>
+						<h3 className="text-xl font-bold text-white mb-2">Nothing saved yet</h3>
 						<p className="max-w-xs text-sm">
-							Save messages to easily find them later. Just hover over a message
-							and click the bookmark icon.
+							Save messages to easily find them later. Just hover over a message and click the bookmark icon.
 						</p>
 					</div>
 				) : (
-					<MessageList
-						messages={messages}
-						onAddReaction={onAddReaction}
-						onToggleSave={onToggleSave}
-					/>
+					<MessageList messages={messages} onAddReaction={onAddReaction} onToggleSave={onToggleSave} />
 				)}
 			</div>
 		</div>

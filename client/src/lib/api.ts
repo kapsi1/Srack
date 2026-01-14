@@ -1,8 +1,8 @@
-import axios from "axios";
+import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-console.log("Final API_URL configured as:", API_URL);
+console.log('Final API_URL configured as:', API_URL);
 
 const api = axios.create({
 	baseURL: API_URL,
@@ -10,18 +10,15 @@ const api = axios.create({
 
 api.interceptors.request.use(
 	(config) => {
-		const token = localStorage.getItem("token");
+		const token = localStorage.getItem('token');
 		if (token) {
 			config.headers.Authorization = `Bearer ${token}`;
 		}
-		console.log(
-			`[API Request] ${config.method?.toUpperCase()} ${config.url}`,
-			config.data || "",
-		);
+		console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, config.data || '');
 		return config;
 	},
 	(error) => {
-		console.error("[API Request Error]", error);
+		console.error('[API Request Error]', error);
 		return Promise.reject(error);
 	},
 );
@@ -33,17 +30,11 @@ api.interceptors.response.use(
 	},
 	(error) => {
 		if (error.response) {
-			console.error(
-				`[API Response Error] ${error.response.status} ${error.config.url}`,
-				error.response.data,
-			);
+			console.error(`[API Response Error] ${error.response.status} ${error.config.url}`, error.response.data);
 		} else if (error.request) {
-			console.error(
-				`[API Network Error] No response received from ${error.config.url}`,
-				error.message,
-			);
+			console.error(`[API Network Error] No response received from ${error.config.url}`, error.message);
 		} else {
-			console.error("[API Error]", error.message);
+			console.error('[API Error]', error.message);
 		}
 		return Promise.reject(error);
 	},
@@ -61,7 +52,7 @@ export interface Channel {
 	name: string;
 	description?: string;
 	isPrivate: boolean;
-	type?: "PUBLIC" | "PRIVATE" | "DM";
+	type?: 'PUBLIC' | 'PRIVATE' | 'DM';
 	members?: User[];
 	createdAt: string;
 	updatedAt: string;
@@ -92,17 +83,17 @@ export interface Message {
 }
 
 export const fetchCurrentUser = async (): Promise<User> => {
-	const response = await api.get("/users/me");
+	const response = await api.get('/users/me');
 	return response.data;
 };
 
 export const fetchUsers = async (): Promise<User[]> => {
-	const response = await api.get("/users");
+	const response = await api.get('/users');
 	return response.data;
 };
 
 export const fetchChannels = async (): Promise<Channel[]> => {
-	const response = await api.get("/channels");
+	const response = await api.get('/channels');
 	return response.data;
 };
 
@@ -111,7 +102,7 @@ export const createChannel = async (
 	isPrivate: boolean = false,
 	description?: string,
 ): Promise<Channel> => {
-	const response = await api.post("/channels", {
+	const response = await api.post('/channels', {
 		name,
 		isPrivate,
 		description,
@@ -127,7 +118,7 @@ export const fetchMessages = async (channelId: string): Promise<Message[]> => {
 };
 
 export const createDM = async (targetUserId: string): Promise<Channel> => {
-	const response = await api.post("/channels/dm", { targetUserId });
+	const response = await api.post('/channels/dm', { targetUserId });
 	return response.data;
 };
 
@@ -137,7 +128,7 @@ export const sendMessage = async (
 	tempId?: string,
 	parentId?: string,
 ): Promise<Message> => {
-	const response = await api.post("/messages", {
+	const response = await api.post('/messages', {
 		channelId,
 		content,
 		tempId,
@@ -146,39 +137,35 @@ export const sendMessage = async (
 	return response.data;
 };
 
-export const fetchThreadMessages = async (
-	messageId: string,
-): Promise<Message[]> => {
+export const fetchThreadMessages = async (messageId: string): Promise<Message[]> => {
 	const response = await api.get(`/messages/${messageId}/thread`);
 	return response.data;
 };
 
 export const fetchUserThreads = async (): Promise<Message[]> => {
-	const response = await api.get("/messages/threads");
+	const response = await api.get('/messages/threads');
 	return response.data;
 };
 
-export const toggleSavedMessage = async (
-	messageId: string,
-): Promise<{ saved: boolean }> => {
-	const response = await api.post("/saved-messages/toggle", { messageId });
+export const toggleSavedMessage = async (messageId: string): Promise<{ saved: boolean }> => {
+	const response = await api.post('/saved-messages/toggle', { messageId });
 	return response.data;
 };
 
 export const fetchSavedMessages = async (): Promise<Message[]> => {
-	const response = await api.get("/saved-messages");
+	const response = await api.get('/saved-messages');
 	return response.data;
 };
 
 export interface ActivityItem {
-	type: "mention" | "reaction";
+	type: 'mention' | 'reaction';
 	id: string;
 	createdAt: string;
 	data: Message | MessageReaction; // Using basic types, might need specific casting
 }
 
 export const fetchUserActivity = async (): Promise<ActivityItem[]> => {
-	const response = await api.get("/activity");
+	const response = await api.get('/activity');
 	return response.data;
 };
 

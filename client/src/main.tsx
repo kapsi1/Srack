@@ -8,11 +8,11 @@ import { SocketProvider } from './context/SocketContext';
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')!).render(
-  <QueryClientProvider client={queryClient}>
-    <SocketProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </SocketProvider>
-  </QueryClientProvider>
+	<QueryClientProvider client={queryClient}>
+		<SocketProvider>
+			<BrowserRouter>
+				<App />
+			</BrowserRouter>
+		</SocketProvider>
+	</QueryClientProvider>,
 );

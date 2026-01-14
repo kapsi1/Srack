@@ -1,24 +1,24 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { Sidebar } from "./Sidebar";
-import { MemoryRouter } from "react-router-dom";
-import { describe, it, expect, vi } from "vitest";
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { describe, expect, it, vi } from 'vitest';
+import { Sidebar } from './Sidebar';
 
 const mockUser = {
 	id: 1,
-	username: "Test User",
-	avatar: "avatar.png",
-	email: "test@example.com",
+	username: 'Test User',
+	avatar: 'avatar.png',
+	email: 'test@example.com',
 };
 
 const mockChannels = [
-	{ id: "1", name: "general", type: "PUBLIC", isPrivate: false, members: [] },
-	{ id: "2", name: "random", type: "PUBLIC", isPrivate: false, members: [] },
+	{ id: '1', name: 'general', type: 'PUBLIC', isPrivate: false, members: [] },
+	{ id: '2', name: 'random', type: 'PUBLIC', isPrivate: false, members: [] },
 ];
 
 const mockDMs = [];
 
-describe("Sidebar", () => {
-	it("renders user name", () => {
+describe('Sidebar', () => {
+	it('renders user name', () => {
 		render(
 			<MemoryRouter>
 				<Sidebar
@@ -30,10 +30,10 @@ describe("Sidebar", () => {
 				/>
 			</MemoryRouter>,
 		);
-		expect(screen.getByText("Test User")).toBeInTheDocument();
+		expect(screen.getByText('Test User')).toBeInTheDocument();
 	});
 
-	it("renders channels", () => {
+	it('renders channels', () => {
 		render(
 			<MemoryRouter>
 				<Sidebar
@@ -45,13 +45,13 @@ describe("Sidebar", () => {
 				/>
 			</MemoryRouter>,
 		);
-		expect(screen.getByText("general")).toBeInTheDocument();
-		expect(screen.getByText("random")).toBeInTheDocument();
+		expect(screen.getByText('general')).toBeInTheDocument();
+		expect(screen.getByText('random')).toBeInTheDocument();
 	});
 
-	it("calls onLogout when logout icon is clicked", () => {
+	it('calls onLogout when logout icon is clicked', () => {
 		const handleLogout = vi.fn();
-		const { container } = render(
+		render(
 			<MemoryRouter>
 				<Sidebar
 					channels={mockChannels}

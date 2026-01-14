@@ -5,19 +5,19 @@ import type { AuthRequest } from "../middleware/auth.middleware";
 export const getChannels = async (req: AuthRequest, res: Response) => {
 	try {
 		const userId = req.userId;
-		
+
 		const channels = await prisma.channel.findMany({
 			where: {
 				OR: [
 					{ type: "PUBLIC" },
-					{ 
+					{
 						members: {
 							some: {
-								id: userId
-							}
-						}
-					}
-				]
+								id: userId,
+							},
+						},
+					},
+				],
 			},
 			orderBy: { name: "asc" },
 			include: {
@@ -25,10 +25,10 @@ export const getChannels = async (req: AuthRequest, res: Response) => {
 					select: {
 						id: true,
 						username: true,
-						avatar: true
-					}
-				}
-			}
+						avatar: true,
+					},
+				},
+			},
 		});
 		res.json(channels);
 	} catch (error) {
@@ -53,8 +53,8 @@ export const createChannel = async (req: AuthRequest, res: Response) => {
 				isPrivate: isPrivate || false,
 				type: isPrivate ? "PRIVATE" : "PUBLIC",
 				members: {
-					connect: { id: userId } // Creator is always a member
-				}
+					connect: { id: userId }, // Creator is always a member
+				},
 			},
 		});
 
@@ -80,18 +80,18 @@ export const createDM = async (req: AuthRequest, res: Response) => {
 				type: "DM",
 				AND: [
 					{ members: { some: { id: userId } } },
-					{ members: { some: { id: targetUserId } } }
-				]
+					{ members: { some: { id: targetUserId } } },
+				],
 			},
 			include: {
 				members: {
 					select: {
 						id: true,
 						username: true,
-						avatar: true
-					}
-				}
-			}
+						avatar: true,
+					},
+				},
+			},
 		});
 
 		if (existingDM) {
@@ -106,25 +106,21 @@ export const createDM = async (req: AuthRequest, res: Response) => {
 				type: "DM",
 				isPrivate: true,
 				members: {
-					connect: [
-						{ id: userId },
-						{ id: targetUserId }
-					]
-				}
+					connect: [{ id: userId }, { id: targetUserId }],
+				},
 			},
 			include: {
 				members: {
 					select: {
 						id: true,
 						username: true,
-						avatar: true
-					}
-				}
-			}
+						avatar: true,
+					},
+				},
+			},
 		});
 
 		res.status(201).json(newDM);
-
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ error: "Error creating DM" });

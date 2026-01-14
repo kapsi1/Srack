@@ -1,5 +1,5 @@
-import { X, Hash, Info, Users, Clock, Shield } from "lucide-react";
-import type { Channel, User } from "../App";
+import { Clock, Hash, Info, Shield, Users, X } from 'lucide-react';
+import type { Channel, User } from '../App';
 
 interface ChannelInfoProps {
 	channel: Channel;
@@ -7,15 +7,9 @@ interface ChannelInfoProps {
 	onClose: () => void;
 }
 
-export function ChannelInfo({
-	channel,
-	currentUser,
-	onClose,
-}: ChannelInfoProps) {
-	const isDM = channel.type === "DM";
-	const otherUser = isDM
-		? channel.members?.find((m) => m.id !== currentUser.id)
-		: null;
+export function ChannelInfo({ channel, currentUser, onClose }: ChannelInfoProps) {
+	const isDM = channel.type === 'DM';
+	const otherUser = isDM ? channel.members?.find((m) => m.id !== currentUser.id) : null;
 	const displayName = otherUser ? otherUser.username : channel.name;
 
 	return (
@@ -23,11 +17,7 @@ export function ChannelInfo({
 			{/* Header */}
 			<div className="h-12 border-b border-gray-800 px-4 flex items-center justify-between">
 				<h3 className="text-white font-bold">Details</h3>
-				<button
-					type="button"
-					onClick={onClose}
-					className="p-1 hover:bg-gray-800 rounded transition-colors"
-				>
+				<button type="button" onClick={onClose} className="p-1 hover:bg-gray-800 rounded transition-colors">
 					<X className="w-5 h-5 text-gray-400" />
 				</button>
 			</div>
@@ -39,10 +29,7 @@ export function ChannelInfo({
 					<div className="flex justify-center mb-3">
 						{isDM ? (
 							<img
-								src={
-									otherUser?.avatar ||
-									`https://api.dicebear.com/7.x/avataaars/svg?seed=${otherUser?.username}`
-								}
+								src={otherUser?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${otherUser?.username}`}
 								alt={displayName}
 								className="w-20 h-20 rounded-lg"
 							/>
@@ -53,9 +40,7 @@ export function ChannelInfo({
 						)}
 					</div>
 					<h4 className="text-white text-xl font-bold">{displayName}</h4>
-					{isDM && (
-						<p className="text-gray-400 text-sm mt-1">{otherUser?.email}</p>
-					)}
+					{isDM && <p className="text-gray-400 text-sm mt-1">{otherUser?.email}</p>}
 				</div>
 
 				{/* About Section */}
@@ -67,25 +52,19 @@ export function ChannelInfo({
 						</h5>
 						<div className="bg-gray-800/50 rounded-lg p-3 space-y-3">
 							<div>
-								<p className="text-gray-400 text-xs uppercase font-bold">
-									Description
-								</p>
+								<p className="text-gray-400 text-xs uppercase font-bold">Description</p>
 								<p className="text-gray-300 text-sm mt-1">
 									{channel.description ||
 										(channel.isPrivate
-											? "This is a private channel."
-											: "This is a public channel anyone in the workspace can join.")}
+											? 'This is a private channel.'
+											: 'This is a public channel anyone in the workspace can join.')}
 								</p>
 							</div>
 							<div>
-								<p className="text-gray-400 text-xs uppercase font-bold">
-									Created on
-								</p>
+								<p className="text-gray-400 text-xs uppercase font-bold">Created on</p>
 								<p className="text-gray-300 text-sm mt-1 flex items-center gap-1.5">
 									<Clock className="w-3.5 h-3.5" />
-									{channel.createdAt
-										? new Date(channel.createdAt).toLocaleDateString()
-										: "Long ago"}
+									{channel.createdAt ? new Date(channel.createdAt).toLocaleDateString() : 'Long ago'}
 								</p>
 							</div>
 						</div>
@@ -96,7 +75,7 @@ export function ChannelInfo({
 				<div className="space-y-3">
 					<h5 className="text-white font-semibold flex items-center gap-2">
 						<Users className="w-4 h-4" />
-						Members {channel.members ? `(${channel.members.length})` : ""}
+						Members {channel.members ? `(${channel.members.length})` : ''}
 					</h5>
 					<div className="space-y-2">
 						{channel.members?.map((member) => (
@@ -105,10 +84,7 @@ export function ChannelInfo({
 								className="flex items-center gap-3 p-2 hover:bg-gray-800 rounded-lg transition-colors group"
 							>
 								<img
-									src={
-										member.avatar ||
-										`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.username}`
-									}
+									src={member.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.username}`}
 									alt={member.username}
 									className="w-8 h-8 rounded"
 								/>
@@ -116,9 +92,7 @@ export function ChannelInfo({
 									<p className="text-sm font-medium text-gray-200 truncate group-hover:text-white">
 										{member.username}
 										{member.id === currentUser.id && (
-											<span className="ml-1.5 text-xs text-gray-500 font-normal">
-												(you)
-											</span>
+											<span className="ml-1.5 text-xs text-gray-500 font-normal">(you)</span>
 										)}
 									</p>
 								</div>

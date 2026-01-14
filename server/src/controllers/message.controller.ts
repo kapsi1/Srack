@@ -25,50 +25,56 @@ export const getChannelMessages = async (req: AuthRequest, res: Response) => {
 						},
 					},
 				},
-                savedMessages: {
-                    where: { userId: req.userId },
-                    select: { id: true }
-                },
-                _count: {
-                    select: { replies: true }
-                }
+				savedMessages: {
+					where: { userId: req.userId },
+					select: { id: true },
+				},
+				_count: {
+					select: { replies: true },
+				},
 			},
 			orderBy: { createdAt: "asc" },
 		});
 
-		res.json(messages.map(m => ({
-            ...m,
-            isSaved: m.savedMessages.length > 0,
-            threadCount: m._count.replies
-        })));
-        
-        // Auto-join public channel if not already a member
-        const userId = req.userId;
-        // Optimization: Run this in background, don't await blocking response? 
-        // Or just let it run. But we already sent response.
-        // To be safe, we should await before sending response or just ignore.
-        // Actually, if we sent response, we can't send error if this fails.
-        // Let's move response to end, or just remove the second send.
-        
-        try {
-            const channel = await prisma.channel.findUnique({
-                where: { id: channelId },
-                include: { members: { where: { id: userId } } }
-            });
+		res.json(
+			messages.map((m) => ({
+				...m,
+				isSaved: m.savedMessages.length > 0,
+				threadCount: m._count.replies,
+			})),
+		);
 
-            if (channel && channel.type === "PUBLIC" && channel.members.length === 0) {
-                await prisma.channel.update({
-                    where: { id: channelId },
-                    data: {
-                        members: {
-                            connect: { id: userId }
-                        }
-                    }
-                });
-            }
-        } catch (e) {
-            console.error("Auto-join failed", e);
-        }
+		// Auto-join public channel if not already a member
+		const userId = req.userId;
+		// Optimization: Run this in background, don't await blocking response?
+		// Or just let it run. But we already sent response.
+		// To be safe, we should await before sending response or just ignore.
+		// Actually, if we sent response, we can't send error if this fails.
+		// Let's move response to end, or just remove the second send.
+
+		try {
+			const channel = await prisma.channel.findUnique({
+				where: { id: channelId },
+				include: { members: { where: { id: userId } } },
+			});
+
+			if (
+				channel &&
+				channel.type === "PUBLIC" &&
+				channel.members.length === 0
+			) {
+				await prisma.channel.update({
+					where: { id: channelId },
+					data: {
+						members: {
+							connect: { id: userId },
+						},
+					},
+				});
+			}
+		} catch (e) {
+			console.error("Auto-join failed", e);
+		}
 	} catch (_error) {
 		res.status(500).json({ error: "Error fetching messages" });
 	}
@@ -90,7 +96,7 @@ export const createMessage = async (req: AuthRequest, res: Response) => {
 				content,
 				channelId,
 				senderId: userId,
-                parentId
+				parentId,
 			},
 			include: {
 				sender: {
@@ -104,15 +110,15 @@ export const createMessage = async (req: AuthRequest, res: Response) => {
 			},
 		});
 
-        // Ensure user is added to channel members (especially for PUBLIC channels)
-        await prisma.channel.update({
-            where: { id: channelId },
-            data: {
-                members: {
-                    connect: { id: userId }
-                }
-            }
-        });
+		// Ensure user is added to channel members (especially for PUBLIC channels)
+		await prisma.channel.update({
+			where: { id: channelId },
+			data: {
+				members: {
+					connect: { id: userId },
+				},
+			},
+		});
 
 		broadcastMessage(channelId, { ...message, tempId, threadCount: 0 }); // New message has 0 replies initially
 
@@ -147,22 +153,24 @@ export const getThreadMessages = async (req: AuthRequest, res: Response) => {
 						},
 					},
 				},
-                savedMessages: {
-                    where: { userId: req.userId },
-                    select: { id: true }
-                },
-                _count: {
-                    select: { replies: true }
-                }
+				savedMessages: {
+					where: { userId: req.userId },
+					select: { id: true },
+				},
+				_count: {
+					select: { replies: true },
+				},
 			},
 			orderBy: { createdAt: "asc" },
 		});
 
-		res.json(messages.map(m => ({
-            ...m,
-            isSaved: m.savedMessages.length > 0,
-            threadCount: m._count.replies
-        })));
+		res.json(
+			messages.map((m) => ({
+				...m,
+				isSaved: m.savedMessages.length > 0,
+				threadCount: m._count.replies,
+			})),
+		);
 	} catch (_error) {
 		res.status(500).json({ error: "Error fetching thread messages" });
 	}
@@ -170,18 +178,15 @@ export const getThreadMessages = async (req: AuthRequest, res: Response) => {
 
 export const getUserThreads = async (req: AuthRequest, res: Response) => {
 	try {
-        const userId = req.userId;
-        if (!userId) return res.status(401).json({ error: "Unauthorized" });
+		const userId = req.userId;
+		if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
 		const messages = await prisma.message.findMany({
-			where: { 
-                parentId: null,
-                replies: { some: {} }, // Has replies
-                OR: [
-                    { senderId: userId },
-                    { replies: { some: { senderId: userId } } }
-                ]
-            },
+			where: {
+				parentId: null,
+				replies: { some: {} }, // Has replies
+				OR: [{ senderId: userId }, { replies: { some: { senderId: userId } } }],
+			},
 			include: {
 				sender: {
 					select: {
@@ -190,7 +195,7 @@ export const getUserThreads = async (req: AuthRequest, res: Response) => {
 						avatar: true,
 					},
 				},
-                channel: true,
+				channel: true,
 				reactions: {
 					include: {
 						user: {
@@ -200,28 +205,30 @@ export const getUserThreads = async (req: AuthRequest, res: Response) => {
 						},
 					},
 				},
-                savedMessages: {
-                    where: { userId: req.userId },
-                    select: { id: true }
-                },
-                _count: {
-                    select: { replies: true }
-                },
-                replies: {
-                    orderBy: { createdAt: "desc" },
-                    take: 1
-                }
+				savedMessages: {
+					where: { userId: req.userId },
+					select: { id: true },
+				},
+				_count: {
+					select: { replies: true },
+				},
+				replies: {
+					orderBy: { createdAt: "desc" },
+					take: 1,
+				},
 			},
 			orderBy: { updatedAt: "desc" }, // Most recent activity
 		});
 
-		res.json(messages.map(m => ({
-            ...m,
-            isSaved: m.savedMessages.length > 0,
-            threadCount: m._count.replies
-        })));
+		res.json(
+			messages.map((m) => ({
+				...m,
+				isSaved: m.savedMessages.length > 0,
+				threadCount: m._count.replies,
+			})),
+		);
 	} catch (error) {
-        console.error("Error fetching user threads:", error);
+		console.error("Error fetching user threads:", error);
 		res.status(500).json({ error: "Error fetching user threads" });
 	}
 };

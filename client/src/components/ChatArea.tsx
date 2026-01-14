@@ -1,17 +1,8 @@
-import { useState, useRef, useEffect } from "react";
-import {
-	Info,
-	Phone,
-	Search,
-	Star,
-	Users,
-	Video,
-	Hash,
-	PanelLeftOpen,
-} from "lucide-react";
-import type { Channel, Message, User } from "../App";
-import { MessageInput } from "./MessageInput";
-import { MessageList } from "./MessageList";
+import { Hash, Info, PanelLeftOpen, Search, Star, Users } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import type { Channel, Message, User } from '../App';
+import { MessageInput } from './MessageInput';
+import { MessageList } from './MessageList';
 
 interface ChatAreaProps {
 	channel: Channel;
@@ -43,18 +34,14 @@ export function ChatArea({
 	onToggleSidebar,
 }: ChatAreaProps) {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
-	const [searchQuery, setSearchQuery] = useState("");
+	const [searchQuery, setSearchQuery] = useState('');
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	const isDM = channel.type === "DM";
-	const otherUser = isDM
-		? channel.members?.find((m) => m.id !== currentUser.id)
-		: null;
+	const isDM = channel.type === 'DM';
+	const otherUser = isDM ? channel.members?.find((m) => m.id !== currentUser.id) : null;
 	const displayName = otherUser ? otherUser.username : channel.name;
 
-	const filteredMessages = messages.filter((msg) =>
-		msg.content.toLowerCase().includes(searchQuery.toLowerCase()),
-	);
+	const filteredMessages = messages.filter((msg) => msg.content.toLowerCase().includes(searchQuery.toLowerCase()));
 
 	useEffect(() => {
 		if (isSearchOpen && inputRef.current) {
@@ -64,7 +51,7 @@ export function ChatArea({
 
 	const toggleSearch = () => {
 		if (isSearchOpen) {
-			setSearchQuery(""); // Clear search when closing
+			setSearchQuery(''); // Clear search when closing
 		}
 		setIsSearchOpen(!isSearchOpen);
 	};
@@ -93,10 +80,7 @@ export function ChatArea({
 						<h2 className="flex items-center gap-1.5 text-white font-bold">
 							{isDM ? (
 								<img
-									src={
-										otherUser?.avatar ||
-										`https://api.dicebear.com/7.x/avataaars/svg?seed=${otherUser?.username}`
-									}
+									src={otherUser?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${otherUser?.username}`}
 									alt={displayName}
 									className="w-5 h-5 rounded"
 								/>
@@ -106,11 +90,7 @@ export function ChatArea({
 							<span>{displayName}</span>
 						</h2>
 					</button>
-					<button
-						type="button"
-						className="p-1 hover:bg-gray-800 rounded transition-colors"
-						title="Star channel"
-					>
+					<button type="button" className="p-1 hover:bg-gray-800 rounded transition-colors" title="Star channel">
 						<Star className="w-4 h-4 text-gray-400" />
 					</button>
 				</div>
@@ -146,7 +126,7 @@ export function ChatArea({
 
 					<button
 						type="button"
-						className={`p-2 rounded transition-colors ${isSearchOpen ? "bg-gray-800 text-white" : "hover:bg-gray-800 text-gray-400"}`}
+						className={`p-2 rounded transition-colors ${isSearchOpen ? 'bg-gray-800 text-white' : 'hover:bg-gray-800 text-gray-400'}`}
 						onClick={toggleSearch}
 						title="Search messages"
 					>
@@ -174,12 +154,7 @@ export function ChatArea({
 			/>
 
 			{/* Message Input */}
-			<MessageInput
-				channelName={displayName}
-				isDM={isDM}
-				onSendMessage={onSendMessage}
-				users={users}
-			/>
+			<MessageInput channelName={displayName} isDM={isDM} onSendMessage={onSendMessage} users={users} />
 		</div>
 	);
 }

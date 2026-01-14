@@ -1,8 +1,8 @@
-import { X } from "lucide-react";
-import type { Message, User } from "../App";
-import { MessageInput } from "./MessageInput";
-import { MessageList } from "./MessageList";
-import { MessageItem } from "./MessageItem";
+import { X } from 'lucide-react';
+import type { Message, User } from '../App';
+import { MessageInput } from './MessageInput';
+import { MessageItem } from './MessageItem';
+import { MessageList } from './MessageList';
 
 interface ThreadViewProps {
 	parentMessage: Message;
@@ -32,15 +32,10 @@ export function ThreadView({
 				<h3 className="text-white font-bold flex items-center gap-2">
 					Thread
 					<span className="text-xs font-normal text-gray-400">
-						#{parentMessage.userId}{" "}
-						{/* Should probably be channel name? keeping simple */}
+						#{parentMessage.userId} {/* Should probably be channel name? keeping simple */}
 					</span>
 				</h3>
-				<button
-					type="button"
-					onClick={onClose}
-					className="p-1 hover:bg-gray-800 rounded transition-colors"
-				>
+				<button type="button" onClick={onClose} className="p-1 hover:bg-gray-800 rounded transition-colors">
 					<X className="w-5 h-5 text-gray-400" />
 				</button>
 			</div>
@@ -61,9 +56,7 @@ export function ThreadView({
 				{/* Separator */}
 				<div className="flex items-center gap-4 px-4 py-2">
 					<div className="h-px bg-gray-800 flex-1" />
-					<span className="text-xs text-gray-500">
-						{replies.length} replies
-					</span>
+					<span className="text-xs text-gray-500">{replies.length} replies</span>
 					<div className="h-px bg-gray-800 flex-1" />
 				</div>
 

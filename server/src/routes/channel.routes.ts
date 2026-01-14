@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { createChannel, createDM, getChannels } from "../controllers/channel.controller";
+import {
+	createChannel,
+	createDM,
+	getChannels,
+} from "../controllers/channel.controller";
 import { getChannelMessages } from "../controllers/message.controller";
 import { authenticate } from "../middleware/auth.middleware";
 

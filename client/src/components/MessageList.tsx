@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
-import type { Message } from "../App";
-import { MessageItem } from "./MessageItem";
+import { useEffect, useRef } from 'react';
+import type { Message } from '../App';
+import { MessageItem } from './MessageItem';
 
 interface MessageListProps {
 	channel?: { name: string; type?: string };
@@ -11,19 +11,12 @@ interface MessageListProps {
 	onForward?: (message: Message) => void;
 }
 
-export function MessageList({
-	channel,
-	messages,
-	onAddReaction,
-	onToggleSave,
-	onReply,
-	onForward,
-}: MessageListProps) {
+export function MessageList({ channel, messages, onAddReaction, onToggleSave, onReply, onForward }: MessageListProps) {
 	const bottomRef = useRef<HTMLDivElement>(null);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to scroll on every message update
 	useEffect(() => {
-		bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+		bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
 	}, [messages]);
 
 	return (
@@ -38,8 +31,7 @@ export function MessageList({
 						<h1 className="text-white">{channel.name}</h1>
 					</div>
 					<p className="text-gray-400">
-						This is the very beginning of the{" "}
-						<span className="text-white">#{channel.name}</span> channel.
+						This is the very beginning of the <span className="text-white">#{channel.name}</span> channel.
 					</p>
 				</div>
 			)}
@@ -51,8 +43,7 @@ export function MessageList({
 					const showAvatar =
 						!prevMessage ||
 						prevMessage.userId !== message.userId ||
-						message.timestamp.getTime() - prevMessage.timestamp.getTime() >
-							5 * 60 * 1000;
+						message.timestamp.getTime() - prevMessage.timestamp.getTime() > 5 * 60 * 1000;
 
 					return (
 						<MessageItem

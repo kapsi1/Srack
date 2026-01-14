@@ -1,8 +1,8 @@
 import { Router } from "express";
 import {
 	createMessage,
-    getThreadMessages,
-    getUserThreads
+	getThreadMessages,
+	getUserThreads,
 } from "../controllers/message.controller";
 import { authenticate } from "../middleware/auth.middleware";
 

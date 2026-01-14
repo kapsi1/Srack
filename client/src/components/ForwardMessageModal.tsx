@@ -1,7 +1,7 @@
-import type React from "react";
-import { useState, useEffect } from "react";
-import { X, Share, Hash } from "lucide-react";
-import type { Channel, Message } from "../App";
+import { Hash, Share, X } from 'lucide-react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import type { Channel, Message } from '../App';
 
 interface ForwardMessageModalProps {
 	isOpen: boolean;
@@ -11,19 +11,13 @@ interface ForwardMessageModalProps {
 	onForward: (channelId: string) => void;
 }
 
-export function ForwardMessageModal({
-	isOpen,
-	onClose,
-	channels,
-	message,
-	onForward,
-}: ForwardMessageModalProps) {
-	const [selectedChannelId, setSelectedChannelId] = useState<string>("");
+export function ForwardMessageModal({ isOpen, onClose, channels, message, onForward }: ForwardMessageModalProps) {
+	const [selectedChannelId, setSelectedChannelId] = useState<string>('');
 
 	// Reset selection when modal opens
 	useEffect(() => {
 		if (isOpen) {
-			setSelectedChannelId("");
+			setSelectedChannelId('');
 		}
 	}, [isOpen]);
 
@@ -37,7 +31,7 @@ export function ForwardMessageModal({
 		}
 	};
 
-	const publicChannels = channels.filter((c) => c.type !== "DM");
+	const publicChannels = channels.filter((c) => c.type !== 'DM');
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -60,24 +54,15 @@ export function ForwardMessageModal({
 					{/* Message Preview */}
 					<div className="mb-6 p-4 rounded-lg bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10">
 						<div className="flex items-baseline gap-2 mb-1">
-							<span className="font-bold text-gray-900 dark:text-white text-sm">
-								{message.userName}
-							</span>
-							<span className="text-xs text-gray-500">
-								{message.timestamp.toLocaleString()}
-							</span>
+							<span className="font-bold text-gray-900 dark:text-white text-sm">{message.userName}</span>
+							<span className="text-xs text-gray-500">{message.timestamp.toLocaleString()}</span>
 						</div>
-						<div className="text-gray-700 dark:text-gray-300 text-sm line-clamp-3">
-							{message.content}
-						</div>
+						<div className="text-gray-700 dark:text-gray-300 text-sm line-clamp-3">{message.content}</div>
 					</div>
 
 					<div className="space-y-4">
 						<div>
-							<label
-								htmlFor="channel-select"
-								className="block text-sm font-bold text-gray-900 dark:text-white mb-2"
-							>
+							<label htmlFor="channel-select" className="block text-sm font-bold text-gray-900 dark:text-white mb-2">
 								Forward to channel
 							</label>
 							<div className="relative">
@@ -132,8 +117,8 @@ export function ForwardMessageModal({
 							disabled={!selectedChannelId}
 							className={`px-6 py-2 text-sm font-bold text-white rounded shadow-sm transition-all ${
 								selectedChannelId
-									? "bg-[#007a5a] hover:bg-[#148567] active:scale-95"
-									: "bg-gray-300 dark:bg-white/10 cursor-not-allowed"
+									? 'bg-[#007a5a] hover:bg-[#148567] active:scale-95'
+									: 'bg-gray-300 dark:bg-white/10 cursor-not-allowed'
 							}`}
 						>
 							Forward

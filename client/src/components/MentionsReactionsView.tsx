@@ -1,12 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import {
-	fetchUserActivity,
-	type ActivityItem as ApiActivityItem,
-	type Message as ApiMessage,
-	type MessageReaction,
-	type User,
-} from "../lib/api";
-import { Menu, MessageSquare, Smile, PanelLeftOpen } from "lucide-react";
+import { useQuery } from '@tanstack/react-query';
+import { Menu, PanelLeftOpen } from 'lucide-react';
+import { type Message as ApiMessage, fetchUserActivity, type MessageReaction, type User } from '../lib/api';
 
 interface MentionsReactionsViewProps {
 	currentUser: User;
@@ -21,24 +15,19 @@ function isMessage(data: ApiMessage | MessageReaction): data is ApiMessage {
 }
 
 export function MentionsReactionsView({
-	currentUser,
 	onToggleRightSidebar,
 	isSidebarCollapsed,
 	onToggleSidebar,
 }: MentionsReactionsViewProps) {
 	const { data: activity, isLoading } = useQuery({
-		queryKey: ["user-activity"],
+		queryKey: ['user-activity'],
 		queryFn: fetchUserActivity,
 		// Refetch often as activity happens in real-time, but for now relies on manual refresh slightly
 		refetchInterval: 10000,
 	});
 
 	if (isLoading) {
-		return (
-			<div className="flex-1 flex items-center justify-center text-gray-400">
-				Loading activity...
-			</div>
-		);
+		return <div className="flex-1 flex items-center justify-center text-gray-400">Loading activity...</div>;
 	}
 
 	if (!activity || activity.length === 0) {
@@ -79,40 +68,30 @@ export function MentionsReactionsView({
 			{/* List */}
 			<div className="flex-1 overflow-y-auto p-4 space-y-4">
 				{activity.map((item) => {
-					const isMention = item.type === "mention";
+					const isMention = item.type === 'mention';
 
 					if (isMention && isMessage(item.data)) {
 						const message = item.data;
 						// Accessing nested props might require type casting if API types aren't fully deep
 						// But our setup should cover it.
 						// Assuming nested fields exist as per API response
-						const channelName =
-							(message as any).channel?.name || "unknown-channel";
+						const channelName = message.channel?.name || 'unknown-channel';
 
 						return (
-							<div
-								key={`mention-${item.id}`}
-								className="bg-[#222529] rounded-lg p-3 border border-gray-700"
-							>
+							<div key={`mention-${item.id}`} className="bg-[#222529] rounded-lg p-3 border border-gray-700">
 								<div className="flex items-center gap-2 mb-2 text-sm text-gray-400">
-									<span className="text-blue-400 font-medium">
-										@{message.sender?.username}
-									</span>
+									<span className="text-blue-400 font-medium">@{message.sender?.username}</span>
 									<span>mentioned you in</span>
-									<span className="font-bold text-gray-300">
-										#{channelName}
-									</span>
+									<span className="font-bold text-gray-300">#{channelName}</span>
 									<span className="text-xs ml-auto">
-										{new Date(item.createdAt).toLocaleDateString()}{" "}
+										{new Date(item.createdAt).toLocaleDateString()}{' '}
 										{new Date(item.createdAt).toLocaleTimeString([], {
-											hour: "2-digit",
-											minute: "2-digit",
+											hour: '2-digit',
+											minute: '2-digit',
 										})}
 									</span>
 								</div>
-								<div className="text-gray-200 bg-[#1a1d21] p-3 rounded border border-gray-800">
-									{message.content}
-								</div>
+								<div className="text-gray-200 bg-[#1a1d21] p-3 rounded border border-gray-800">{message.content}</div>
 							</div>
 						);
 					}
@@ -122,27 +101,20 @@ export function MentionsReactionsView({
 						const reaction = item.data as MessageReaction & {
 							message: ApiMessage & { channel: { name: string } };
 						};
-						const reactorName = (reaction.user as any)?.username || "Someone";
-						const channelName = reaction.message?.channel?.name || "unknown";
+						const reactorName = reaction.user?.username || 'Someone';
+						const channelName = reaction.message?.channel?.name || 'unknown';
 
 						return (
-							<div
-								key={`reaction-${item.id}`}
-								className="bg-[#222529] rounded-lg p-3 border border-gray-700"
-							>
+							<div key={`reaction-${item.id}`} className="bg-[#222529] rounded-lg p-3 border border-gray-700">
 								<div className="flex items-center gap-2 mb-2 text-sm text-gray-400">
-									<span className="text-yellow-500 font-medium">
-										{reactorName}
-									</span>
+									<span className="text-yellow-500 font-medium">{reactorName}</span>
 									<span>reacted to your message in</span>
-									<span className="font-bold text-gray-300">
-										#{channelName}
-									</span>
+									<span className="font-bold text-gray-300">#{channelName}</span>
 									<span className="text-xs ml-auto">
-										{new Date(item.createdAt).toLocaleDateString()}{" "}
+										{new Date(item.createdAt).toLocaleDateString()}{' '}
 										{new Date(item.createdAt).toLocaleTimeString([], {
-											hour: "2-digit",
-											minute: "2-digit",
+											hour: '2-digit',
+											minute: '2-digit',
 										})}
 									</span>
 								</div>

@@ -4,12 +4,12 @@ import dotenv from "dotenv";
 import express from "express";
 import { Server } from "socket.io";
 import prisma from "./lib/prisma";
+import activityRoutes from "./routes/activity.routes";
 import authRoutes from "./routes/auth.routes";
 import channelRoutes from "./routes/channel.routes";
 import messageRoutes from "./routes/message.routes";
 import savedMessageRoutes from "./routes/saved-message.routes";
 import userRoutes from "./routes/user.routes";
-import activityRoutes from "./routes/activity.routes";
 import { setupSocket } from "./socket";
 
 dotenv.config();

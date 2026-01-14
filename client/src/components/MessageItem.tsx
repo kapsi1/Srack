@@ -1,11 +1,12 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: Container handles mouse events for showing actions overlay */
-import { Bookmark, MessageSquare, Share, Smile } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { createPortal } from "react-dom";
-import EmojiPicker, { Theme, type EmojiClickData } from "emoji-picker-react";
-import type { Message } from "../App";
+
+import EmojiPicker, { type EmojiClickData, Theme } from 'emoji-picker-react';
+import { Bookmark, MessageSquare, Share, Smile } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import type { Message } from '../App';
 
 interface MessageItemProps {
 	message: Message;
@@ -33,25 +34,20 @@ export function MessageItem({
 
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
-			if (
-				pickerRef.current &&
-				!pickerRef.current.contains(event.target as Node)
-			) {
+			if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
 				setShowEmojiPicker(false);
 			}
 		};
 
 		if (showEmojiPicker) {
-			document.addEventListener("mousedown", handleClickOutside);
+			document.addEventListener('mousedown', handleClickOutside);
 		}
 		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener('mousedown', handleClickOutside);
 		};
 	}, [showEmojiPicker]);
 
-	const toggleEmojiPicker = (
-		buttonRef: React.RefObject<HTMLButtonElement | null>,
-	) => {
+	const toggleEmojiPicker = (buttonRef: React.RefObject<HTMLButtonElement | null>) => {
 		if (showEmojiPicker) {
 			setShowEmojiPicker(false);
 			return;
@@ -78,9 +74,9 @@ export function MessageItem({
 	};
 
 	const formatTime = (date: Date) => {
-		return date.toLocaleTimeString("en-US", {
-			hour: "numeric",
-			minute: "2-digit",
+		return date.toLocaleTimeString('en-US', {
+			hour: 'numeric',
+			minute: '2-digit',
 			hour12: true,
 		});
 	};
@@ -90,7 +86,7 @@ export function MessageItem({
 		// Replace @username with a markdown link that we can intercept
 		// Be careful not to replace inside code blocks (handled by regex lookarounds or by remark plugins properly)
 		// For simplicity: simple regex.
-		return text.replace(/@(\w+)/g, "[@$1](/user/$1)");
+		return text.replace(/@(\w+)/g, '[@$1](/user/$1)');
 	};
 
 	return (
@@ -105,13 +101,7 @@ export function MessageItem({
 			<div className="flex gap-2">
 				{/* Avatar */}
 				<div className="w-9 flex-shrink-0">
-					{showAvatar && (
-						<img
-							src={message.userAvatar}
-							alt={message.userName}
-							className="w-9 h-9 rounded"
-						/>
-					)}
+					{showAvatar && <img src={message.userAvatar} alt={message.userName} className="w-9 h-9 rounded" />}
 				</div>
 
 				{/* Message Content */}
@@ -119,20 +109,16 @@ export function MessageItem({
 					{showAvatar && (
 						<div className="flex items-baseline gap-2 mb-0.5">
 							<span className="text-white">{message.userName}</span>
-							<span className="text-xs text-gray-500">
-								{formatTime(message.timestamp)}
-							</span>
+							<span className="text-xs text-gray-500">{formatTime(message.timestamp)}</span>
 						</div>
 					)}
 					<div className="text-gray-200 markdown-content">
 						<ReactMarkdown
 							remarkPlugins={[remarkGfm]}
 							components={{
-								p: ({ node, ...props }) => (
-									<p className="markdown-paragraph" {...props} />
-								),
+								p: ({ node, ...props }) => <p className="markdown-paragraph" {...props} />,
 								a: ({ node, href, ...props }) => {
-									if (href?.startsWith("/user/")) {
+									if (href?.startsWith('/user/')) {
 										return (
 											<span className="text-blue-400 bg-blue-500/10 px-1 rounded font-medium hover:bg-blue-500/20">
 												{props.children}
@@ -140,24 +126,12 @@ export function MessageItem({
 										);
 									}
 									return (
-										<a
-											className="markdown-link"
-											target="_blank"
-											rel="noopener noreferrer"
-											href={href}
-											{...props}
-										/>
+										<a className="markdown-link" target="_blank" rel="noopener noreferrer" href={href} {...props} />
 									);
 								},
-								ul: ({ node, ...props }) => (
-									<ul className="markdown-list-unordered" {...props} />
-								),
-								ol: ({ node, ...props }) => (
-									<ol className="markdown-list-ordered" {...props} />
-								),
-								li: ({ node, ...props }) => (
-									<li className="markdown-list-item" {...props} />
-								),
+								ul: ({ node, ...props }) => <ul className="markdown-list-unordered" {...props} />,
+								ol: ({ node, ...props }) => <ol className="markdown-list-ordered" {...props} />,
+								li: ({ node, ...props }) => <li className="markdown-list-item" {...props} />,
 								code: ({
 									node,
 									inline,
@@ -173,15 +147,9 @@ export function MessageItem({
 											<code {...props} />
 										</pre>
 									),
-								strong: ({ node, ...props }) => (
-									<strong className="markdown-strong" {...props} />
-								),
-								em: ({ node, ...props }) => (
-									<em className="markdown-em" {...props} />
-								),
-								del: ({ node, ...props }) => (
-									<del className="markdown-del" {...props} />
-								),
+								strong: ({ node, ...props }) => <strong className="markdown-strong" {...props} />,
+								em: ({ node, ...props }) => <em className="markdown-em" {...props} />,
+								del: ({ node, ...props }) => <del className="markdown-del" {...props} />,
 							}}
 						>
 							{formatMentions(message.content)}
@@ -199,9 +167,7 @@ export function MessageItem({
 									onClick={() => onAddReaction(message.id, reaction.emoji)}
 								>
 									<span>{reaction.emoji}</span>
-									<span className="text-xs text-gray-300">
-										{reaction.count}
-									</span>
+									<span className="text-xs text-gray-300">{reaction.count}</span>
 								</button>
 							))}
 							<button
@@ -225,8 +191,7 @@ export function MessageItem({
 						>
 							<MessageSquare className="w-4 h-4" />
 							<span>
-								{message.threadCount}{" "}
-								{message.threadCount === 1 ? "reply" : "replies"}
+								{message.threadCount} {message.threadCount === 1 ? 'reply' : 'replies'}
 							</span>
 						</button>
 					)}
@@ -263,13 +228,11 @@ export function MessageItem({
 					</button>
 					<button
 						type="button"
-						className={`p-1.5 hover:bg-gray-700 transition-colors ${message.isSaved ? "text-blue-400 bg-gray-700" : ""}`}
+						className={`p-1.5 hover:bg-gray-700 transition-colors ${message.isSaved ? 'text-blue-400 bg-gray-700' : ''}`}
 						onClick={() => onToggleSave?.(message.id)}
-						title={message.isSaved ? "Remove from saved" : "Save message"}
+						title={message.isSaved ? 'Remove from saved' : 'Save message'}
 					>
-						<Bookmark
-							className={`w-4 h-4 ${message.isSaved ? "fill-current" : "text-gray-300"}`}
-						/>
+						<Bookmark className={`w-4 h-4 ${message.isSaved ? 'fill-current' : 'text-gray-300'}`} />
 					</button>
 					{/* <div className="w-px h-5 bg-gray-700" />
 					<button

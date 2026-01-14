@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
-    toggleSavedMessage,
-    getSavedMessages
+	getSavedMessages,
+	toggleSavedMessage,
 } from "../controllers/saved-message.controller";
 import { authenticate } from "../middleware/auth.middleware";
 
