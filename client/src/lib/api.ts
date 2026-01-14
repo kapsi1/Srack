@@ -125,4 +125,16 @@ export const fetchSavedMessages = async (): Promise<Message[]> => {
     return response.data;
 };
 
+export interface ActivityItem {
+    type: 'mention' | 'reaction';
+    id: string;
+    createdAt: string;
+    data: Message | MessageReaction; // Using basic types, might need specific casting
+}
+
+export const fetchUserActivity = async (): Promise<ActivityItem[]> => {
+    const response = await api.get("/activity");
+    return response.data;
+};
+
 export default api;

@@ -25,6 +25,7 @@ import {
     fetchThreadMessages
 } from "./lib/api";
 import { ThreadView } from "./components/ThreadView";
+import { MentionsReactionsView } from "./components/MentionsReactionsView";
 
 export type User = ApiUser;
 
@@ -139,6 +140,7 @@ export default function App() {
             <Route path="/channel/:channelName" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
             <Route path="/user/:userName" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
             <Route path="/saved-items" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
+            <Route path="/mentions-reactions" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );
@@ -547,6 +549,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
     };
 
     const isSavedItemsPath = location.pathname === "/saved-items";
+    const isActivityPath = location.pathname === "/mentions-reactions";
 
     // dmMutation logic is now handled in useEffect based on userName param
 
@@ -567,6 +570,11 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
                         messages={mapApiMessagesToMessages(savedMessagesData || [])}
                         onAddReaction={handleAddReaction}
                         onToggleSave={handleToggleSave}
+                    />
+                ) : isActivityPath ? (
+                    <MentionsReactionsView
+                        currentUser={currentUser}
+                        onToggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
                     />
                 ) : activeChannel ? (
 					<ChatArea

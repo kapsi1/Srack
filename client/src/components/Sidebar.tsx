@@ -64,7 +64,12 @@ export function Sidebar({
 					{/* Quick Access */}
 					<div className="px-2 mb-4">
 						<SidebarItem icon={MessageSquare} label="Threads" />
-						<SidebarItem icon={AtSign} label="Mentions & reactions" />
+						<SidebarItem 
+                            icon={AtSign} 
+                            label="Mentions & reactions" 
+                            to="/mentions-reactions" 
+                            active={location.pathname === '/mentions-reactions'} 
+                        />
 						<SidebarItem icon={Bookmark} label="Saved items" to="/saved-items" active={location.pathname === '/saved-items'} />
 						{/* <SidebarItem icon={MoreVertical} label="More" /> */}
 					</div>
