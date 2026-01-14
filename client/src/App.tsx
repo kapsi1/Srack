@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
-import { Routes, Route, useParams, useNavigate, Navigate } from "react-router-dom";
+import { Routes, Route, useParams, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { AuthPage } from "./components/AuthPage";
 import { ChatArea } from "./components/ChatArea";
 import { Sidebar } from "./components/Sidebar";
 import { ChannelInfo } from "./components/ChannelInfo";
 import { CreateChannelModal } from "./components/CreateChannelModal";
+import { SavedItemsView } from "./components/SavedItemsView";
 import { useSocket } from "./context/SocketContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -15,6 +16,8 @@ import {
     fetchUsers, 
     sendMessage,
     createChannel,
+    toggleSavedMessage,
+    fetchSavedMessages,
     type Channel as ApiChannel,
     type Message as ApiMessage,
     type User as ApiUser,
@@ -40,6 +43,7 @@ export interface Message {
 	timestamp: Date;
 	reactions?: { emoji: string; count: number; users: string[] }[];
 	threadCount?: number;
+    isSaved?: boolean;
 }
 
 export interface Channel {
@@ -54,6 +58,39 @@ export interface Channel {
 }
 
 
+
+
+function mapApiMessagesToMessages(apiMessages: ApiMessage[]): Message[] {
+	return apiMessages.map((msg: ApiMessage) => {
+		const agg: Record<string, { count: number; users: string[] }> = {};
+		msg.reactions?.forEach((r: MessageReaction) => {
+			const reactionEmoji = r.emoji;
+			if (!agg[reactionEmoji]) {
+				agg[reactionEmoji] = { count: 0, users: [] };
+			}
+			agg[reactionEmoji].count++;
+			const username = r.user?.username;
+			if (username) agg[reactionEmoji].users.push(username);
+		});
+
+		return {
+			id: msg.id,
+			userId: msg.senderId || msg.sender?.id,
+			userName: msg.sender?.username || "Unknown",
+			userAvatar:
+				msg.sender?.avatar ||
+				`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.sender?.username || "Unknown"}`,
+			content: msg.content,
+			timestamp: new Date(msg.createdAt),
+			reactions: Object.entries(agg).map(([emoji, data]) => ({
+				emoji,
+				count: data.count,
+				users: data.users,
+			})),
+			isSaved: msg.isSaved,
+		};
+	});
+}
 
 export default function App() {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -98,12 +135,14 @@ export default function App() {
             <Route path="/" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
             <Route path="/channel/:channelName" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
             <Route path="/user/:userName" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
+            <Route path="/saved-items" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );
 }
 
 function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout: () => void, token: string }) {
+    const location = useLocation();
 	// State for UI
 	const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -133,6 +172,12 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 		queryFn: () =>
 			activeChannel ? fetchMessages(activeChannel.id) : Promise.resolve([]),
 		enabled: !!token && !!activeChannel,
+	});
+
+	const { data: savedMessagesData } = useQuery({
+		queryKey: ["saved-messages"],
+		queryFn: fetchSavedMessages,
+		enabled: !!token,
 	});
 
     // Mutations
@@ -225,12 +270,22 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
         // Remove empty onSuccess as we handle updates via socket/optimistic
     });
 
+    const toggleSaveMutation = useMutation({
+        mutationFn: toggleSavedMessage,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["messages"] });
+            queryClient.invalidateQueries({ queryKey: ["saved-messages"] });
+        }
+    });
+
     const { channelName, userName } = useParams();
     const navigate = useNavigate();
 
 	// Set initial active channel
 	useEffect(() => {
 		if (channelsData && channelsData.length > 0) {
+            if (location.pathname === "/saved-items") return;
+            
             if (channelName) {
                 const found = channelsData.find(c => c.name === channelName);
                 if (found && found.id !== activeChannel?.id) {
@@ -256,7 +311,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
                 navigate(`/channel/${channelsData[0].name}`, { replace: true });
             }
 		}
-	}, [channelsData, usersData, channelName, userName, activeChannel, navigate, dmMutation]);
+	}, [channelsData, usersData, channelName, userName, activeChannel, navigate, dmMutation, location.pathname]);
 
 	// Clear unreads when changing active channel
 	useEffect(() => {
@@ -268,51 +323,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 	// Sync messages when channel changes or data fetches
 	useEffect(() => {
 		if (messagesData) {
-			// Mapping with simple type assertions to fix 'any' warnings
-			const mappedMessages: Message[] = messagesData.map((msg: ApiMessage) => ({
-				id: msg.id,
-				userId: msg.senderId || msg.sender?.id,
-				userName: msg.sender?.username || "Unknown",
-				userAvatar:
-					msg.sender?.avatar ||
-					`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.sender?.username || "Unknown"}`,
-				content: msg.content,
-				timestamp: new Date(msg.createdAt),
-				reactions:
-					msg.reactions?.map((r: MessageReaction) => ({
-						emoji: r.emoji,
-						count: 1,
-						users: [r.user?.username].filter((u): u is string => !!u),
-					})) || [],
-			}));
-
-			// Aggregation logic
-			const aggregatedMessages = mappedMessages.map((msg) => {
-				const rawReactions =
-					messagesData.find((m: ApiMessage) => m.id === msg.id)?.reactions || [];
-				const agg: Record<string, { count: number; users: string[] }> = {};
-
-				rawReactions.forEach((r: MessageReaction) => {
-					const reactionEmoji = r.emoji as string;
-					if (!agg[reactionEmoji]) {
-						agg[reactionEmoji] = { count: 0, users: [] };
-					}
-					agg[reactionEmoji].count++;
-					const username = r.user?.username;
-					if (username) agg[reactionEmoji].users.push(username);
-				});
-
-				return {
-					...msg,
-					reactions: Object.entries(agg).map(([emoji, data]) => ({
-						emoji,
-						count: data.count,
-						users: data.users,
-					})),
-				};
-			});
-
-			setMessages(aggregatedMessages);
+			setMessages(mapApiMessagesToMessages(messagesData));
 		}
 	}, [messagesData]);
 
@@ -479,6 +490,12 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 		});
 	};
 
+    const handleToggleSave = (messageId: string) => {
+        toggleSaveMutation.mutate(messageId);
+    };
+
+    const isSavedItemsPath = location.pathname === "/saved-items";
+
     // dmMutation logic is now handled in useEffect based on userName param
 
 	return (
@@ -492,13 +509,21 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
                 onAddChannel={() => setIsCreateChannelModalOpen(true)}
 			/>
 			<div className="flex-1 flex overflow-hidden">
-				{activeChannel ? (
+                {isSavedItemsPath ? (
+                    <SavedItemsView
+                        currentUser={currentUser}
+                        messages={mapApiMessagesToMessages(savedMessagesData || [])}
+                        onAddReaction={handleAddReaction}
+                        onToggleSave={handleToggleSave}
+                    />
+                ) : activeChannel ? (
 					<ChatArea
 						channel={activeChannel}
 						currentUser={currentUser}
 						messages={messages}
 						onSendMessage={handleSendMessage}
 						onAddReaction={handleAddReaction}
+                        onToggleSave={handleToggleSave}
 						onToggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
 					/>
 				) : (

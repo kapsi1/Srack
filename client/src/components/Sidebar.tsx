@@ -9,7 +9,7 @@ import {
 	MessageSquare,
 	Plus,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import type { Channel, DirectMessage, User } from "../App";
 
 interface SidebarProps {
@@ -29,6 +29,7 @@ export function Sidebar({
 	onLogout,
 	onAddChannel,
 }: SidebarProps) {
+    const location = useLocation();
 	const handleLogout = () => {
 		onLogout();
 	};
@@ -64,7 +65,7 @@ export function Sidebar({
 					<div className="px-2 mb-4">
 						<SidebarItem icon={MessageSquare} label="Threads" />
 						<SidebarItem icon={AtSign} label="Mentions & reactions" />
-						<SidebarItem icon={Bookmark} label="Saved items" />
+						<SidebarItem icon={Bookmark} label="Saved items" to="/saved-items" active={location.pathname === '/saved-items'} />
 						{/* <SidebarItem icon={MoreVertical} label="More" /> */}
 					</div>
 
@@ -194,17 +195,38 @@ export function Sidebar({
 function SidebarItem({
 	icon: Icon,
 	label,
+    to,
+    active
 }: {
 	icon: LucideIcon;
 	label: string;
+    to?: string;
+    active?: boolean;
 }) {
+    const content = (
+        <>
+            <Icon className="w-4 h-4" />
+            <span className="text-sm">{label}</span>
+        </>
+    );
+
+    if (to) {
+        return (
+            <Link
+                to={to}
+                className={`w-full px-2 py-1 flex items-center gap-1.5 hover:bg-white/10 transition-colors rounded ${active ? 'bg-[#1164a3]' : ''}`}
+            >
+                {content}
+            </Link>
+        )
+    }
+
 	return (
 		<button
 			type="button"
 			className="w-full px-2 py-1 flex items-center gap-1.5 hover:bg-white/10 transition-colors rounded"
 		>
-			<Icon className="w-4 h-4" />
-			<span className="text-sm">{label}</span>
+			{content}
 		</button>
 	);
 }

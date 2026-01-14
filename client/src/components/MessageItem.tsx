@@ -16,6 +16,7 @@ interface MessageItemProps {
 	message: Message;
 	showAvatar: boolean;
 	onAddReaction: (messageId: string, emoji: string) => void;
+	onToggleSave?: (messageId: string) => void;
 }
 
 
@@ -23,6 +24,7 @@ export function MessageItem({
 	message,
 	showAvatar,
 	onAddReaction,
+	onToggleSave,
 }: MessageItemProps) {
 	const [showActions, setShowActions] = useState(false);
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -227,9 +229,10 @@ export function MessageItem({
 					</button>
 					<button
 						type="button"
-						className="p-1.5 hover:bg-gray-700 transition-colors"
+						className={`p-1.5 hover:bg-gray-700 transition-colors ${message.isSaved ? 'text-blue-400 bg-gray-700' : ''}`}
+                        onClick={() => onToggleSave?.(message.id)}
 					>
-						<Bookmark className="w-4 h-4 text-gray-300" />
+						<Bookmark className={`w-4 h-4 ${message.isSaved ? 'fill-current' : 'text-gray-300'}`} />
 					</button>
 					{/* <div className="w-px h-5 bg-gray-700" />
 					<button

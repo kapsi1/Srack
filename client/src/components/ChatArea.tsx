@@ -9,6 +9,7 @@ interface ChatAreaProps {
 	messages: Message[];
 	onSendMessage: (content: string) => void;
 	onAddReaction: (messageId: string, emoji: string) => void;
+	onToggleSave: (messageId: string) => void;
 	onToggleRightSidebar: () => void;
 }
 
@@ -18,6 +19,7 @@ export function ChatArea({
 	messages, 
 	onSendMessage, 
 	onAddReaction, 
+	onToggleSave,
 	onToggleRightSidebar 
 }: ChatAreaProps) {
 	const isDM = channel.type === 'DM';
@@ -80,7 +82,12 @@ export function ChatArea({
 			</div>
 
 			{/* Messages Area */}
-			<MessageList channel={channel} messages={messages} onAddReaction={onAddReaction} />
+			<MessageList 
+                channel={channel} 
+                messages={messages} 
+                onAddReaction={onAddReaction} 
+                onToggleSave={onToggleSave}
+            />
 
 			{/* Message Input */}
 			<MessageInput channelName={displayName} isDM={isDM} onSendMessage={onSendMessage} />

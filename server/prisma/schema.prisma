@@ -8,16 +8,17 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  username  String
-  password  String
-  avatar    String?
-  messages  Message[]
-  reactions Reaction[]
-  channels  Channel[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id            String         @id @default(cuid())
+  email         String         @unique
+  username      String
+  password      String
+  avatar        String?
+  messages      Message[]
+  reactions     Reaction[]
+  channels      Channel[]
+  savedMessages SavedMessage[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Channel {
@@ -39,15 +40,16 @@ enum ChannelType {
 }
 
 model Message {
-  id        String     @id @default(cuid())
-  content   String
-  sender    User       @relation(fields: [senderId], references: [id])
-  senderId  String
-  channel   Channel    @relation(fields: [channelId], references: [id])
-  channelId String
-  reactions Reaction[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id            String         @id @default(cuid())
+  content       String
+  sender        User           @relation(fields: [senderId], references: [id])
+  senderId      String
+  channel       Channel        @relation(fields: [channelId], references: [id])
+  channelId     String
+  reactions     Reaction[]
+  savedMessages SavedMessage[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Reaction {
@@ -60,4 +62,15 @@ model Reaction {
   createdAt DateTime @default(now())
 
   @@unique([messageId, userId, emoji])
+}
+
+model SavedMessage {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  message   Message  @relation(fields: [messageId], references: [id])
+  messageId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, messageId])
 }

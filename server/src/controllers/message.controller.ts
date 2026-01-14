@@ -25,10 +25,18 @@ export const getChannelMessages = async (req: AuthRequest, res: Response) => {
 						},
 					},
 				},
+                savedMessages: {
+                    where: { userId: req.userId },
+                    select: { id: true }
+                }
 			},
 			orderBy: { createdAt: "asc" },
 		});
 
+		res.json(messages.map(m => ({
+            ...m,
+            isSaved: m.savedMessages.length > 0
+        })));
         // Auto-join public channel if not already a member
         const userId = req.userId;
         const channel = await prisma.channel.findUnique({

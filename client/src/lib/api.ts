@@ -69,6 +69,7 @@ export interface Message {
   updatedAt: string;
   sender: User;
   reactions: MessageReaction[];
+  isSaved?: boolean;
 }
 
 export const fetchCurrentUser = async (): Promise<User> => {
@@ -106,6 +107,16 @@ export const createDM = async (targetUserId: string): Promise<Channel> => {
 export const sendMessage = async (channelId: string, content: string, tempId?: string): Promise<Message> => {
    const response = await api.post("/messages", { channelId, content, tempId });
    return response.data;
+};
+
+export const toggleSavedMessage = async (messageId: string): Promise<{ saved: boolean }> => {
+    const response = await api.post("/saved-messages/toggle", { messageId });
+    return response.data;
+};
+
+export const fetchSavedMessages = async (): Promise<Message[]> => {
+    const response = await api.get("/saved-messages");
+    return response.data;
 };
 
 export default api;
