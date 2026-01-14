@@ -100,6 +100,7 @@ function mapApiMessagesToMessages(apiMessages: ApiMessage[]): Message[] {
 export default function App() {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
 	const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+	const [isLoading, setIsLoading] = useState(!!localStorage.getItem('token'));
 	const navigate = useNavigate();
 
 	const handleLogout = useCallback(() => {
@@ -127,9 +128,22 @@ export default function App() {
 				})
 				.catch(() => {
 					handleLogout();
+				})
+				.finally(() => {
+					setIsLoading(false);
 				});
+		} else {
+			setIsLoading(false);
 		}
 	}, [handleLogout]);
+
+	if (isLoading) {
+		return (
+			<div className="flex items-center justify-center h-screen bg-gray-900 text-white">
+				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white" />
+			</div>
+		);
+	}
 
 	if (!currentUser) {
 		return <AuthPage onLogin={handleLogin} />;
