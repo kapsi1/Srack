@@ -7,7 +7,6 @@ import {
 	LogOut,
 	type LucideIcon,
 	MessageSquare,
-	MoreVertical,
 	Plus,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -19,6 +18,7 @@ interface SidebarProps {
 	activeChannel: Channel;
 	currentUser: User;
 	onLogout: () => void;
+	onAddChannel: () => void;
 }
 
 export function Sidebar({
@@ -27,6 +27,7 @@ export function Sidebar({
 	activeChannel,
 	currentUser,
 	onLogout,
+	onAddChannel,
 }: SidebarProps) {
 	const handleLogout = () => {
 		onLogout();
@@ -69,16 +70,23 @@ export function Sidebar({
 
 					{/* Channels */}
 					<div className="mb-4">
-						<button
-							type="button"
-							className="w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group"
-						>
-							<div className="flex items-center gap-1">
+						<div className="px-2 py-1 flex items-center justify-between group">
+							<div className="flex items-center gap-1 cursor-pointer">
 								<ChevronDown className="w-3 h-3" />
 								<span className="text-sm">Channels</span>
 							</div>
-							<Plus className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-						</button>
+							<button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									onAddChannel();
+								}}
+								className="p-0.5 hover:bg-white/10 rounded transition-all opacity-0 group-hover:opacity-100"
+								title="Add Channel"
+							>
+								<Plus className="w-4 h-4" />
+							</button>
+						</div>
 						<div className="mt-1">
 							{channels.map((channel: Channel) => (
 								<Link

@@ -4,6 +4,7 @@ import { AuthPage } from "./components/AuthPage";
 import { ChatArea } from "./components/ChatArea";
 import { Sidebar } from "./components/Sidebar";
 import { ChannelInfo } from "./components/ChannelInfo";
+import { CreateChannelModal } from "./components/CreateChannelModal";
 import { useSocket } from "./context/SocketContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -13,6 +14,7 @@ import {
     fetchMessages, 
     fetchUsers, 
     sendMessage,
+    createChannel,
     type Channel as ApiChannel,
     type Message as ApiMessage,
     type User as ApiUser,
@@ -43,6 +45,7 @@ export interface Message {
 export interface Channel {
 	id: string;
 	name: string;
+    description?: string;
 	isPrivate?: boolean;
     type?: "PUBLIC" | "PRIVATE" | "DM";
 	unreadCount?: number;
@@ -106,6 +109,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 	const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+	const [isCreateChannelModalOpen, setIsCreateChannelModalOpen] = useState(false);
 
 	// Hooks must be unconditional
 	const { socket } = useSocket();
@@ -154,6 +158,16 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
             });
 
             setActiveChannel(channel);
+        }
+    });
+    
+    const createChannelMutation = useMutation({
+        mutationFn: ({ name, isPrivate, description }: { name: string, isPrivate: boolean, description?: string }) => 
+            createChannel(name, isPrivate, description),
+        onSuccess: (newChannel: ApiChannel) => {
+            queryClient.invalidateQueries({ queryKey: ["channels"] });
+            navigate(`/channel/${newChannel.name}`);
+            setIsCreateChannelModalOpen(false);
         }
     });
 
@@ -433,18 +447,26 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 	useEffect(() => {
 		if (socket && channelsData) {
 			channelsData.forEach((c) => {
-				socket.emit("join_channel", c.id);
-			});
-		}
-	}, [socket, channelsData]);
+                socket.emit("join_channel", c.id);
+            });
+        }
+    }, [socket, channelsData]);
 
-	const handleSendMessage = (content: string) => {
-		if (!currentUser || !activeChannel) return;
+    const handleSendMessage = (content: string) => {
+        if (!currentUser || !activeChannel) return;
 
         const tempId = `temp-${Date.now()}`;
         // Use mutation instead of socket directly for optimistic updates
         sendMessageMutation.mutate({ channelId: activeChannel.id, content, tempId });
-	};
+    };
+
+    const handleCreateChannel = (
+        name: string,
+        isPrivate: boolean,
+        description: string,
+    ) => {
+        createChannelMutation.mutate({ name, isPrivate, description });
+    };
 
 	const handleAddReaction = (messageId: string, emoji: string) => {
 		if (!currentUser || !socket || !activeChannel) return;
@@ -467,6 +489,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 				activeChannel={activeChannel || channels[0]} // Fallback or assume conditional rendering for chat
 				currentUser={currentUser}
 				onLogout={onLogout}
+                onAddChannel={() => setIsCreateChannelModalOpen(true)}
 			/>
 			<div className="flex-1 flex overflow-hidden">
 				{activeChannel ? (
@@ -492,6 +515,11 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 					/>
 				)}
 			</div>
+            <CreateChannelModal 
+                isOpen={isCreateChannelModalOpen}
+                onClose={() => setIsCreateChannelModalOpen(false)}
+                onCreate={handleCreateChannel}
+            />
 		</div>
 	);
 }

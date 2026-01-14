@@ -39,7 +39,7 @@ export const getChannels = async (req: AuthRequest, res: Response) => {
 
 export const createChannel = async (req: AuthRequest, res: Response) => {
 	try {
-		const { name, isPrivate } = req.body;
+		const { name, isPrivate, description } = req.body;
 		const userId = req.userId;
 
 		if (!name) {
@@ -49,6 +49,7 @@ export const createChannel = async (req: AuthRequest, res: Response) => {
 		const channel = await prisma.channel.create({
 			data: {
 				name,
+				description: description || null,
 				isPrivate: isPrivate || false,
 				type: isPrivate ? "PRIVATE" : "PUBLIC",
 				members: {
@@ -58,7 +59,8 @@ export const createChannel = async (req: AuthRequest, res: Response) => {
 		});
 
 		res.status(201).json(channel);
-	} catch (_error) {
+	} catch (error) {
+		console.error("Error creating channel:", error);
 		res.status(500).json({ error: "Error creating channel" });
 	}
 };

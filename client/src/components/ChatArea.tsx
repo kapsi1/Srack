@@ -80,7 +80,7 @@ export function ChatArea({
 			</div>
 
 			{/* Messages Area */}
-			<MessageList messages={messages} onAddReaction={onAddReaction} />
+			<MessageList channel={channel} messages={messages} onAddReaction={onAddReaction} />
 
 			{/* Message Input */}
 			<MessageInput channelName={displayName} isDM={isDM} onSendMessage={onSendMessage} />

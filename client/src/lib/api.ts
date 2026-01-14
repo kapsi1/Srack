@@ -44,6 +44,7 @@ export interface User {
 export interface Channel {
   id: string;
   name: string;
+  description?: string;
   isPrivate: boolean;
   type?: "PUBLIC" | "PRIVATE" | "DM";
   members?: User[];
@@ -85,8 +86,8 @@ export const fetchChannels = async (): Promise<Channel[]> => {
   return response.data;
 };
 
-export const createChannel = async (name: string, isPrivate: boolean = false): Promise<Channel> => {
-  const response = await api.post("/channels", { name, isPrivate });
+export const createChannel = async (name: string, isPrivate: boolean = false, description?: string): Promise<Channel> => {
+  const response = await api.post("/channels", { name, isPrivate, description });
   return response.data;
 };
 

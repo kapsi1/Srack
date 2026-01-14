@@ -58,7 +58,7 @@ export function ChannelInfo({ channel, currentUser, onClose }: ChannelInfoProps)
 							<div>
 								<p className="text-gray-400 text-xs uppercase font-bold">Description</p>
 								<p className="text-gray-300 text-sm mt-1">
-                                    {channel.isPrivate ? 'This is a private channel.' : 'This is a public channel anyone in the workspace can join.'}
+                                    {channel.description || (channel.isPrivate ? 'This is a private channel.' : 'This is a public channel anyone in the workspace can join.')}
                                 </p>
 							</div>
 							<div>
