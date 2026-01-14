@@ -10,15 +10,18 @@ export interface UploadResult {
 	mimeType: string;
 }
 
-export const uploadFile = async (file: File | Blob): Promise<UploadResult> => {
+export const uploadFile = async (file: File | Blob, fileName?: string): Promise<UploadResult> => {
+	const name = fileName || (file instanceof File ? file.name : 'recording.webm');
+	
 	const result = await uploadDirect(file, {
 		publicKey: UPLOADCARE_PUBKEY,
 		store: 'auto',
+		fileName: name,
 	});
 
 	return {
 		uuid: result.uuid,
-		name: result.name || 'recording.webm',
+		name: result.name || name,
 		size: result.size,
 		cdnUrl: result.cdnUrl,
 		mimeType: result.mimeType || (file instanceof File ? file.type : 'audio/webm'),

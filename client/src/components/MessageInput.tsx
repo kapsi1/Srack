@@ -82,7 +82,7 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 				stream.getTracks().forEach(track => { track.stop(); });
 
 				try {
-					const result = await uploadFile(blob);
+					const result = await uploadFile(blob, 'recording.webm');
 					// Mark as audio explicitly if needed, though mimetype handles it
 					setAttachments((prev) => [...prev, result]);
 				} catch (error) {
