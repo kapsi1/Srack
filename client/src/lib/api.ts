@@ -71,6 +71,8 @@ export interface Message {
   reactions: MessageReaction[];
   isSaved?: boolean;
   threadCount?: number;
+  channel?: Channel;
+  replies?: Message[]; // Recursive
 }
 
 export const fetchCurrentUser = async (): Promise<User> => {
@@ -112,6 +114,11 @@ export const sendMessage = async (channelId: string, content: string, tempId?: s
 
 export const fetchThreadMessages = async (messageId: string): Promise<Message[]> => {
     const response = await api.get(`/messages/${messageId}/thread`);
+    return response.data;
+};
+
+export const fetchUserThreads = async (): Promise<Message[]> => {
+    const response = await api.get("/messages/threads");
     return response.data;
 };
 

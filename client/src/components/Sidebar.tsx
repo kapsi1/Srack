@@ -63,7 +63,12 @@ export function Sidebar({
 				<div className="flex-1 overflow-y-auto py-2">
 					{/* Quick Access */}
 					<div className="px-2 mb-4">
-						<SidebarItem icon={MessageSquare} label="Threads" />
+						<SidebarItem 
+                            icon={MessageSquare} 
+                            label="Threads" 
+                            to="/threads" 
+                            active={location.pathname === '/threads'} 
+                        />
 						<SidebarItem 
                             icon={AtSign} 
                             label="Mentions & reactions" 

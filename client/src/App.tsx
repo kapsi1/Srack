@@ -26,6 +26,7 @@ import {
 } from "./lib/api";
 import { ThreadView } from "./components/ThreadView";
 import { MentionsReactionsView } from "./components/MentionsReactionsView";
+import { ThreadsListView } from "./components/ThreadsListView";
 
 export type User = ApiUser;
 
@@ -141,6 +142,7 @@ export default function App() {
             <Route path="/user/:userName" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
             <Route path="/saved-items" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
             <Route path="/mentions-reactions" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
+            <Route path="/threads" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ""} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );
@@ -550,6 +552,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 
     const isSavedItemsPath = location.pathname === "/saved-items";
     const isActivityPath = location.pathname === "/mentions-reactions";
+    const isThreadsPath = location.pathname === "/threads";
 
     // dmMutation logic is now handled in useEffect based on userName param
 
@@ -575,6 +578,12 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
                     <MentionsReactionsView
                         currentUser={currentUser}
                         onToggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+                    />
+                ) : isThreadsPath ? (
+                    <ThreadsListView
+                        currentUser={currentUser}
+                        onToggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+                        onOpenThread={(msg) => setActiveThread(mapApiMessagesToMessages([msg])[0])}
                     />
                 ) : activeChannel ? (
 					<ChatArea

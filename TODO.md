@@ -75,7 +75,7 @@ This document outlines the tasks required to convert the existing Figma-based Re
 - [x] **Threads (Replies)**: Implement "Reply in Thread" from the message popup. Requires `parentMessageId` in DB and a side-panel UI for thread conversations.
 - [x] **Mentions & Reactions View**: Implement the sidebar link to show a consolidated feed of all mentions and reactions received by the user.
 - [x] **User Mentions (@)**: Implement the "@" button/trigger logic to show a user dropdown and handle mention notifications.
-- [ ] **Threads View**: Implement the thread view accessible from the sidebar.
+- [x] **Threads View**: Implement the thread view accessible from the sidebar.
 - [ ] **Forward Message**: Implement the "Share" icon in the message popup to copy a message to another channel.
 
 ### Hard (Requires Media Handling / External Services)
