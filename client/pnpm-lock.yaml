@@ -17,6 +17,9 @@ importers:
       '@uploadcare/react-uploader':
         specifier: ^1.11.2
         version: 1.11.2(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@uploadcare/upload-client':
+        specifier: ^6.18.2
+        version: 6.18.2
       axios:
         specifier: ^1.13.2
         version: 1.13.2

@@ -12,13 +12,16 @@ import {
 	Paperclip,
 	Send,
 	Smile,
+	Square,
 	Strikethrough,
+	Trash2,
 	X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { User } from '../App';
 import type { Attachment } from '../lib/api';
+import { uploadFile } from '../lib/uploadcare';
 import FileUploader from './FileUploader';
 
 interface MessageInputProps {
@@ -42,9 +45,11 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 
 	const [attachments, setAttachments] = useState<Attachment[]>([]);
 	const [showUploader, setShowUploader] = useState(false);
+	const [isRecording, setIsRecording] = useState(false);
+	const [recordingTime, setRecordingTime] = useState(0);
 
 	const handleUploadComplete = (files: Attachment[]) => {
-		setAttachments(files);
+		setAttachments((prev) => [...prev, ...files]);
 	};
 
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -52,6 +57,82 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 	const smileButtonRef = useRef<HTMLButtonElement>(null);
 	const atButtonRef = useRef<HTMLButtonElement>(null);
 	const uploaderButtonRef = useRef<HTMLButtonElement>(null);
+	const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+	const chunksRef = useRef<Blob[]>([]);
+	const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+	const startRecording = async () => {
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			const mediaRecorder = new MediaRecorder(stream);
+			mediaRecorderRef.current = mediaRecorder;
+			chunksRef.current = [];
+
+			mediaRecorder.ondataavailable = (e) => {
+				if (e.data.size > 0) {
+					chunksRef.current.push(e.data);
+				}
+			};
+
+			mediaRecorder.onstop = async () => {
+				const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+				chunksRef.current = [];
+				
+				// Stop all tracks
+				stream.getTracks().forEach(track => { track.stop(); });
+
+				try {
+					const result = await uploadFile(blob);
+					// Mark as audio explicitly if needed, though mimetype handles it
+					setAttachments((prev) => [...prev, result]);
+				} catch (error) {
+					console.error('Failed to upload recording:', error);
+				}
+			};
+
+			mediaRecorder.start();
+			setIsRecording(true);
+			setRecordingTime(0);
+			timerRef.current = setInterval(() => {
+				setRecordingTime((prev) => prev + 1);
+			}, 1000);
+		} catch (error) {
+			console.error('Error accessing microphone:', error);
+			alert('Could not access microphone. Please check permissions.');
+		}
+	};
+
+	const stopRecording = () => {
+		if (mediaRecorderRef.current && isRecording) {
+			mediaRecorderRef.current.stop();
+			setIsRecording(false);
+			if (timerRef.current) {
+				clearInterval(timerRef.current);
+				timerRef.current = null;
+			}
+		}
+	};
+
+	const cancelRecording = () => {
+		if (mediaRecorderRef.current && isRecording) {
+			// Stop but don't process
+			mediaRecorderRef.current.onstop = null; // Remove handler
+			mediaRecorderRef.current.stop();
+			mediaRecorderRef.current.stream.getTracks().forEach(track => { track.stop(); });
+			setIsRecording(false);
+			if (timerRef.current) {
+				clearInterval(timerRef.current);
+				timerRef.current = null;
+			}
+			setRecordingTime(0);
+		}
+	};
+
+	const formatTime = (seconds: number) => {
+		const mins = Math.floor(seconds / 60);
+		const secs = seconds % 60;
+		return `${mins}:${secs.toString().padStart(2, '0')}`;
+	};
 
 	const filteredUsers = users.filter((u) => u.username.toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 5); // Limit to 5 suggestions
 
@@ -545,9 +626,28 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 									</div>
 								)}
 							</div>
-							<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="Record audio">
-								<Mic className="w-4 h-4 text-gray-300" />
+							<button
+								type="button"
+								className={`p-1.5 hover:bg-gray-700 rounded transition-colors ${isRecording ? 'text-red-500 animate-pulse' : 'text-gray-300'}`}
+								title={isRecording ? 'Stop recording' : 'Record audio'}
+								onClick={isRecording ? stopRecording : startRecording}
+							>
+								{isRecording ? <Square className="w-4 h-4 fill-current" /> : <Mic className="w-4 h-4" />}
 							</button>
+							{isRecording && (
+								<div className="flex items-center gap-2 bg-gray-800 px-3 py-1 rounded text-red-400 font-mono text-sm">
+									<div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+									{formatTime(recordingTime)}
+									<button
+										type="button"
+										onClick={cancelRecording}
+										className="ml-2 p-1 hover:text-red-300 hover:bg-gray-700 rounded"
+										title="Cancel recording"
+									>
+										<Trash2 className="w-3 h-3" />
+									</button>
+								</div>
+							)}
 						</div>
 						<button
 							type="submit"
