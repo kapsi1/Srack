@@ -3,6 +3,7 @@ import { Routes, Route, useParams, useNavigate, Navigate } from "react-router-do
 import { AuthPage } from "./components/AuthPage";
 import { ChatArea } from "./components/ChatArea";
 import { Sidebar } from "./components/Sidebar";
+import { ChannelInfo } from "./components/ChannelInfo";
 import { useSocket } from "./context/SocketContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -46,6 +47,7 @@ export interface Channel {
     type?: "PUBLIC" | "PRIVATE" | "DM";
 	unreadCount?: number;
     members?: User[];
+	createdAt?: string;
 }
 
 
@@ -103,6 +105,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 	const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+	const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
 	// Hooks must be unconditional
 	const { socket } = useSocket();
@@ -139,7 +142,8 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
                 isPrivate: newChannel.isPrivate,
                 type: newChannel.type,
                 members: newChannel.members,
-                unreadCount: 0
+                unreadCount: 0,
+                createdAt: newChannel.createdAt
             };
             
             // Optimistically update channels list if not there
@@ -195,6 +199,9 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
             }
 
             return { previousMessages };
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["channels"] });
         },
         onError: (_err, { channelId }, context) => {
             if (context?.previousMessages) {
@@ -461,19 +468,30 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 				currentUser={currentUser}
 				onLogout={onLogout}
 			/>
-			{activeChannel ? (
-				<ChatArea
-					channel={activeChannel}
-					currentUser={currentUser}
-					messages={messages}
-					onSendMessage={handleSendMessage}
-					onAddReaction={handleAddReaction}
-				/>
-			) : (
-				<div className="flex-1 flex items-center justify-center bg-gray-900 text-white">
-					<p>Select a channel or create one to start</p>
-				</div>
-			)}
+			<div className="flex-1 flex overflow-hidden">
+				{activeChannel ? (
+					<ChatArea
+						channel={activeChannel}
+						currentUser={currentUser}
+						messages={messages}
+						onSendMessage={handleSendMessage}
+						onAddReaction={handleAddReaction}
+						onToggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+					/>
+				) : (
+					<div className="flex-1 flex items-center justify-center bg-gray-900 text-white">
+						<p>Select a channel or create one to start</p>
+					</div>
+				)}
+				
+				{isRightSidebarOpen && activeChannel && (
+					<ChannelInfo 
+						channel={activeChannel} 
+						currentUser={currentUser} 
+						onClose={() => setIsRightSidebarOpen(false)} 
+					/>
+				)}
+			</div>
 		</div>
 	);
 }

@@ -29,6 +29,24 @@ export const getChannelMessages = async (req: AuthRequest, res: Response) => {
 			orderBy: { createdAt: "asc" },
 		});
 
+        // Auto-join public channel if not already a member
+        const userId = req.userId;
+        const channel = await prisma.channel.findUnique({
+            where: { id: channelId },
+            include: { members: { where: { id: userId } } }
+        });
+
+        if (channel && channel.type === "PUBLIC" && channel.members.length === 0) {
+            await prisma.channel.update({
+                where: { id: channelId },
+                data: {
+                    members: {
+                        connect: { id: userId }
+                    }
+                }
+            });
+        }
+
 		res.json(messages);
 	} catch (_error) {
 		res.status(500).json({ error: "Error fetching messages" });
@@ -63,6 +81,16 @@ export const createMessage = async (req: AuthRequest, res: Response) => {
 				reactions: true,
 			},
 		});
+
+        // Ensure user is added to channel members (especially for PUBLIC channels)
+        await prisma.channel.update({
+            where: { id: channelId },
+            data: {
+                members: {
+                    connect: { id: userId }
+                }
+            }
+        });
 
 		broadcastMessage(channelId, { ...message, tempId });
 

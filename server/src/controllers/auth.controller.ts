@@ -23,11 +23,19 @@ export const register = async (req: Request, res: Response) => {
 
 		const hashedPassword = await bcrypt.hash(password, 10);
 
+		// Find all public channels to add the new user to
+		const publicChannels = await prisma.channel.findMany({
+			where: { type: "PUBLIC" },
+		});
+
 		const user = await prisma.user.create({
 			data: {
 				email,
 				username,
 				password: hashedPassword,
+				channels: {
+					connect: publicChannels.map((channel) => ({ id: channel.id })),
+				},
 			},
 		});
 
