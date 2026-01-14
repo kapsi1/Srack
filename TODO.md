@@ -58,6 +58,25 @@ This document outlines the tasks required to convert the existing Figma-based Re
 - [x] **Persistent Auth**: Refresh token logic or session management.
 
 ## Phase 8: Deployment
-- [ ] Containerize with Docker (optional).
-- [ ] Prepare production build for the client.
-- [ ] Set up environment variables for production.
+- [x] Prepare production build for the client.
+- [x] Set up environment variables for production.
+
+## Phase 9: Feature Implementation (Unused UI Items)
+*Sorted by implementation difficulty (Easiest to Hardest)*
+
+### Easiest (Frontend & Simple DB State)
+- [ ] **Emoji Picker integration**: Replace basic reaction list with a full emoji picker (e.g., `emoji-picker-react`) in both Message Input and Message Popup.
+- [ ] **Channel Info / View Members**: Implement the "i" and "Users" icons in the top bar to show channel details and member lists.
+- [ ] **Save Message / Saved Items**: Implement the "Bookmark" functionality. Add a "Saved Items" view in the sidebar to retrieve bookmarked messages.
+- [ ] **Channel Search**: basic search functionality using the "Search" icon in the top bar to filter messages in the current channel.
+
+### Medium (Requires Schema Changes or Complex UI)
+- [ ] **Threads (Replies)**: Implement "Reply in Thread" from the message popup. Requires `parentMessageId` in DB and a side-panel UI for thread conversations.
+- [ ] **Mentions & Reactions View**: Implement the sidebar link to show a consolidated feed of all mentions and reactions received by the user.
+- [ ] **User Mentions (@)**: Implement the "@" button/trigger logic to show a user dropdown and handle mention notifications.
+- [ ] **Forward Message**: Implement the "Share" icon in the message popup to copy a message to another channel.
+
+### Hard (Requires Media Handling / External Services)
+- [ ] **File Attachments**: Implement the "Paperclip" icon functionality using a storage service (S3/Uploadthing) to support image and file sharing.
+- [ ] **Voice Recording**: Implement the "Microphone" icon to record and send voice messages.
+- [ ] **Voice/Video Calls**: Implement the "Phone" and "Video" icons in the top bar using WebRTC or a service like LiveKit/Agora.

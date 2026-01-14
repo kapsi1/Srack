@@ -184,13 +184,13 @@ export function MessageItem({
 					>
 						<Bookmark className="w-4 h-4 text-gray-300" />
 					</button>
-					<div className="w-px h-5 bg-gray-700" />
+					{/* <div className="w-px h-5 bg-gray-700" />
 					<button
 						type="button"
 						className="p-1.5 hover:bg-gray-700 rounded transition-colors"
 					>
 						<MoreVertical className="w-4 h-4 text-gray-300" />
-					</button>
+					</button> */}
 				</div>
 			)}
 

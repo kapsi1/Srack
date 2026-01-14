@@ -64,7 +64,7 @@ export function Sidebar({
 						<SidebarItem icon={MessageSquare} label="Threads" />
 						<SidebarItem icon={AtSign} label="Mentions & reactions" />
 						<SidebarItem icon={Bookmark} label="Saved items" />
-						<SidebarItem icon={MoreVertical} label="More" />
+						{/* <SidebarItem icon={MoreVertical} label="More" /> */}
 					</div>
 
 					{/* Channels */}
