@@ -72,7 +72,7 @@ This document outlines the tasks required to convert the existing Figma-based Re
 - [x] **Channel Search**: basic search functionality using the "Search" icon in the top bar to filter messages in the current channel.
 
 ### Medium (Requires Schema Changes or Complex UI)
-- [ ] **Threads (Replies)**: Implement "Reply in Thread" from the message popup. Requires `parentMessageId` in DB and a side-panel UI for thread conversations.
+- [x] **Threads (Replies)**: Implement "Reply in Thread" from the message popup. Requires `parentMessageId` in DB and a side-panel UI for thread conversations.
 - [ ] **Mentions & Reactions View**: Implement the sidebar link to show a consolidated feed of all mentions and reactions received by the user.
 - [ ] **User Mentions (@)**: Implement the "@" button/trigger logic to show a user dropdown and handle mention notifications.
 - [ ] **Forward Message**: Implement the "Share" icon in the message popup to copy a message to another channel.

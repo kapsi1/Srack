@@ -20,9 +20,10 @@ interface MessageInputProps {
 	channelName: string;
 	isDM?: boolean;
 	onSendMessage: (content: string) => void;
+    placeholder?: string;
 }
 
-export function MessageInput({ channelName, isDM, onSendMessage }: MessageInputProps) {
+export function MessageInput({ channelName, isDM, onSendMessage, placeholder }: MessageInputProps) {
 	const [message, setMessage] = useState('');
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 	const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
@@ -284,7 +285,7 @@ export function MessageInput({ channelName, isDM, onSendMessage }: MessageInputP
 						value={message}
 						onChange={(e) => setMessage(e.target.value)}
 						onKeyDown={handleKeyDown}
-						placeholder={`Message ${isDM ? '@' : '#'}${channelName}`}
+						placeholder={placeholder || `Message ${isDM ? '@' : '#'}${channelName}`}
 						className="w-full px-3 py-2 resize-none outline-none bg-transparent text-white placeholder-gray-500 font-normal"
 						rows={3}
 					/>

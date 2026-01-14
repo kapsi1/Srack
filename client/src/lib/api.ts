@@ -70,6 +70,7 @@ export interface Message {
   sender: User;
   reactions: MessageReaction[];
   isSaved?: boolean;
+  threadCount?: number;
 }
 
 export const fetchCurrentUser = async (): Promise<User> => {
@@ -104,9 +105,14 @@ export const createDM = async (targetUserId: string): Promise<Channel> => {
   return response.data;
 };
 
-export const sendMessage = async (channelId: string, content: string, tempId?: string): Promise<Message> => {
-   const response = await api.post("/messages", { channelId, content, tempId });
+export const sendMessage = async (channelId: string, content: string, tempId?: string, parentId?: string): Promise<Message> => {
+   const response = await api.post("/messages", { channelId, content, tempId, parentId });
    return response.data;
+};
+
+export const fetchThreadMessages = async (messageId: string): Promise<Message[]> => {
+    const response = await api.get(`/messages/${messageId}/thread`);
+    return response.data;
 };
 
 export const toggleSavedMessage = async (messageId: string): Promise<{ saved: boolean }> => {

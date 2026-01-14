@@ -21,8 +21,10 @@ import {
     type Channel as ApiChannel,
     type Message as ApiMessage,
     type User as ApiUser,
-    type MessageReaction
+    type MessageReaction,
+    fetchThreadMessages
 } from "./lib/api";
+import { ThreadView } from "./components/ThreadView";
 
 export type User = ApiUser;
 
@@ -88,6 +90,7 @@ function mapApiMessagesToMessages(apiMessages: ApiMessage[]): Message[] {
 				users: data.users,
 			})),
 			isSaved: msg.isSaved,
+            threadCount: msg.threadCount,
 		};
 	});
 }
@@ -148,7 +151,10 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 	const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+
 	const [isCreateChannelModalOpen, setIsCreateChannelModalOpen] = useState(false);
+    const [activeThread, setActiveThread] = useState<Message | null>(null);
+    const [threadMessages, setThreadMessages] = useState<Message[]>([]);
 
 	// Hooks must be unconditional
 	const { socket } = useSocket();
@@ -179,6 +185,12 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 		queryFn: fetchSavedMessages,
 		enabled: !!token,
 	});
+
+    const { data: threadMessagesData } = useQuery({
+        queryKey: ["thread-messages", activeThread?.id],
+        queryFn: () => activeThread ? fetchThreadMessages(activeThread.id) : Promise.resolve([]),
+        enabled: !!token && !!activeThread,
+    });
 
     // Mutations
     const dmMutation = useMutation({
@@ -217,9 +229,15 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
     });
 
     const sendMessageMutation = useMutation({
-        mutationFn: ({ channelId, content, tempId }: { channelId: string, content: string, tempId: string }) => 
-            sendMessage(channelId, content, tempId),
-        onMutate: async ({ channelId, content, tempId }) => {
+        mutationFn: ({ channelId, content, tempId, parentId }: { channelId: string, content: string, tempId: string, parentId?: string }) => 
+            sendMessage(channelId, content, tempId, parentId),
+        onMutate: async ({ channelId, content, tempId, parentId }) => {
+            if (parentId) {
+                // Optimistic update for thread
+                await queryClient.cancelQueries({ queryKey: ["thread-messages", parentId] });
+                 // logic for optimistic thread update could go here, omitting for brevity/complexity
+                 return;
+            }
             await queryClient.cancelQueries({ queryKey: ["messages", channelId] });
 
             const previousMessages = queryClient.getQueryData(["messages", channelId]);
@@ -327,6 +345,12 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 		}
 	}, [messagesData]);
 
+    useEffect(() => {
+        if (threadMessagesData) {
+            setThreadMessages(mapApiMessagesToMessages(threadMessagesData));
+        }
+    }, [threadMessagesData]);
+
 	// Derived state for props
 	const channels: Channel[] =
 		channelsData
@@ -374,8 +398,31 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 				content: message.content,
 				timestamp: new Date(message.createdAt),
 				reactions: [],
-				threadCount: 0,
+				threadCount: message.threadCount || 0,
 			};
+
+            const parentId = (message as any).parentId; // Access parentId if present
+
+            if (parentId) {
+                // Handle reply
+                if (activeThread && activeThread.id === parentId) {
+                    setThreadMessages(prev => [...prev, newMessage]);
+                }
+                
+                // Update parent message thread count in main channel list
+                if (message.channelId === activeChannel.id) {
+                     setMessages(prev => prev.map(m => {
+                         if (m.id === parentId) {
+                             return {
+                                 ...m,
+                                 threadCount: (m.threadCount || 0) + 1
+                             };
+                         }
+                         return m;
+                     }));
+                }
+                return;
+            }
 
 			if (message.channelId === activeChannel.id) {
                 setMessages((prev) => {
@@ -452,7 +499,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 			socket.off("new_message", handleNewMessage);
 			socket.off("reaction_added", handleReactionAdded);
 		};
-	}, [socket, activeChannel, currentUser, channelsData]); // Added channelsData dependency logic implicitly
+	}, [socket, activeChannel, currentUser, channelsData, activeThread]); // Added channelsData dependency logic implicitly
 
 	// We need a separate effect to join all channels once
 	useEffect(() => {
@@ -467,8 +514,13 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
         if (!currentUser || !activeChannel) return;
 
         const tempId = `temp-${Date.now()}`;
-        // Use mutation instead of socket directly for optimistic updates
         sendMessageMutation.mutate({ channelId: activeChannel.id, content, tempId });
+    };
+
+    const handleSendReply = (content: string) => {
+        if (!currentUser || !activeChannel || !activeThread) return;
+        const tempId = `temp-${Date.now()}`;
+        sendMessageMutation.mutate({ channelId: activeChannel.id, content, tempId, parentId: activeThread.id });
     };
 
     const handleCreateChannel = (
@@ -525,6 +577,10 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 						onAddReaction={handleAddReaction}
                         onToggleSave={handleToggleSave}
 						onToggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+                        onReply={(msg) => {
+                            setActiveThread(msg);
+                            setIsRightSidebarOpen(false); // Close info if open
+                        }}
 					/>
 				) : (
 					<div className="flex-1 flex items-center justify-center bg-gray-900 text-white">
@@ -539,6 +595,17 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 						onClose={() => setIsRightSidebarOpen(false)} 
 					/>
 				)}
+
+                {activeThread && (
+                    <ThreadView
+                        parentMessage={activeThread}
+                        replies={threadMessages}
+                        onClose={() => setActiveThread(null)}
+                        onSendMessage={handleSendReply}
+                        onAddReaction={handleAddReaction}
+                        onToggleSave={handleToggleSave}
+                    />
+                )}
 			</div>
             <CreateChannelModal 
                 isOpen={isCreateChannelModalOpen}

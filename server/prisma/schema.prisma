@@ -46,6 +46,9 @@ model Message {
   senderId      String
   channel       Channel        @relation(fields: [channelId], references: [id])
   channelId     String
+  parentId      String?
+  parent        Message?       @relation("Thread", fields: [parentId], references: [id])
+  replies       Message[]      @relation("Thread")
   reactions     Reaction[]
   savedMessages SavedMessage[]
   createdAt     DateTime       @default(now())

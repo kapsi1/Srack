@@ -17,6 +17,7 @@ interface MessageItemProps {
 	showAvatar: boolean;
 	onAddReaction: (messageId: string, emoji: string) => void;
 	onToggleSave?: (messageId: string) => void;
+    onReply?: (message: Message) => void;
 }
 
 
@@ -25,6 +26,7 @@ export function MessageItem({
 	showAvatar,
 	onAddReaction,
 	onToggleSave,
+    onReply,
 }: MessageItemProps) {
 	const [showActions, setShowActions] = useState(false);
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -193,6 +195,7 @@ export function MessageItem({
 						<button
 							type="button"
 							className="flex items-center gap-2 mt-1 text-sm text-blue-400 hover:underline"
+                            onClick={() => onReply?.(message)}
 						>
 							<MessageSquare className="w-4 h-4" />
 							<span>
@@ -218,6 +221,7 @@ export function MessageItem({
 					<button
 						type="button"
 						className="p-1.5 hover:bg-gray-700 transition-colors"
+                        onClick={() => onReply?.(message)}
 					>
 						<MessageSquare className="w-4 h-4 text-gray-300" />
 					</button>

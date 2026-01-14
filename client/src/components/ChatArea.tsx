@@ -12,6 +12,7 @@ interface ChatAreaProps {
 	onAddReaction: (messageId: string, emoji: string) => void;
 	onToggleSave: (messageId: string) => void;
 	onToggleRightSidebar: () => void;
+    onReply?: (message: Message) => void;
 }
 
 export function ChatArea({ 
@@ -21,7 +22,8 @@ export function ChatArea({
 	onSendMessage, 
 	onAddReaction, 
 	onToggleSave,
-	onToggleRightSidebar 
+	onToggleRightSidebar,
+    onReply
 }: ChatAreaProps) {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
@@ -127,6 +129,7 @@ export function ChatArea({
                 messages={filteredMessages} 
                 onAddReaction={onAddReaction} 
                 onToggleSave={onToggleSave}
+                onReply={onReply}
             />
 
 			{/* Message Input */}
