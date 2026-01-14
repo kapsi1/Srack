@@ -108,7 +108,7 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
             setShowMentionPicker(false);
         }
 
-    }, [message, users]); // filteredUsers dep loop specific properties not needed if we calculate inside render or use memos properly
+    }, [message, filteredUsers.length]); // filteredUsers dep loop specific properties not needed if we calculate inside render or use memos properly
 
 
 	const toggleEmojiPicker = () => {
@@ -420,10 +420,10 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 					{/* Bottom Actions */}
 					<div className="px-2 py-1 flex items-center justify-between">
 						<div className="flex items-center gap-1">
-							<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors">
+							<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="Attach file">
 								<Paperclip className="w-4 h-4 text-gray-300" />
 							</button>
-							<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors">
+							<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="Record audio">
 								<Mic className="w-4 h-4 text-gray-300" />
 							</button>
 							<div className="relative">
@@ -432,6 +432,7 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 									ref={smileButtonRef}
 									className="p-1.5 hover:bg-gray-700 rounded transition-colors"
 									onClick={toggleEmojiPicker}
+									title="Emoji"
 								>
 									<Smile className="w-4 h-4 text-gray-300" />
 								</button>
@@ -461,6 +462,7 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
                                 ref={atButtonRef}
                                 className="p-1.5 hover:bg-gray-700 rounded transition-colors"
                                 onClick={toggleMentionPicker}
+                                title="Mention someone"
                             >
 								<AtSign className="w-4 h-4 text-gray-300" />
 							</button>
@@ -476,6 +478,7 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
                                     <div className="p-1">
                                         {filteredUsers.map((user, index) => (
                                             <button
+                                                type="button"
                                                 key={user.id}
                                                 className={`w-full text-left px-3 py-2 rounded flex items-center gap-2 ${
                                                     index === mentionSelectedIndex ? 'bg-blue-600 text-white' : 'hover:bg-gray-800 text-gray-200'
@@ -503,6 +506,7 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 							type="submit"
 							disabled={!message.trim()}
 							className="p-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600"
+							title="Send message"
 						>
 							<Send className="w-4 h-4" />
 						</button>

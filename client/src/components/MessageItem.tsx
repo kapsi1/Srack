@@ -209,6 +209,7 @@ export function MessageItem({
 								ref={reactionsSmileButtonRef}
 								className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#222529] border border-gray-700 rounded hover:border-blue-500 transition-colors text-sm"
 								onClick={() => toggleEmojiPicker(reactionsSmileButtonRef)}
+								title="Add reaction"
 							>
 								<Smile className="w-3.5 h-3.5 text-gray-400" />
 							</button>
@@ -240,6 +241,7 @@ export function MessageItem({
 						ref={smileButtonRef}
 						className="p-1.5 hover:bg-gray-700 rounded transition-colors relative"
 						onClick={() => toggleEmojiPicker(smileButtonRef)}
+						title="Add reaction"
 					>
 						<Smile className="w-4 h-4 text-gray-300" />
 					</button>
@@ -247,6 +249,7 @@ export function MessageItem({
 						type="button"
 						className="p-1.5 hover:bg-gray-700 transition-colors"
 						onClick={() => onReply?.(message)}
+						title="Reply in thread"
 					>
 						<MessageSquare className="w-4 h-4 text-gray-300" />
 					</button>
@@ -254,6 +257,7 @@ export function MessageItem({
 						type="button"
 						className="p-1.5 hover:bg-gray-700 transition-colors"
 						onClick={() => onForward?.(message)}
+						title="Forward message"
 					>
 						<Share className="w-4 h-4 text-gray-300" />
 					</button>
@@ -261,6 +265,7 @@ export function MessageItem({
 						type="button"
 						className={`p-1.5 hover:bg-gray-700 transition-colors ${message.isSaved ? "text-blue-400 bg-gray-700" : ""}`}
 						onClick={() => onToggleSave?.(message.id)}
+						title={message.isSaved ? "Remove from saved" : "Save message"}
 					>
 						<Bookmark
 							className={`w-4 h-4 ${message.isSaved ? "fill-current" : "text-gray-300"}`}

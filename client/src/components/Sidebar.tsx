@@ -193,7 +193,7 @@ export function Sidebar({
 						</div>
 						<span className="text-sm">{currentUser.username}</span>
 					</div>
-					<div className="p-2 cursor-pointer hover:bg-gray-800 transition-colors rounded">
+					<div className="p-2 cursor-pointer hover:bg-gray-800 transition-colors rounded" title="Logout">
 						<LogOut className="w-4 h-4" onClick={handleLogout} />
 					</div>
 				</div>

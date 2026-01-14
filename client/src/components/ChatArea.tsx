@@ -63,6 +63,7 @@ export function ChatArea({
 						type="button"
 						onClick={onToggleRightSidebar}
 						className="flex items-center gap-2 hover:bg-gray-800 px-2 py-1 rounded-md transition-colors text-left"
+						title="Channel details"
 					>
 						<h2 className="flex items-center gap-1.5 text-white font-bold">
 							{isDM ? (
@@ -77,21 +78,22 @@ export function ChatArea({
 							<span>{displayName}</span>
 						</h2>
 					</button>
-					<button type="button" className="p-1 hover:bg-gray-800 rounded transition-colors">
+					<button type="button" className="p-1 hover:bg-gray-800 rounded transition-colors" title="Star channel">
 						<Star className="w-4 h-4 text-gray-400" />
 					</button>
 				</div>
 				<div className="flex items-center gap-1">
-					<button type="button" className="p-2 hover:bg-gray-800 rounded transition-colors">
+					<button type="button" className="p-2 hover:bg-gray-800 rounded transition-colors" title="Start call">
 						<Phone className="w-4 h-4 text-gray-400" />
 					</button>
-					<button type="button" className="p-2 hover:bg-gray-800 rounded transition-colors">
+					<button type="button" className="p-2 hover:bg-gray-800 rounded transition-colors" title="Start video call">
 						<Video className="w-4 h-4 text-gray-400" />
 					</button>
 					<button 
 						type="button" 
 						onClick={onToggleRightSidebar}
 						className="p-2 hover:bg-gray-800 rounded transition-colors"
+						title="View members"
 					>
 						<Users className="w-4 h-4 text-gray-400" />
 					</button>
@@ -114,6 +116,7 @@ export function ChatArea({
 						type="button" 
 						className={`p-2 rounded transition-colors ${isSearchOpen ? 'bg-gray-800 text-white' : 'hover:bg-gray-800 text-gray-400'}`}
 						onClick={toggleSearch}
+						title="Search messages"
 					>
 						<Search className="w-4 h-4" />
 					</button>
@@ -121,6 +124,7 @@ export function ChatArea({
 						type="button" 
 						onClick={onToggleRightSidebar}
 						className="p-2 hover:bg-gray-800 rounded transition-colors"
+						title="Show details"
 					>
 						<Info className="w-4 h-4 text-gray-400" />
 					</button>
