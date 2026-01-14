@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { FileUploaderRegular } from "@uploadcare/react-uploader";
 import "@uploadcare/react-uploader/core.css";
 import type { Attachment } from "../lib/api";
@@ -18,20 +19,27 @@ interface UploadEntry {
 }
 
 export default function FileUploader({ onUploadComplete }: FileUploaderProps) {
+	const processedUuids = useRef<Set<string>>(new Set());
+
 	const handleChangeEvent = (e: { allEntries: UploadEntry[] }) => {
 		if (e.allEntries) {
-			const successfulFiles: Attachment[] = e.allEntries
-				.filter((f) => f.status === "success")
-				.map((f) => ({
-					uuid: f.uuid,
-					name: f.fileInfo.originalFilename,
-					size: f.fileInfo.size,
-					cdnUrl: f.cdnUrl,
-					mimeType: f.fileInfo.mimeType,
-				}));
+			const newFiles: Attachment[] = [];
 
-			if (successfulFiles.length > 0) {
-				onUploadComplete(successfulFiles);
+			for (const f of e.allEntries) {
+				if (f.status === "success" && !processedUuids.current.has(f.uuid)) {
+					processedUuids.current.add(f.uuid);
+					newFiles.push({
+						uuid: f.uuid,
+						name: f.fileInfo.originalFilename,
+						size: f.fileInfo.size,
+						cdnUrl: f.cdnUrl,
+						mimeType: f.fileInfo.mimeType,
+					});
+				}
+			}
+
+			if (newFiles.length > 0) {
+				onUploadComplete(newFiles);
 			}
 		}
 	};

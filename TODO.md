@@ -71,6 +71,7 @@ This document outlines the tasks required to convert the existing Figma-based Re
 - [x] **Save Message / Saved Items**: Implement the "Bookmark" functionality. Add a "Saved Items" view in the sidebar to retrieve bookmarked messages.
 - [x] **Channel Search**: basic search functionality using the "Search" icon in the top bar to filter messages in the current channel.
 - [ ] **Starred channels**: Implement the "Star" icon in the top bar to mark channels as starred. Starred channels should appear at the top of the channel list.
+- [ ] **Delete message**: Implement the "Trash" icon in the message popup to delete a message. Only the message owner should be able to delete their own messages.
 
 ### Medium (Requires Schema Changes or Complex UI)
 - [x] **Threads (Replies)**: Implement "Reply in Thread" from the message popup. Requires `parentMessageId` in DB and a side-panel UI for thread conversations.
