@@ -27,6 +27,7 @@ import {
 	type MessageReaction,
 	sendMessage,
 	toggleSavedMessage,
+	type Attachment,
 } from './lib/api';
 
 export type User = ApiUser;
@@ -49,6 +50,7 @@ export interface Message {
 	reactions?: { emoji: string; count: number; users: string[] }[];
 	threadCount?: number;
 	isSaved?: boolean;
+	attachments?: Attachment[];
 }
 
 export interface Channel {
@@ -90,6 +92,7 @@ function mapApiMessagesToMessages(apiMessages: ApiMessage[]): Message[] {
 			})),
 			isSaved: msg.isSaved,
 			threadCount: msg.threadCount,
+			attachments: msg.attachments,
 		};
 	});
 }
@@ -252,13 +255,15 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 			content,
 			tempId,
 			parentId,
+			attachments,
 		}: {
 			channelId: string;
 			content: string;
 			tempId: string;
 			parentId?: string;
-		}) => sendMessage(channelId, content, tempId, parentId),
-		onMutate: async ({ channelId, content, tempId, parentId }) => {
+			attachments?: Attachment[];
+		}) => sendMessage(channelId, content, tempId, parentId, attachments),
+		onMutate: async ({ channelId, content, tempId, parentId, attachments }) => {
 			if (parentId) {
 				// Optimistic update for thread
 				await queryClient.cancelQueries({ queryKey: ['thread-messages', parentId] });
@@ -280,6 +285,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 					updatedAt: new Date().toISOString(),
 					sender: currentUser,
 					reactions: [],
+					attachments,
 				};
 
 				queryClient.setQueryData(['messages', channelId], (old: ApiMessage[] | undefined) => {
@@ -298,6 +304,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 						timestamp: new Date(),
 						reactions: [],
 						threadCount: 0,
+						attachments,
 					},
 				]);
 			}
@@ -531,17 +538,17 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 		}
 	}, [socket, channelsData]);
 
-	const handleSendMessage = (content: string) => {
+	const handleSendMessage = (content: string, attachments?: Attachment[]) => {
 		if (!currentUser || !activeChannel) return;
 
 		const tempId = `temp-${Date.now()}`;
-		sendMessageMutation.mutate({ channelId: activeChannel.id, content, tempId });
+		sendMessageMutation.mutate({ channelId: activeChannel.id, content, tempId, attachments });
 	};
 
-	const handleSendReply = (content: string) => {
+	const handleSendReply = (content: string, attachments?: Attachment[]) => {
 		if (!currentUser || !activeChannel || !activeThread) return;
 		const tempId = `temp-${Date.now()}`;
-		sendMessageMutation.mutate({ channelId: activeChannel.id, content, tempId, parentId: activeThread.id });
+		sendMessageMutation.mutate({ channelId: activeChannel.id, content, tempId, parentId: activeThread.id, attachments });
 	};
 
 	const handleCreateChannel = (name: string, isPrivate: boolean, description: string) => {

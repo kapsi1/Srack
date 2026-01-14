@@ -40,6 +40,14 @@ api.interceptors.response.use(
 	},
 );
 
+export interface Attachment {
+	uuid: string;
+	name: string;
+	size: number;
+	cdnUrl: string;
+	mimeType?: string;
+}
+
 export interface User {
 	id: string;
 	email: string;
@@ -80,6 +88,7 @@ export interface Message {
 	channel?: Channel;
 	replies?: Message[]; // Recursive
 	parentId?: string;
+	attachments?: Attachment[];
 }
 
 export const fetchCurrentUser = async (): Promise<User> => {
@@ -127,12 +136,14 @@ export const sendMessage = async (
 	content: string,
 	tempId?: string,
 	parentId?: string,
+	attachments?: Attachment[],
 ): Promise<Message> => {
 	const response = await api.post('/messages', {
 		channelId,
 		content,
 		tempId,
 		parentId,
+		attachments,
 	});
 	return response.data;
 };

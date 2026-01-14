@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: Container handles mouse events for showing actions overlay */
 
 import EmojiPicker, { type EmojiClickData, Theme } from 'emoji-picker-react';
-import { Bookmark, MessageSquare, Share, Smile } from 'lucide-react';
+import { Bookmark, FileText, MessageSquare, Share, Smile } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import ReactMarkdown from 'react-markdown';
@@ -155,6 +155,76 @@ export function MessageItem({
 							{formatMentions(message.content)}
 						</ReactMarkdown>
 					</div>
+					
+					{/* Attachments */}
+					{message.attachments && message.attachments.length > 0 && (
+						<div className="flex flex-wrap gap-2 mt-2">
+							{message.attachments.map((attachment) => {
+								const isImage = attachment.mimeType?.startsWith('image/');
+								const isAudio = attachment.mimeType?.startsWith('audio/');
+								const isVideo = attachment.mimeType?.startsWith('video/');
+
+								if (isImage) {
+									return (
+										<a
+											key={attachment.uuid}
+											href={attachment.cdnUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="block rounded-lg overflow-hidden border border-gray-700 hover:border-blue-500 transition-colors"
+										>
+											<img
+												src={`${attachment.cdnUrl}-/preview/600x600/-/quality/smart/`}
+												alt={attachment.name}
+												className="max-w-full max-h-[300px] object-contain bg-[#1a1d21]"
+											/>
+										</a>
+									);
+								}
+
+								if (isAudio) {
+									return (
+										<div key={attachment.uuid} className="rounded-lg overflow-hidden border border-gray-700 bg-[#1a1d21] p-2 min-w-[300px]">
+											<div className="flex items-center gap-2 mb-2 text-sm text-gray-300">
+												<FileText className="w-4 h-4" />
+												<span className="truncate">{attachment.name}</span>
+											</div>
+											<audio controls className="w-full h-8" src={attachment.cdnUrl} />
+										</div>
+									);
+								}
+
+								if (isVideo) {
+									return (
+										<div key={attachment.uuid} className="rounded-lg overflow-hidden border border-gray-700 bg-[#1a1d21] max-w-[400px]">
+											<video controls className="w-full max-h-[300px]" src={attachment.cdnUrl} />
+											<div className="p-2 border-t border-gray-800 text-xs text-gray-400 truncate">
+												{attachment.name}
+											</div>
+										</div>
+									);
+								}
+
+								return (
+									<a
+										key={attachment.uuid}
+										href={attachment.cdnUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="flex items-center gap-3 px-3 py-2 bg-[#1a1d21] border border-gray-700 rounded-lg hover:border-blue-500 transition-colors group/file"
+									>
+										<div className="p-2 bg-gray-800 rounded group-hover/file:bg-gray-700 transition-colors">
+											<FileText className="w-5 h-5 text-gray-400" />
+										</div>
+										<div className="flex flex-col min-w-0">
+											<span className="text-sm text-gray-200 font-medium truncate max-w-[200px]">{attachment.name}</span>
+											<span className="text-xs text-gray-500">{(attachment.size / 1024).toFixed(1)} KB</span>
+										</div>
+									</a>
+								);
+							})}
+						</div>
+					)}
 
 					{/* Reactions */}
 					{message.reactions && message.reactions.length > 0 && (

@@ -3,6 +3,7 @@ import {
 	AtSign,
 	Bold,
 	Code,
+	FileText,
 	Italic,
 	Link,
 	List,
@@ -12,15 +13,18 @@ import {
 	Send,
 	Smile,
 	Strikethrough,
+	X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { User } from '../App';
+import type { Attachment } from '../lib/api';
+import FileUploader from './FileUploader';
 
 interface MessageInputProps {
 	channelName: string;
 	isDM?: boolean;
-	onSendMessage: (content: string) => void;
+	onSendMessage: (content: string, attachments?: Attachment[]) => void;
 	placeholder?: string;
 	users?: User[];
 }
@@ -36,10 +40,18 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 	const [mentionPosition, setMentionPosition] = useState({ top: 0, left: 0 });
 	const [mentionSelectedIndex, setMentionSelectedIndex] = useState(0);
 
+	const [attachments, setAttachments] = useState<Attachment[]>([]);
+	const [showUploader, setShowUploader] = useState(false);
+
+	const handleUploadComplete = (files: Attachment[]) => {
+		setAttachments(files);
+	};
+
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const pickerRef = useRef<HTMLDivElement>(null);
 	const smileButtonRef = useRef<HTMLButtonElement>(null);
 	const atButtonRef = useRef<HTMLButtonElement>(null);
+	const uploaderButtonRef = useRef<HTMLButtonElement>(null);
 
 	const filteredUsers = users.filter((u) => u.username.toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 5); // Limit to 5 suggestions
 
@@ -300,9 +312,11 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		if (message.trim()) {
-			onSendMessage(message);
+		if (message.trim() || attachments.length > 0) {
+			onSendMessage(message, attachments);
 			setMessage('');
+			setAttachments([]);
+			setShowUploader(false);
 		}
 	};
 
@@ -401,6 +415,26 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 						</button>
 					</div>
 
+					{/* Attachment Previews */}
+					{attachments.length > 0 && (
+						<div className="flex flex-wrap gap-2 p-2 border-b border-gray-700 bg-[#1a1d21]">
+							{attachments.map((file) => (
+								<div key={file.uuid} className="flex items-center gap-2 bg-gray-800 px-2 py-1 rounded border border-gray-700 text-xs text-gray-300">
+									<FileText className="w-3 h-3" />
+									<span className="truncate max-w-[150px] font-medium">{file.name}</span>
+									<button 
+										type="button" 
+										onClick={() => setAttachments(prev => prev.filter(a => a.uuid !== file.uuid))}
+										className="hover:text-red-400 transition-colors"
+										title="Remove attachment"
+									>
+										<X className="w-3 h-3" />
+									</button>
+								</div>
+							))}
+						</div>
+					)}
+
 					{/* Text Input */}
 					<textarea
 						ref={textareaRef}
@@ -495,16 +529,29 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 									</div>,
 									document.body,
 								)}
-							<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="Attach file">
-								<Paperclip className="w-4 h-4 text-gray-300" />
-							</button>
+							<div className="relative">
+								<button
+									type="button"
+									ref={uploaderButtonRef}
+									className={`p-1.5 hover:bg-gray-700 rounded transition-colors ${showUploader || attachments.length > 0 ? 'text-purple-400' : 'text-gray-300'}`}
+									onClick={() => setShowUploader(!showUploader)}
+									title="Attach file"
+								>
+									<Paperclip className="w-4 h-4" />
+								</button>
+								{showUploader && (
+									<div className="absolute bottom-full left-0 mb-2 z-1000">
+										<FileUploader onUploadComplete={handleUploadComplete} />
+									</div>
+								)}
+							</div>
 							<button type="button" className="p-1.5 hover:bg-gray-700 rounded transition-colors" title="Record audio">
 								<Mic className="w-4 h-4 text-gray-300" />
 							</button>
 						</div>
 						<button
 							type="submit"
-							disabled={!message.trim()}
+							disabled={!message.trim() && attachments.length === 0}
 							className="p-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600"
 							title="Send message"
 						>

@@ -1,6 +1,7 @@
 import { Hash, Info, PanelLeftOpen, Search, Star, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { Channel, Message, User } from '../App';
+import type { Attachment } from '../lib/api';
 import { MessageInput } from './MessageInput';
 import { MessageList } from './MessageList';
 
@@ -8,7 +9,7 @@ interface ChatAreaProps {
 	channel: Channel;
 	currentUser: User;
 	messages: Message[];
-	onSendMessage: (content: string) => void;
+	onSendMessage: (content: string, attachments?: Attachment[]) => void;
 	onAddReaction: (messageId: string, emoji: string) => void;
 	onToggleSave: (messageId: string) => void;
 	onToggleRightSidebar: () => void;

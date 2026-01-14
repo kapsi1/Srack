@@ -5,6 +5,7 @@
     "dependencies": {
         "@tanstack/react-query": "^5.90.16",
         "@types/react": "^19.2.8",
+        "@uploadcare/react-uploader": "^1.11.2",
         "axios": "^1.13.2",
         "clsx": "^2.1.1",
         "emoji-picker-react": "^4.16.1",

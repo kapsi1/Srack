@@ -84,7 +84,7 @@ import { broadcastMessage } from "../socket";
 
 export const createMessage = async (req: AuthRequest, res: Response) => {
 	try {
-		const { content, channelId, tempId, parentId } = req.body;
+		const { content, channelId, tempId, parentId, attachments } = req.body;
 		const userId = req.userId;
 
 		if (!content || !channelId || !userId) {
@@ -97,6 +97,7 @@ export const createMessage = async (req: AuthRequest, res: Response) => {
 				channelId,
 				senderId: userId,
 				parentId,
+				attachments,
 			},
 			include: {
 				sender: {

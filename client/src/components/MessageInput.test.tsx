@@ -31,7 +31,7 @@ describe('MessageInput', () => {
 		await user.type(input, 'Hello World');
 		await user.keyboard('{Enter}');
 
-		expect(handleSend).toHaveBeenCalledWith('Hello World');
+		expect(handleSend).toHaveBeenCalledWith('Hello World', []);
 		expect(input).toHaveValue('');
 	});
 

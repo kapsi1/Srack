@@ -51,6 +51,7 @@ model Message {
   replies       Message[]      @relation("Thread")
   reactions     Reaction[]
   savedMessages SavedMessage[]
+  attachments   Json?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }

@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import type { Message, User } from '../App';
+import type { Attachment } from '../lib/api';
 import { MessageInput } from './MessageInput';
 import { MessageItem } from './MessageItem';
 import { MessageList } from './MessageList';
@@ -8,7 +9,7 @@ interface ThreadViewProps {
 	parentMessage: Message;
 	replies: Message[];
 	onClose: () => void;
-	onSendMessage: (content: string) => void;
+	onSendMessage: (content: string, attachments?: Attachment[]) => void;
 	onAddReaction: (messageId: string, emoji: string) => void;
 	onToggleSave: (messageId: string) => void;
 	onForward?: (message: Message) => void;
