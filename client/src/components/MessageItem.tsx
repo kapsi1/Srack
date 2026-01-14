@@ -84,6 +84,14 @@ export function MessageItem({
 		});
 	};
 
+	// Helper to highlight mentions
+	const formatMentions = (text: string) => {
+		// Replace @username with a markdown link that we can intercept
+        // Be careful not to replace inside code blocks (handled by regex lookarounds or by remark plugins properly)
+        // For simplicity: simple regex.
+		return text.replace(/@(\w+)/g, '[@$1](/user/$1)');
+	};
+
 	return (
 		<div
 			className="group relative py-2 hover:bg-[#222529] -mx-4 px-4"
@@ -120,14 +128,24 @@ export function MessageItem({
 							remarkPlugins={[remarkGfm]}
 							components={{
 								p: ({ node, ...props }) => <p className="markdown-paragraph" {...props} />,
-								a: ({ node, ...props }) => (
-									<a
-										className="markdown-link"
-										target="_blank"
-										rel="noopener noreferrer"
-										{...props}
-									/>
-								),
+								a: ({ node, href, ...props }) => {
+                                    if (href?.startsWith('/user/')) {
+                                        return (
+                                            <span className="text-blue-400 bg-blue-500/10 px-1 rounded font-medium cursor-pointer hover:bg-blue-500/20">
+                                                {props.children}
+                                            </span>
+                                        );
+                                    }
+                                    return (
+                                        <a
+                                            className="markdown-link"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            href={href}
+                                            {...props}
+                                        />
+                                    );
+                                },
 								ul: ({ node, ...props }) => (
 									<ul className="markdown-list-unordered" {...props} />
 								),
@@ -159,7 +177,7 @@ export function MessageItem({
 								),
 							}}
 						>
-							{message.content}
+							{formatMentions(message.content)}
 						</ReactMarkdown>
 					</div>
 

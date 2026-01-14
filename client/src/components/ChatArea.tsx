@@ -13,6 +13,7 @@ interface ChatAreaProps {
 	onToggleSave: (messageId: string) => void;
 	onToggleRightSidebar: () => void;
     onReply?: (message: Message) => void;
+    users?: User[];
 }
 
 export function ChatArea({ 
@@ -23,7 +24,8 @@ export function ChatArea({
 	onAddReaction, 
 	onToggleSave,
 	onToggleRightSidebar,
-    onReply
+    onReply,
+    users
 }: ChatAreaProps) {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
@@ -133,7 +135,7 @@ export function ChatArea({
             />
 
 			{/* Message Input */}
-			<MessageInput channelName={displayName} isDM={isDM} onSendMessage={onSendMessage} />
+			<MessageInput channelName={displayName} isDM={isDM} onSendMessage={onSendMessage} users={users} />
 		</div>
 	);
 }

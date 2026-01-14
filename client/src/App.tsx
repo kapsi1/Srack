@@ -581,6 +581,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
                             setActiveThread(msg);
                             setIsRightSidebarOpen(false); // Close info if open
                         }}
+                        users={usersData}
 					/>
 				) : (
 					<div className="flex-1 flex items-center justify-center bg-gray-900 text-white">
@@ -604,6 +605,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
                         onSendMessage={handleSendReply}
                         onAddReaction={handleAddReaction}
                         onToggleSave={handleToggleSave}
+                        users={usersData}
                     />
                 )}
 			</div>

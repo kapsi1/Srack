@@ -1,8 +1,8 @@
-import { X } from 'lucide-react';
-import type { Message } from '../App';
-import { MessageInput } from './MessageInput';
-import { MessageList } from './MessageList';
-import { MessageItem } from './MessageItem';
+import { X } from "lucide-react";
+import type { Message, User } from "../App";
+import { MessageInput } from "./MessageInput";
+import { MessageList } from "./MessageList";
+import { MessageItem } from "./MessageItem";
 
 interface ThreadViewProps {
 	parentMessage: Message;
@@ -11,6 +11,7 @@ interface ThreadViewProps {
 	onSendMessage: (content: string) => void;
 	onAddReaction: (messageId: string, emoji: string) => void;
 	onToggleSave: (messageId: string) => void;
+    users?: User[];
 }
 
 export function ThreadView({
@@ -20,6 +21,7 @@ export function ThreadView({
 	onSendMessage,
 	onAddReaction,
 	onToggleSave,
+    users
 }: ThreadViewProps) {
 	return (
 		<div className="w-[350px] flex flex-col border-l border-gray-800 bg-[#1a1d21]">
@@ -28,7 +30,8 @@ export function ThreadView({
 				<h3 className="text-white font-bold flex items-center gap-2">
 					Thread
 					<span className="text-xs font-normal text-gray-400">
-						#{parentMessage.userId} {/* Should probably be channel name? keeping simple */}
+						#{parentMessage.userId}{" "}
+						{/* Should probably be channel name? keeping simple */}
 					</span>
 				</h3>
 				<button
@@ -51,13 +54,15 @@ export function ThreadView({
 						onToggleSave={onToggleSave}
 					/>
 				</div>
-                
-                {/* Separator */}
-                <div className="flex items-center gap-4 px-4 py-2">
-                    <div className="h-px bg-gray-800 flex-1" />
-                    <span className="text-xs text-gray-500">{replies.length} replies</span>
-                    <div className="h-px bg-gray-800 flex-1" />
-                </div>
+
+				{/* Separator */}
+				<div className="flex items-center gap-4 px-4 py-2">
+					<div className="h-px bg-gray-800 flex-1" />
+					<span className="text-xs text-gray-500">
+						{replies.length} replies
+					</span>
+					<div className="h-px bg-gray-800 flex-1" />
+				</div>
 
 				{/* Replies */}
 				<MessageList
@@ -69,12 +74,13 @@ export function ThreadView({
 
 			{/* Input */}
 			<div className="p-4 border-t border-gray-800">
-				<MessageInput 
-                    channelName={`Thread`} 
-                    isDM={false}
-                    placeholder="Reply..."
-                    onSendMessage={onSendMessage} 
-                />
+				<MessageInput
+					channelName={`Thread`}
+					isDM={false}
+					placeholder="Reply..."
+					onSendMessage={onSendMessage}
+                    users={users}
+				/>
 			</div>
 		</div>
 	);
