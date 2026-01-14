@@ -15,6 +15,7 @@ interface ChatAreaProps {
 	onToggleRightSidebar: () => void;
 	onReply?: (message: Message) => void;
 	onForward?: (message: Message) => void;
+	onStarChannel?: (channelId: string) => void;
 	users?: User[];
 	isSidebarCollapsed: boolean;
 	onToggleSidebar: () => void;
@@ -31,6 +32,7 @@ export function ChatArea({
 	onToggleRightSidebar,
 	onReply,
 	onForward,
+	onStarChannel,
 	users,
 	isSidebarCollapsed,
 	onToggleSidebar,
@@ -93,8 +95,15 @@ export function ChatArea({
 							<span>{displayName}</span>
 						</h2>
 					</button>
-					<button type="button" className="p-1 hover:bg-gray-800 rounded transition-colors" title="Star channel">
-						<Star className="w-4 h-4 text-gray-400" />
+					<button
+						type="button"
+						className="p-1 hover:bg-gray-800 rounded transition-colors"
+						title={channel.isStarred ? 'Unstar channel' : 'Star channel'}
+						onClick={() => onStarChannel?.(channel.id)}
+					>
+						<Star
+							className={`w-4 h-4 ${channel.isStarred ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'}`}
+						/>
 					</button>
 				</div>
 				<div className="flex items-center gap-1">

@@ -9,6 +9,7 @@ import {
 	MessageSquare,
 	PanelLeftClose,
 	Plus,
+	Star,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import type { Channel, DirectMessage, User } from '../App';
@@ -90,6 +91,40 @@ export function Sidebar({
 						{/* <SidebarItem icon={MoreVertical} label="More" /> */}
 					</div>
 
+					{/* Starred Channels */}
+					{channels.filter((c: Channel) => c.isStarred).length > 0 && (
+						<div className="mb-4">
+							<div className="px-2 py-1 flex items-center gap-1">
+								<ChevronDown className="w-3 h-3" />
+								<Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+								<span className="text-sm">Starred</span>
+							</div>
+							<div className="mt-1">
+								{channels
+									.filter((channel: Channel) => channel.isStarred)
+									.map((channel: Channel) => (
+										<Link
+											key={channel.id}
+											to={`/channel/${channel.name}`}
+											className={`w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group cursor-default ${
+												activeChannel.id === channel.id ? 'bg-[#1164a3]' : ''
+											}`}
+										>
+											<div className="flex items-center gap-1.5">
+												{channel.isPrivate ? <Lock className="w-3.5 h-3.5" /> : <Hash className="w-3.5 h-3.5" />}
+												<span className="text-sm">{channel.name}</span>
+											</div>
+											{(channel.unreadCount || 0) > 0 && (
+												<div className="w-5 h-5 bg-white rounded flex items-center justify-center">
+													<span className="text-xs text-[#5a2a4e]">{channel.unreadCount}</span>
+												</div>
+											)}
+										</Link>
+									))}
+							</div>
+						</div>
+					)}
+
 					{/* Channels */}
 					<div className="mb-4">
 						<div className="px-2 py-1 flex items-center justify-between group">
@@ -110,25 +145,27 @@ export function Sidebar({
 							</button>
 						</div>
 						<div className="mt-1">
-							{channels.map((channel: Channel) => (
-								<Link
-									key={channel.id}
-									to={`/channel/${channel.name}`}
-									className={`w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group cursor-default ${
-										activeChannel.id === channel.id ? 'bg-[#1164a3]' : ''
-									}`}
-								>
-									<div className="flex items-center gap-1.5">
-										{channel.isPrivate ? <Lock className="w-3.5 h-3.5" /> : <Hash className="w-3.5 h-3.5" />}
-										<span className="text-sm">{channel.name}</span>
-									</div>
-									{(channel.unreadCount || 0) > 0 && (
-										<div className="w-5 h-5 bg-white rounded flex items-center justify-center">
-											<span className="text-xs text-[#5a2a4e]">{channel.unreadCount}</span>
+							{channels
+								.filter((channel: Channel) => !channel.isStarred)
+								.map((channel: Channel) => (
+									<Link
+										key={channel.id}
+										to={`/channel/${channel.name}`}
+										className={`w-full px-2 py-1 flex items-center justify-between hover:bg-white/10 transition-colors group cursor-default ${
+											activeChannel.id === channel.id ? 'bg-[#1164a3]' : ''
+										}`}
+									>
+										<div className="flex items-center gap-1.5">
+											{channel.isPrivate ? <Lock className="w-3.5 h-3.5" /> : <Hash className="w-3.5 h-3.5" />}
+											<span className="text-sm">{channel.name}</span>
 										</div>
-									)}
-								</Link>
-							))}
+										{(channel.unreadCount || 0) > 0 && (
+											<div className="w-5 h-5 bg-white rounded flex items-center justify-center">
+												<span className="text-xs text-[#5a2a4e]">{channel.unreadCount}</span>
+											</div>
+										)}
+									</Link>
+								))}
 						</div>
 					</div>
 

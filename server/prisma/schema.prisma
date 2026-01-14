@@ -8,29 +8,31 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  username      String
-  password      String
-  avatar        String?
-  messages      Message[]
-  reactions     Reaction[]
-  channels      Channel[]
-  savedMessages SavedMessage[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id              String           @id @default(cuid())
+  email           String           @unique
+  username        String
+  password        String
+  avatar          String?
+  messages        Message[]
+  reactions       Reaction[]
+  channels        Channel[]
+  savedMessages   SavedMessage[]
+  starredChannels StarredChannel[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 }
 
 model Channel {
-  id          String    @id @default(cuid())
-  name        String
-  description String?
-  type        ChannelType @default(PUBLIC)
-  isPrivate   Boolean   @default(false)
-  messages    Message[]
-  members     User[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id              String           @id @default(cuid())
+  name            String
+  description     String?
+  type            ChannelType      @default(PUBLIC)
+  isPrivate       Boolean          @default(false)
+  messages        Message[]
+  members         User[]
+  starredByUsers  StarredChannel[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 }
 
 enum ChannelType {
@@ -77,4 +79,15 @@ model SavedMessage {
   createdAt DateTime @default(now())
 
   @@unique([userId, messageId])
+}
+
+model StarredChannel {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  channel   Channel  @relation(fields: [channelId], references: [id])
+  channelId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, channelId])
 }

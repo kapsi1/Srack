@@ -6,6 +6,13 @@ export const getChannels = async (req: AuthRequest, res: Response) => {
 	try {
 		const userId = req.userId;
 
+		// Get user's starred channel IDs
+		const starredChannels = await prisma.starredChannel.findMany({
+			where: { userId },
+			select: { channelId: true },
+		});
+		const starredChannelIds = new Set(starredChannels.map((sc) => sc.channelId));
+
 		const channels = await prisma.channel.findMany({
 			where: {
 				OR: [
@@ -30,10 +37,56 @@ export const getChannels = async (req: AuthRequest, res: Response) => {
 				},
 			},
 		});
-		res.json(channels);
+
+		// Add isStarred property to each channel
+		const channelsWithStarred = channels.map((channel) => ({
+			...channel,
+			isStarred: starredChannelIds.has(channel.id),
+		}));
+
+		res.json(channelsWithStarred);
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ error: "Error fetching channels" });
+	}
+};
+
+export const toggleStarChannel = async (req: AuthRequest, res: Response) => {
+	try {
+		const { channelId } = req.body;
+		const userId = req.userId;
+
+		if (!userId) {
+			return res.status(401).json({ error: "Unauthorized" });
+		}
+
+		if (!channelId) {
+			return res.status(400).json({ error: "Channel ID is required" });
+		}
+
+		// Check if already starred
+		const existingStarred = await prisma.starredChannel.findUnique({
+			where: {
+				userId_channelId: { userId, channelId },
+			},
+		});
+
+		if (existingStarred) {
+			// Unstar
+			await prisma.starredChannel.delete({
+				where: { id: existingStarred.id },
+			});
+			return res.json({ starred: false, channelId });
+		} else {
+			// Star
+			await prisma.starredChannel.create({
+				data: { userId, channelId },
+			});
+			return res.json({ starred: true, channelId });
+		}
+	} catch (error) {
+		console.error("Error toggling starred channel:", error);
+		res.status(500).json({ error: "Error toggling starred channel" });
 	}
 };
 

@@ -60,6 +60,7 @@ export interface Channel {
 	name: string;
 	description?: string;
 	isPrivate: boolean;
+	isStarred?: boolean;
 	type?: 'PUBLIC' | 'PRIVATE' | 'DM';
 	members?: User[];
 	createdAt: string;
@@ -128,6 +129,11 @@ export const fetchMessages = async (channelId: string): Promise<Message[]> => {
 
 export const createDM = async (targetUserId: string): Promise<Channel> => {
 	const response = await api.post('/channels/dm', { targetUserId });
+	return response.data;
+};
+
+export const toggleStarChannel = async (channelId: string): Promise<{ starred: boolean; channelId: string }> => {
+	const response = await api.post('/channels/star', { channelId });
 	return response.data;
 };
 

@@ -70,7 +70,7 @@ This document outlines the tasks required to convert the existing Figma-based Re
 - [x] **Add new channels**: Implement the "+" icon in channel list to add new channels, using a popup to fill in channel name and optional description.
 - [x] **Save Message / Saved Items**: Implement the "Bookmark" functionality. Add a "Saved Items" view in the sidebar to retrieve bookmarked messages.
 - [x] **Channel Search**: basic search functionality using the "Search" icon in the top bar to filter messages in the current channel.
-- [ ] **Starred channels**: Implement the "Star" icon in the top bar to mark channels as starred. Starred channels should appear at the top of the channel list.
+- [x] **Starred channels**: Implement the "Star" icon in the top bar to mark channels as starred. Starred channels should appear at the top of the channel list.
 - [x] **Delete message**: Implement the "Trash" icon in the message popup to delete a message. Only the message owner should be able to delete their own messages. If a message contains attachments, they should be deleted as well.
 
 ### Medium (Requires Schema Changes or Complex UI)

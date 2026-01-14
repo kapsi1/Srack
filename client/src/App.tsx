@@ -27,6 +27,7 @@ import {
 	type MessageReaction,
 	sendMessage,
 	toggleSavedMessage,
+	toggleStarChannel,
 	deleteMessage,
 	type Attachment,
 } from './lib/api';
@@ -59,6 +60,7 @@ export interface Channel {
 	name: string;
 	description?: string;
 	isPrivate?: boolean;
+	isStarred?: boolean;
 	type?: 'PUBLIC' | 'PRIVATE' | 'DM';
 	unreadCount?: number;
 	members?: User[];
@@ -352,6 +354,21 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 		},
 	});
 
+	const toggleStarChannelMutation = useMutation({
+		mutationFn: toggleStarChannel,
+		onSuccess: (result) => {
+			// Update the channels list to reflect the new starred state
+			queryClient.setQueryData(['channels'], (old: ApiChannel[] | undefined) => {
+				if (!old) return old;
+				return old.map((c) => (c.id === result.channelId ? { ...c, isStarred: result.starred } : c));
+			});
+			// Also update activeChannel if it matches
+			if (activeChannel?.id === result.channelId) {
+				setActiveChannel({ ...activeChannel, isStarred: result.starred });
+			}
+		},
+	});
+
 	const { channelName, userName } = useParams();
 	const navigate = useNavigate();
 
@@ -612,6 +629,10 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 		}
 	};
 
+	const handleStarChannel = (channelId: string) => {
+		toggleStarChannelMutation.mutate(channelId);
+	};
+
 	const isSavedItemsPath = location.pathname === '/saved-items';
 	const isActivityPath = location.pathname === '/mentions-reactions';
 	const isThreadsPath = location.pathname === '/threads';
@@ -695,6 +716,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 						}}
 						onDelete={handleDeleteMessage}
 						onForward={handleForwardMessage}
+						onStarChannel={handleStarChannel}
 						users={usersData}
 						isSidebarCollapsed={isSidebarCollapsed}
 						onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
