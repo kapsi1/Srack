@@ -8,9 +8,10 @@ interface MessageListProps {
 	onAddReaction: (messageId: string, emoji: string) => void;
 	onToggleSave?: (messageId: string) => void;
     onReply?: (message: Message) => void;
+    onForward?: (message: Message) => void;
 }
 
-export function MessageList({ channel, messages, onAddReaction, onToggleSave, onReply }: MessageListProps) {
+export function MessageList({ channel, messages, onAddReaction, onToggleSave, onReply, onForward }: MessageListProps) {
 	const bottomRef = useRef<HTMLDivElement>(null);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to scroll on every message update
@@ -52,6 +53,7 @@ export function MessageList({ channel, messages, onAddReaction, onToggleSave, on
 							onAddReaction={onAddReaction}
                             onToggleSave={onToggleSave}
                             onReply={onReply}
+                            onForward={onForward}
 						/>
 					);
 				})}

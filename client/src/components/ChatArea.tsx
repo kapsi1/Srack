@@ -13,6 +13,7 @@ interface ChatAreaProps {
 	onToggleSave: (messageId: string) => void;
 	onToggleRightSidebar: () => void;
     onReply?: (message: Message) => void;
+    onForward?: (message: Message) => void;
     users?: User[];
 }
 
@@ -25,6 +26,7 @@ export function ChatArea({
 	onToggleSave,
 	onToggleRightSidebar,
     onReply,
+    onForward,
     users
 }: ChatAreaProps) {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -132,6 +134,7 @@ export function ChatArea({
                 onAddReaction={onAddReaction} 
                 onToggleSave={onToggleSave}
                 onReply={onReply}
+                onForward={onForward}
             />
 
 			{/* Message Input */}

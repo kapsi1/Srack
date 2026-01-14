@@ -27,6 +27,7 @@ import {
 import { ThreadView } from "./components/ThreadView";
 import { MentionsReactionsView } from "./components/MentionsReactionsView";
 import { ThreadsListView } from "./components/ThreadsListView";
+import { ForwardMessageModal } from "./components/ForwardMessageModal";
 
 export type User = ApiUser;
 
@@ -159,6 +160,8 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 	const [isCreateChannelModalOpen, setIsCreateChannelModalOpen] = useState(false);
     const [activeThread, setActiveThread] = useState<Message | null>(null);
     const [threadMessages, setThreadMessages] = useState<Message[]>([]);
+	const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
+	const [messageToForward, setMessageToForward] = useState<Message | null>(null);
 
 	// Hooks must be unconditional
 	const { socket } = useSocket();
@@ -405,7 +408,7 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 				threadCount: message.threadCount || 0,
 			};
 
-            const parentId = (message as any).parentId; // Access parentId if present
+            const parentId = message.parentId; // Access parentId if present
 
             if (parentId) {
                 // Handle reply
@@ -554,6 +557,31 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
     const isActivityPath = location.pathname === "/mentions-reactions";
     const isThreadsPath = location.pathname === "/threads";
 
+	const handleForwardMessage = (message: Message) => {
+		setMessageToForward(message);
+		setIsForwardModalOpen(true);
+	};
+
+	const submitForwardMessage = (targetChannelId: string) => {
+		if (!messageToForward || !currentUser) return;
+
+        // Create a quoted version of the message
+		// Note: Using standard markdown blockquote
+		const content = `> **${messageToForward.userName}** said:\n> ${messageToForward.content.replace(/\n/g, '\n> ')}`;
+        
+        const tempId = `temp-${Date.now()}`;
+        sendMessageMutation.mutate({ channelId: targetChannelId, content, tempId });
+        
+        // If we forwarded to a different channel, we might want to navigate there, 
+        // or just show a toast. For now, let's navigate if it's not the current one.
+        if (activeChannel?.id !== targetChannelId) {
+             const targetChannel = channelsData?.find(c => c.id === targetChannelId);
+             if (targetChannel) {
+                 navigate(`/channel/${targetChannel.name}`);
+             }
+        }
+	};
+
     // dmMutation logic is now handled in useEffect based on userName param
 
 	return (
@@ -594,10 +622,11 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
 						onAddReaction={handleAddReaction}
                         onToggleSave={handleToggleSave}
 						onToggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
-                        onReply={(msg) => {
+						onReply={(msg) => {
                             setActiveThread(msg);
                             setIsRightSidebarOpen(false); // Close info if open
                         }}
+                        onForward={handleForwardMessage}
                         users={usersData}
 					/>
 				) : (
@@ -631,6 +660,15 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User, onLogout
                 onClose={() => setIsCreateChannelModalOpen(false)}
                 onCreate={handleCreateChannel}
             />
+			{channelsData && (
+				<ForwardMessageModal
+					isOpen={isForwardModalOpen}
+					onClose={() => setIsForwardModalOpen(false)}
+					channels={channelsData}
+					message={messageToForward}
+					onForward={submitForwardMessage}
+				/>
+			)}
 		</div>
 	);
 }

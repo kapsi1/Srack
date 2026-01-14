@@ -1,15 +1,10 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: Container handles mouse events for showing actions overlay */
-import {
-	Bookmark,
-	MessageSquare,
-	Share,
-	Smile,
-} from "lucide-react";
+import { Bookmark, MessageSquare, Share, Smile } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { createPortal } from "react-dom";
-import EmojiPicker, { Theme, type EmojiClickData } from 'emoji-picker-react';
+import EmojiPicker, { Theme, type EmojiClickData } from "emoji-picker-react";
 import type { Message } from "../App";
 
 interface MessageItemProps {
@@ -17,16 +12,17 @@ interface MessageItemProps {
 	showAvatar: boolean;
 	onAddReaction: (messageId: string, emoji: string) => void;
 	onToggleSave?: (messageId: string) => void;
-    onReply?: (message: Message) => void;
+	onReply?: (message: Message) => void;
+	onForward?: (message: Message) => void;
 }
-
 
 export function MessageItem({
 	message,
 	showAvatar,
 	onAddReaction,
 	onToggleSave,
-    onReply,
+	onReply,
+	onForward,
 }: MessageItemProps) {
 	const [showActions, setShowActions] = useState(false);
 	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -37,20 +33,25 @@ export function MessageItem({
 
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
-			if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+			if (
+				pickerRef.current &&
+				!pickerRef.current.contains(event.target as Node)
+			) {
 				setShowEmojiPicker(false);
 			}
 		};
 
 		if (showEmojiPicker) {
-			document.addEventListener('mousedown', handleClickOutside);
+			document.addEventListener("mousedown", handleClickOutside);
 		}
 		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
+			document.removeEventListener("mousedown", handleClickOutside);
 		};
 	}, [showEmojiPicker]);
 
-	const toggleEmojiPicker = (buttonRef: React.RefObject<HTMLButtonElement | null>) => {
+	const toggleEmojiPicker = (
+		buttonRef: React.RefObject<HTMLButtonElement | null>,
+	) => {
 		if (showEmojiPicker) {
 			setShowEmojiPicker(false);
 			return;
@@ -61,13 +62,13 @@ export function MessageItem({
 			// Position the picker above/below the button
 			const top = rect.top + window.scrollY;
 			const left = rect.left + window.scrollX;
-			
+
 			// Adjust if it would go off screen
 			let pickerTop = top + rect.height + 5;
 			if (pickerTop + 450 > window.innerHeight) {
 				pickerTop = top - 450 - 5;
 			}
-			
+
 			let pickerLeft = left - 350 + rect.width;
 			if (pickerLeft < 0) pickerLeft = left;
 
@@ -87,9 +88,9 @@ export function MessageItem({
 	// Helper to highlight mentions
 	const formatMentions = (text: string) => {
 		// Replace @username with a markdown link that we can intercept
-        // Be careful not to replace inside code blocks (handled by regex lookarounds or by remark plugins properly)
-        // For simplicity: simple regex.
-		return text.replace(/@(\w+)/g, '[@$1](/user/$1)');
+		// Be careful not to replace inside code blocks (handled by regex lookarounds or by remark plugins properly)
+		// For simplicity: simple regex.
+		return text.replace(/@(\w+)/g, "[@$1](/user/$1)");
 	};
 
 	return (
@@ -127,32 +128,36 @@ export function MessageItem({
 						<ReactMarkdown
 							remarkPlugins={[remarkGfm]}
 							components={{
-								p: ({ node, ...props }) => <p className="markdown-paragraph" {...props} />,
+								p: ({ node, ...props }) => (
+									<p className="markdown-paragraph" {...props} />
+								),
 								a: ({ node, href, ...props }) => {
-                                    if (href?.startsWith('/user/')) {
-                                        return (
-                                            <span className="text-blue-400 bg-blue-500/10 px-1 rounded font-medium cursor-pointer hover:bg-blue-500/20">
-                                                {props.children}
-                                            </span>
-                                        );
-                                    }
-                                    return (
-                                        <a
-                                            className="markdown-link"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            href={href}
-                                            {...props}
-                                        />
-                                    );
-                                },
+									if (href?.startsWith("/user/")) {
+										return (
+											<span className="text-blue-400 bg-blue-500/10 px-1 rounded font-medium cursor-pointer hover:bg-blue-500/20">
+												{props.children}
+											</span>
+										);
+									}
+									return (
+										<a
+											className="markdown-link"
+											target="_blank"
+											rel="noopener noreferrer"
+											href={href}
+											{...props}
+										/>
+									);
+								},
 								ul: ({ node, ...props }) => (
 									<ul className="markdown-list-unordered" {...props} />
 								),
 								ol: ({ node, ...props }) => (
 									<ol className="markdown-list-ordered" {...props} />
 								),
-								li: ({ node, ...props }) => <li className="markdown-list-item" {...props} />,
+								li: ({ node, ...props }) => (
+									<li className="markdown-list-item" {...props} />
+								),
 								code: ({
 									node,
 									inline,
@@ -171,7 +176,9 @@ export function MessageItem({
 								strong: ({ node, ...props }) => (
 									<strong className="markdown-strong" {...props} />
 								),
-								em: ({ node, ...props }) => <em className="markdown-em" {...props} />,
+								em: ({ node, ...props }) => (
+									<em className="markdown-em" {...props} />
+								),
 								del: ({ node, ...props }) => (
 									<del className="markdown-del" {...props} />
 								),
@@ -197,14 +204,14 @@ export function MessageItem({
 									</span>
 								</button>
 							))}
-								<button
-									type="button"
-									ref={reactionsSmileButtonRef}
-									className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#222529] border border-gray-700 rounded hover:border-blue-500 transition-colors text-sm"
-									onClick={() => toggleEmojiPicker(reactionsSmileButtonRef)}
-								>
-									<Smile className="w-3.5 h-3.5 text-gray-400" />
-								</button>
+							<button
+								type="button"
+								ref={reactionsSmileButtonRef}
+								className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#222529] border border-gray-700 rounded hover:border-blue-500 transition-colors text-sm"
+								onClick={() => toggleEmojiPicker(reactionsSmileButtonRef)}
+							>
+								<Smile className="w-3.5 h-3.5 text-gray-400" />
+							</button>
 						</div>
 					)}
 
@@ -213,7 +220,7 @@ export function MessageItem({
 						<button
 							type="button"
 							className="flex items-center gap-2 mt-1 text-sm text-blue-400 hover:underline"
-                            onClick={() => onReply?.(message)}
+							onClick={() => onReply?.(message)}
 						>
 							<MessageSquare className="w-4 h-4" />
 							<span>
@@ -239,22 +246,25 @@ export function MessageItem({
 					<button
 						type="button"
 						className="p-1.5 hover:bg-gray-700 transition-colors"
-                        onClick={() => onReply?.(message)}
+						onClick={() => onReply?.(message)}
 					>
 						<MessageSquare className="w-4 h-4 text-gray-300" />
 					</button>
 					<button
 						type="button"
 						className="p-1.5 hover:bg-gray-700 transition-colors"
+						onClick={() => onForward?.(message)}
 					>
 						<Share className="w-4 h-4 text-gray-300" />
 					</button>
 					<button
 						type="button"
-						className={`p-1.5 hover:bg-gray-700 transition-colors ${message.isSaved ? 'text-blue-400 bg-gray-700' : ''}`}
-                        onClick={() => onToggleSave?.(message.id)}
+						className={`p-1.5 hover:bg-gray-700 transition-colors ${message.isSaved ? "text-blue-400 bg-gray-700" : ""}`}
+						onClick={() => onToggleSave?.(message.id)}
 					>
-						<Bookmark className={`w-4 h-4 ${message.isSaved ? 'fill-current' : 'text-gray-300'}`} />
+						<Bookmark
+							className={`w-4 h-4 ${message.isSaved ? "fill-current" : "text-gray-300"}`}
+						/>
 					</button>
 					{/* <div className="w-px h-5 bg-gray-700" />
 					<button
@@ -267,28 +277,29 @@ export function MessageItem({
 			)}
 
 			{/* Emoji Picker Portal */}
-			{showEmojiPicker && createPortal(
-				<div 
-					className="fixed z-[9999]" 
-					style={{ 
-						top: `${pickerPosition.top}px`, 
-						left: `${pickerPosition.left}px` 
-					}} 
-					ref={pickerRef}
-				>
-					<EmojiPicker
-						theme={Theme.DARK}
-						onEmojiClick={(emojiData: EmojiClickData) => {
-							onAddReaction(message.id, emojiData.emoji);
-							setShowEmojiPicker(false);
+			{showEmojiPicker &&
+				createPortal(
+					<div
+						className="fixed z-[9999]"
+						style={{
+							top: `${pickerPosition.top}px`,
+							left: `${pickerPosition.left}px`,
 						}}
-						autoFocusSearch={false}
-						width={350}
-						height={450}
-					/>
-				</div>,
-				document.body
-			)}
+						ref={pickerRef}
+					>
+						<EmojiPicker
+							theme={Theme.DARK}
+							onEmojiClick={(emojiData: EmojiClickData) => {
+								onAddReaction(message.id, emojiData.emoji);
+								setShowEmojiPicker(false);
+							}}
+							autoFocusSearch={false}
+							width={350}
+							height={450}
+						/>
+					</div>,
+					document.body,
+				)}
 		</div>
 	);
 }

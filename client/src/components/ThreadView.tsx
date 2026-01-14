@@ -11,7 +11,8 @@ interface ThreadViewProps {
 	onSendMessage: (content: string) => void;
 	onAddReaction: (messageId: string, emoji: string) => void;
 	onToggleSave: (messageId: string) => void;
-    users?: User[];
+	onForward?: (message: Message) => void;
+	users?: User[];
 }
 
 export function ThreadView({
@@ -21,7 +22,8 @@ export function ThreadView({
 	onSendMessage,
 	onAddReaction,
 	onToggleSave,
-    users
+	onForward,
+	users,
 }: ThreadViewProps) {
 	return (
 		<div className="w-[350px] flex flex-col border-l border-gray-800 bg-[#1a1d21]">
@@ -52,6 +54,7 @@ export function ThreadView({
 						showAvatar={true}
 						onAddReaction={onAddReaction}
 						onToggleSave={onToggleSave}
+						onForward={onForward}
 					/>
 				</div>
 
@@ -69,6 +72,7 @@ export function ThreadView({
 					messages={replies}
 					onAddReaction={onAddReaction}
 					onToggleSave={onToggleSave}
+					onForward={onForward}
 				/>
 			</div>
 
@@ -79,7 +83,7 @@ export function ThreadView({
 					isDM={false}
 					placeholder="Reply..."
 					onSendMessage={onSendMessage}
-                    users={users}
+					users={users}
 				/>
 			</div>
 		</div>
