@@ -69,7 +69,7 @@ This document outlines the tasks required to convert the existing Figma-based Re
 - [x] **Channel Info / View Members**: Implement the "i" and "Users" icons in the top bar to show channel details and member lists.
 - [x] **Add new channels**: Implement the "+" icon in channel list to add new channels, using a popup to fill in channel name and optional description.
 - [x] **Save Message / Saved Items**: Implement the "Bookmark" functionality. Add a "Saved Items" view in the sidebar to retrieve bookmarked messages.
-- [ ] **Channel Search**: basic search functionality using the "Search" icon in the top bar to filter messages in the current channel.
+- [x] **Channel Search**: basic search functionality using the "Search" icon in the top bar to filter messages in the current channel.
 
 ### Medium (Requires Schema Changes or Complex UI)
 - [ ] **Threads (Replies)**: Implement "Reply in Thread" from the message popup. Requires `parentMessageId` in DB and a side-panel UI for thread conversations.

@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import { Info, Phone, Search, Star, Users, Video, Hash } from 'lucide-react';
 import type { Channel, Message, User } from '../App';
 import { MessageInput } from './MessageInput';
@@ -22,9 +23,30 @@ export function ChatArea({
 	onToggleSave,
 	onToggleRightSidebar 
 }: ChatAreaProps) {
+	const [isSearchOpen, setIsSearchOpen] = useState(false);
+	const [searchQuery, setSearchQuery] = useState("");
+	const inputRef = useRef<HTMLInputElement>(null);
+
 	const isDM = channel.type === 'DM';
 	const otherUser = isDM ? channel.members?.find(m => m.id !== currentUser.id) : null;
 	const displayName = otherUser ? otherUser.username : channel.name;
+
+	const filteredMessages = messages.filter(msg => 
+		msg.content.toLowerCase().includes(searchQuery.toLowerCase())
+	);
+
+	useEffect(() => {
+		if (isSearchOpen && inputRef.current) {
+			inputRef.current.focus();
+		}
+	}, [isSearchOpen]);
+
+	const toggleSearch = () => {
+		if (isSearchOpen) {
+			setSearchQuery(""); // Clear search when closing
+		}
+		setIsSearchOpen(!isSearchOpen);
+	};
 
 	return (
 		<div className="flex-1 flex flex-col bg-[#1a1d21]">
@@ -68,8 +90,26 @@ export function ChatArea({
 						<Users className="w-4 h-4 text-gray-400" />
 					</button>
 					<div className="w-px h-6 bg-gray-800 mx-1" />
-					<button type="button" className="p-2 hover:bg-gray-800 rounded transition-colors">
-						<Search className="w-4 h-4 text-gray-400" />
+					
+					{isSearchOpen && (
+						<div className="relative mr-1">
+							<input
+								ref={inputRef}
+								type="text"
+								placeholder="Search..."
+								className="bg-gray-900 text-white border border-gray-700 rounded px-2 py-1 text-sm w-48 focus:outline-none focus:border-blue-500 placeholder-gray-500"
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+							/>
+						</div>
+					)}
+					
+					<button 
+						type="button" 
+						className={`p-2 rounded transition-colors ${isSearchOpen ? 'bg-gray-800 text-white' : 'hover:bg-gray-800 text-gray-400'}`}
+						onClick={toggleSearch}
+					>
+						<Search className="w-4 h-4" />
 					</button>
 					<button 
 						type="button" 
@@ -84,7 +124,7 @@ export function ChatArea({
 			{/* Messages Area */}
 			<MessageList 
                 channel={channel} 
-                messages={messages} 
+                messages={filteredMessages} 
                 onAddReaction={onAddReaction} 
                 onToggleSave={onToggleSave}
             />
