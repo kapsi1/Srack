@@ -34,7 +34,7 @@ export function MessageList({ channel, messages, onAddReaction, onToggleSave, on
 	return (
 		<div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
 			{/* Channel Intro */}
-			{channel && (
+			{channel && channel.type !== 'DM' && (
 				<div className="p-6 border-b border-gray-800">
 					<div className="flex items-center gap-2 mb-2">
 						<div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center">

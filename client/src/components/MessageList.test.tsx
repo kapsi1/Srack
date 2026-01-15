@@ -40,6 +40,12 @@ describe('MessageList', () => {
 		expect(screen.getByText(/This is the very beginning/)).toBeInTheDocument();
 	});
 
+	it('does not render channel intro for DM channels', () => {
+		render(<MessageList channel={{ name: 'dm-123', type: 'DM' }} messages={mockMessages} onAddReaction={() => {}} />);
+		expect(screen.queryByText('dm-123')).not.toBeInTheDocument();
+		expect(screen.queryByText(/This is the very beginning/)).not.toBeInTheDocument();
+	});
+
 	it('groups messages by user within 5 minutes', () => {
 		const sameUserMessages: Message[] = [
 			{

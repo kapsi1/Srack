@@ -40,9 +40,10 @@ Snack is a real-time team communication platform that replicates the core functi
 - 🔍 **Channel Search** — Filter messages within the current channel
 - ℹ️ **Channel Info** — View channel details and member lists
 
-### Media & Files
+### Media & Calls
 - 📎 **File Attachments** — Share images, videos, and documents via Uploadcare
 - 🎤 **Voice Recording** — Record and send voice messages directly
+- 📞 **Audio & Video Calls** — Real-time WebRTC calls between users
 
 ### Authentication
 - 🔐 **JWT Authentication** — Secure user registration and login
@@ -119,6 +120,11 @@ Socket.io events power the real-time features:
 | `message:new` | Server → Client | New message broadcast |
 | `message:deleted` | Server → Client | Message deletion broadcast |
 | `reaction:updated` | Server → Client | Reaction change broadcast |
+| `call-request` | Client → Server → Client | Initiate WebRTC call |
+| `call-answer` | Client → Server → Client | Accept WebRTC call |
+| `ice-candidate` | Client → Server → Client | Exchange connection candidates |
+| `call-rejected` | Client → Server → Client | Call rejection signal |
+| `call-ended` | Client → Server → Client | Call termination signal |
 
 ---
 
