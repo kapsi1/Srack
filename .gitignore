@@ -5,3 +5,4 @@ client/build
 server/dist
 server/src/generated
 .test-results
+.agent/skills
