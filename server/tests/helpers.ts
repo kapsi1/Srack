@@ -18,36 +18,102 @@ export const getAuthToken = async () => {
 };
 
 export const cleanupTestData = async () => {
-	// Order matters due to foreign key constraints
-	// Delete reactions first if they exist (though not directly tested yet)
-	await prisma.reaction.deleteMany({
+	// 1. Find all users with TEST_PREFIX
+	const testUsers = await prisma.user.findMany({
 		where: {
-			OR: [{ user: { username: { startsWith: TEST_PREFIX } } }, { message: { content: { startsWith: TEST_PREFIX } } }],
+			OR: [
+				{ username: { startsWith: TEST_PREFIX } },
+				{ email: { startsWith: TEST_PREFIX } }
+			]
 		},
+		select: { id: true }
+	});
+	const testUserIds = testUsers.map(u => u.id);
+
+	// 2. Find all channels with TEST_PREFIX or DMs involving test users
+	const testChannels = await prisma.channel.findMany({
+		where: {
+			OR: [
+				{ name: { startsWith: TEST_PREFIX } },
+				{ AND: [{ type: 'DM' }, { members: { some: { id: { in: testUserIds } } } }] }
+			]
+		},
+		select: { id: true }
+	});
+	const testChannelIds = testChannels.map(c => c.id);
+
+	// Order matters due to foreign key constraints
+	
+	// 3. Delete StarredChannel
+	await prisma.starredChannel.deleteMany({
+		where: {
+			OR: [
+				{ userId: { in: testUserIds } },
+				{ channelId: { in: testChannelIds } }
+			]
+		}
 	});
 
-	// Delete messages
+	// 4. Delete SavedMessage
+	await prisma.savedMessage.deleteMany({
+		where: {
+			OR: [
+				{ userId: { in: testUserIds } },
+				{ message: { channelId: { in: testChannelIds } } },
+				{ message: { senderId: { in: testUserIds } } }
+			]
+		}
+	});
+
+	// 5. Delete Reaction
+	await prisma.reaction.deleteMany({
+		where: {
+			OR: [
+				{ userId: { in: testUserIds } },
+				{ message: { channelId: { in: testChannelIds } } },
+				{ message: { senderId: { in: testUserIds } } }
+			]
+		}
+	});
+
+	// 6. Delete Message (including replies)
+	// First delete all replies (messages with parentId) to avoid self-relation constraints
+	await prisma.message.deleteMany({
+		where: {
+			AND: [
+				{ parentId: { not: null } },
+				{
+					OR: [
+						{ senderId: { in: testUserIds } },
+						{ channelId: { in: testChannelIds } }
+					]
+				}
+			]
+		}
+	});
+
+	// Then delete root messages
 	await prisma.message.deleteMany({
 		where: {
 			OR: [
-				{ content: { startsWith: TEST_PREFIX } },
-				{ sender: { username: { startsWith: TEST_PREFIX } } },
-				{ channel: { name: { startsWith: TEST_PREFIX } } },
-			],
-		},
+				{ senderId: { in: testUserIds } },
+				{ channelId: { in: testChannelIds } }
+			]
+		}
 	});
 
-	// Delete channels (including DMs if their name starts with the prefix)
+	// 7. Delete Channel
 	await prisma.channel.deleteMany({
-		where: {
-			name: { startsWith: TEST_PREFIX },
-		},
+		where: { id: { in: testChannelIds } }
 	});
 
-	// Delete users
+	// 8. Delete ClientLog
+	await prisma.clientLog.deleteMany({
+		where: { userId: { in: testUserIds } }
+	});
+
+	// 9. Delete User
 	await prisma.user.deleteMany({
-		where: {
-			OR: [{ username: { startsWith: TEST_PREFIX } }, { email: { startsWith: TEST_PREFIX } }],
-		},
+		where: { id: { in: testUserIds } }
 	});
 };

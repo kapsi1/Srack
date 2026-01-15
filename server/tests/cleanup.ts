@@ -34,7 +34,28 @@ async function main() {
 		const testChannelIds = testChannels.map((c) => c.id);
 		console.log(`Found ${testChannelIds.length} test channels.`);
 
-		// 3. Delete Reactions related to test users or test messages (in test channels or by test users)
+		// 3. Delete StarredChannel
+		const starredChannels = await prisma.starredChannel.deleteMany({
+			where: {
+				OR: [
+					{ userId: { in: testUserIds } },
+					{ channelId: { in: testChannelIds } }
+				],
+			},
+		});
+
+		// 4. Delete SavedMessage
+		const savedMessages = await prisma.savedMessage.deleteMany({
+			where: {
+				OR: [
+					{ userId: { in: testUserIds } },
+					{ message: { channelId: { in: testChannelIds } } },
+					{ message: { senderId: { in: testUserIds } } }
+				],
+			},
+		});
+
+		// 5. Delete Reactions related to test users or test messages (in test channels or by test users)
 		const reactions = await prisma.reaction.deleteMany({
 			where: {
 				OR: [
@@ -45,7 +66,22 @@ async function main() {
 			},
 		});
 
-		// 4. Delete Messages related to test users or test channels
+		// 6. Delete Messages related to test users or test channels
+		// First delete all replies (messages with parentId) to avoid self-relation constraints
+		await prisma.message.deleteMany({
+			where: {
+				AND: [
+					{ parentId: { not: null } },
+					{
+						OR: [
+							{ senderId: { in: testUserIds } },
+							{ channelId: { in: testChannelIds } }
+						]
+					}
+				]
+			}
+		});
+
 		const messages = await prisma.message.deleteMany({
 			where: {
 				OR: [
@@ -57,18 +93,23 @@ async function main() {
 			},
 		});
 
-		// 5. Delete Test Channels
+		// 7. Delete Test Channels
 		const deletedChannels = await prisma.channel.deleteMany({
 			where: { id: { in: testChannelIds } },
 		});
 
-		// 6. Delete Test Users
+		// 8. Delete ClientLog
+		const deletedLogs = await prisma.clientLog.deleteMany({
+			where: { userId: { in: testUserIds } }
+		});
+
+		// 9. Delete Test Users
 		const deletedUsers = await prisma.user.deleteMany({
 			where: { id: { in: testUserIds } },
 		});
 
 		console.log(
-			`Cleanup complete: ${reactions.count} reactions, ${messages.count} messages, ${deletedChannels.count} channels, ${deletedUsers.count} users deleted.`,
+			`Cleanup complete: ${starredChannels.count} starred channels, ${savedMessages.count} saved messages, ${reactions.count} reactions, ${messages.count} messages, ${deletedChannels.count} channels, ${deletedLogs.count} logs, ${deletedUsers.count} users deleted.`,
 		);
 	} catch (error) {
 		console.error('Error during cleanup:', error);
