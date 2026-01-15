@@ -152,6 +152,9 @@ export const setupSocket = (io: Server) => {
 					io.to(targetSocketId).emit("ice-candidate", {
 						candidate: data.candidate,
 					});
+					console.log(`ICE candidate forwarded to ${data.to}`);
+				} else {
+					console.log(`ICE candidate failed: User ${data.to} not found in socket map`);
 				}
 			},
 		);
