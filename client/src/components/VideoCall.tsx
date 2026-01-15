@@ -1,33 +1,49 @@
 import { Maximize2, Mic, MicOff, Minimize2, PhoneOff, Video, VideoOff } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCall } from '../context/CallContext';
 import { logger } from '../lib/logger';
 
 export function VideoCall() {
 	const {
 		callState,
-		localStream,
-		remoteStream,
 		endCall,
-		toggleVideo,
 		toggleAudio,
+		toggleVideo,
+		remoteStream,
+		localStream,
 	} = useCall();
 
+	
 	const localVideoRef = useRef<HTMLVideoElement>(null);
-	const remoteVideoRef = useRef<HTMLVideoElement>(null);
-	const [isFullscreen, setIsFullscreen] = useState(false);
+	const remoteVideoRef = useRef<HTMLMediaElement | null>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
+	const [isFullscreen, setIsFullscreen] = useState(false);
 
-	// Attach local stream to video element
+	const isVideoCall = callState.callType === 'video';
+
+	// Attach local stream to local video element
 	useEffect(() => {
 		if (localVideoRef.current && localStream) {
 			localVideoRef.current.srcObject = localStream;
 		}
 	}, [localStream]);
 
+	// Use a callback ref to handle video/audio element mounting
+	const [videoElState, setVideoElState] = useState<HTMLMediaElement | null>(null);
+	const remoteVideoCallbackRef = useCallback((node: HTMLMediaElement | null) => {
+		remoteVideoRef.current = node;
+		setVideoElState(node);
+	}, []);
+
 	// Attach remote stream to video element and listen for track changes
 	useEffect(() => {
-		const videoEl = remoteVideoRef.current;
+		const videoEl = videoElState;
+		logger.debug('[VideoCall] useEffect triggered', { 
+			hasVideoEl: !!videoEl, 
+			hasRemoteStream: !!remoteStream,
+			remoteStreamTracks: remoteStream?.getTracks().length 
+		});
+
 		if (!videoEl || !remoteStream) return;
 		
 		logger.info('[VideoCall] Setting remote stream', { tracks: remoteStream.getTracks().length });
@@ -48,7 +64,7 @@ export function VideoCall() {
 		return () => {
 			remoteStream.removeEventListener('addtrack', handleTrackAdded);
 		};
-	}, [remoteStream]);
+	}, [remoteStream, videoElState]);
 
 	const toggleFullscreen = async () => {
 		if (!containerRef.current) return;
@@ -78,15 +94,13 @@ export function VideoCall() {
 		return null;
 	}
 
-	const isVideoCall = callState.callType === 'video';
-
 	return (
 		<div
 			ref={containerRef}
-			className="fixed inset-0 z-50 bg-gray-900 flex flex-col"
+			className="fixed inset-0 z-50 bg-gray-900 text-white flex flex-col"
 		>
 			{/* Header */}
-			<div className="absolute top-0 left-0 right-0 z-10 p-4 bg-linear-to-b from-black/70 to-transparent">
+			<div className="absolute top-0 left-0 right-0 p-4 z-10 bg-linear-to-b from-black/70 to-transparent">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-3">
 						<img
@@ -97,17 +111,20 @@ export function VideoCall() {
 							alt={callState.remoteUser?.username}
 							className="w-10 h-10 rounded-full border-2 border-white/30"
 						/>
-						<div>
-							<h3 className="text-white font-semibold">
-								{callState.remoteUser?.username}
-							</h3>
-							<p className="text-white/70 text-sm">
-								{callState.isCalling
-									? 'Calling...'
-									: isVideoCall
-										? 'Video Call'
-										: 'Voice Call'}
-							</p>
+						<div className="flex items-center gap-2">
+							<div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+							<div>
+								<h3 className="font-semibold text-lg drop-shadow-md">
+									{callState.remoteUser?.username}
+								</h3>
+								<p className="text-xs text-white/80">
+									{callState.isCalling
+										? 'Calling...'
+										: isVideoCall
+											? 'Video Call'
+											: 'Voice Call'}
+								</p>
+							</div>
 						</div>
 					</div>
 					<button
@@ -131,7 +148,7 @@ export function VideoCall() {
 					<>
 						{/* Remote Video (full screen) */}
 						<video
-							ref={remoteVideoRef}
+							ref={remoteVideoCallbackRef}
 							autoPlay
 							playsInline
 							className="w-full h-full object-cover"
@@ -178,7 +195,7 @@ export function VideoCall() {
 							</p>
 						</div>
 						{/* Hidden audio elements */}
-						<audio ref={remoteVideoRef as React.RefObject<HTMLAudioElement>} autoPlay className="hidden" />
+						<audio ref={remoteVideoCallbackRef} autoPlay className="hidden" />
 					</div>
 				)}
 			</div>
