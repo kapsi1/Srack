@@ -6,6 +6,7 @@
 		"dev:server": "pnpm --filter server dev",
 		"dev": "pnpm run --parallel dev",
 		"test": "playwright test",
+		"test:headed": "playwright test --headed",
 		"test:cleanup": "pnpm --filter server run cleanup",
 		"format": "biome format --write .",
 		"lint": "biome check --write .",

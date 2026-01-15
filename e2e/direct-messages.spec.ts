@@ -2,14 +2,14 @@ import { expect, test } from '@playwright/test';
 import { logoutUser, registerUser, sendMessage, uniqueId, waitForAppLoaded } from './helpers';
 
 test.describe('Direct Messages', () => {
-	test('should create a DM with another user', async ({ page, context }) => {
+	test('should create a DM with another user', async ({ page }) => {
 		// Register first user
-		const user1 = await registerUser(page, 'dmuser1');
+		await registerUser(page, 'dmuser1');
 		await waitForAppLoaded(page);
 		await logoutUser(page);
 
 		// Register second user
-		const user2 = await registerUser(page, 'dmuser2');
+		await registerUser(page, 'dmuser2');
 		await waitForAppLoaded(page);
 
 		// Look for the first user in the Direct Messages section
@@ -22,7 +22,7 @@ test.describe('Direct Messages', () => {
 		await expect(page.getByText('Direct messages')).toBeVisible();
 	});
 
-	test('should send a message in DM', async ({ page, browser }) => {
+	test('should send a message in DM', async ({ page }) => {
 		// Register first user
 		const user1 = await registerUser(page, 'dm1');
 		await waitForAppLoaded(page);
@@ -30,7 +30,7 @@ test.describe('Direct Messages', () => {
 		await logoutUser(page);
 
 		// Register second user
-		const user2 = await registerUser(page, 'dm2');
+		await registerUser(page, 'dm2');
 		await waitForAppLoaded(page);
 
 		// Click on the DM section - it should show other users

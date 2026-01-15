@@ -36,10 +36,7 @@ async function main() {
 		// 3. Delete StarredChannel
 		const starredChannels = await prisma.starredChannel.deleteMany({
 			where: {
-				OR: [
-					{ userId: { in: testUserIds } },
-					{ channelId: { in: testChannelIds } }
-				],
+				OR: [{ userId: { in: testUserIds } }, { channelId: { in: testChannelIds } }],
 			},
 		});
 
@@ -49,7 +46,7 @@ async function main() {
 				OR: [
 					{ userId: { in: testUserIds } },
 					{ message: { channelId: { in: testChannelIds } } },
-					{ message: { senderId: { in: testUserIds } } }
+					{ message: { senderId: { in: testUserIds } } },
 				],
 			},
 		});
@@ -72,13 +69,10 @@ async function main() {
 				AND: [
 					{ parentId: { not: null } },
 					{
-						OR: [
-							{ senderId: { in: testUserIds } },
-							{ channelId: { in: testChannelIds } }
-						]
-					}
-				]
-			}
+						OR: [{ senderId: { in: testUserIds } }, { channelId: { in: testChannelIds } }],
+					},
+				],
+			},
 		});
 
 		const messages = await prisma.message.deleteMany({
@@ -99,7 +93,7 @@ async function main() {
 
 		// 8. Delete ClientLog
 		const deletedLogs = await prisma.clientLog.deleteMany({
-			where: { userId: { in: testUserIds } }
+			where: { userId: { in: testUserIds } },
 		});
 
 		// 9. Delete Test Users

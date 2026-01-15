@@ -30,9 +30,11 @@ test.describe('Sidebar Navigation', () => {
 
 			// Sidebar should be collapsed - width should be smaller
 			// Check that full channel names aren't visible anymore
-			await expect(page.getByText('Channels')).not.toBeVisible({ timeout: 3000 }).catch(() => {
-				// Sidebar might still show icons only
-			});
+			await expect(page.getByText('Channels'))
+				.not.toBeVisible({ timeout: 3000 })
+				.catch(() => {
+					// Sidebar might still show icons only
+				});
 		}
 	});
 
