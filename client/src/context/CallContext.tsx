@@ -114,7 +114,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 	// Create peer connection
 	const createPeerConnection = useCallback((targetUserId: string) => {
-		logger.debug('[WebRTC] Creating peer connection for target:', { targetUserId });
+
 		
 		// Store target user ID in ref for later use
 		targetUserIdRef.current = targetUserId;
@@ -126,7 +126,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 		pc.onicecandidate = (event) => {
 			if (event.candidate && socket && targetUserIdRef.current) {
-				logger.debug('[WebRTC] Sending ICE candidate to:', { targetUserId: targetUserIdRef.current });
+
 				socket.emit('ice-candidate', {
 					candidate: event.candidate,
 					to: targetUserIdRef.current,
@@ -153,13 +153,11 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 			}
 			
 			// Also log if the event has streams (for debugging)
-			if (event.streams.length > 0) {
-				logger.debug('[WebRTC] Event also has streams', { count: event.streams.length });
-			}
+
 		};
 
 		pc.oniceconnectionstatechange = () => {
-			logger.debug('[WebRTC] ICE connection state:', { state: pc.iceConnectionState });
+
 			if (pc.iceConnectionState === 'connected') {
 				logger.info('[WebRTC] ICE connection established!');
 			}
@@ -169,13 +167,9 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 			}
 		};
 
-		pc.onconnectionstatechange = () => {
-			logger.debug('[WebRTC] Connection state:', { state: pc.connectionState });
-		};
 
-		pc.onsignalingstatechange = () => {
-			logger.debug('[WebRTC] Signaling state:', { state: pc.signalingState });
-		};
+
+
 
 		peerConnectionRef.current = pc;
 		return pc;
@@ -183,7 +177,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 	// Get user media
 	const getUserMedia = async (isVideo: boolean): Promise<MediaStream> => {
-		logger.debug('[WebRTC] Getting user media', { isVideo });
+
 		const stream = await navigator.mediaDevices.getUserMedia({
 			video: isVideo,
 			audio: true,
@@ -220,7 +214,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 			// Add local stream tracks to peer connection
 			for (const track of stream.getTracks()) {
-				logger.debug('[WebRTC] Adding local track:', { kind: track.kind });
+
 				pc.addTrack(track, stream);
 			}
 
@@ -264,12 +258,12 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 			// Add local stream tracks to peer connection
 			for (const track of stream.getTracks()) {
-				logger.debug('[WebRTC] Adding local track:', { kind: track.kind });
+
 				pc.addTrack(track, stream);
 			}
 
 			// Process any pending ICE candidates
-			logger.debug('[WebRTC] Processing pending ICE candidates', { count: pendingIceCandidatesRef.current.length });
+
 			for (const candidate of pendingIceCandidatesRef.current) {
 				await pc.addIceCandidate(new RTCIceCandidate(candidate));
 			}
@@ -381,7 +375,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 			// Create peer connection and set remote description
 			const pc = createPeerConnection(data.from.id);
-			logger.debug('[WebRTC] Setting remote description from offer');
+
 			await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
 		};
 
@@ -395,10 +389,10 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 			}
 
 			await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-			logger.debug('[WebRTC] Remote description set from answer');
+
 
 			// Process any pending ICE candidates
-			logger.debug('[WebRTC] Processing pending ICE candidates', { count: pendingIceCandidatesRef.current.length });
+
 			for (const candidate of pendingIceCandidatesRef.current) {
 				await pc.addIceCandidate(new RTCIceCandidate(candidate));
 			}
@@ -413,14 +407,12 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 		// Handle ICE candidate
 		const handleIceCandidate = async (data: { candidate: RTCIceCandidateInit }) => {
-			logger.debug('[WebRTC] Received ICE candidate');
+
 			const pc = peerConnectionRef.current;
 			if (pc?.remoteDescription) {
-				logger.debug('[WebRTC] Adding ICE candidate immediately');
 				await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
 			} else {
 				// Queue the candidate if remote description isn't set yet
-				logger.debug('[WebRTC] Queuing ICE candidate (no remote description yet)');
 				pendingIceCandidatesRef.current.push(data.candidate);
 			}
 		};
