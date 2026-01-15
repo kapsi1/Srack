@@ -6,6 +6,8 @@ let ioInstance: Server;
 
 // Map socket IDs to user IDs for reverse lookup
 const socketUserMap = new Map<string, string>();
+// Map user IDs to socket IDs for call routing
+const userSocketMap = new Map<string, string>();
 
 interface CallSession {
 	initiatorId: string;
