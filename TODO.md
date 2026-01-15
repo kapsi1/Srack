@@ -83,4 +83,4 @@ This document outlines the tasks required to convert the existing Figma-based Re
 ### Hard (Requires Media Handling / External Services)
 - [x] **File Attachments**: Implement the "Paperclip" icon functionality using a storage service (S3/Uploadthing) to support image and file sharing.
 - [x] **Voice Recording**: Implement the "Microphone" icon to record and send voice messages.
-- [ ] **Voice/Video Calls**: Implement the "Phone" and "Video" icons in the top bar using WebRTC or a service like LiveKit/Agora.
+- [x] **Voice/Video Calls**: Implement the "Phone" and "Video" icons in the top bar using WebRTC or a service like LiveKit/Agora.

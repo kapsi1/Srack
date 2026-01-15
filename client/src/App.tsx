@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { AuthPage } from './components/AuthPage';
+import { CallNotification } from './components/CallNotification';
 import { ChannelInfo } from './components/ChannelInfo';
 import { ChatArea } from './components/ChatArea';
 import { CreateChannelModal } from './components/CreateChannelModal';
@@ -11,6 +12,8 @@ import { SavedItemsView } from './components/SavedItemsView';
 import { Sidebar } from './components/Sidebar';
 import { ThreadsListView } from './components/ThreadsListView';
 import { ThreadView } from './components/ThreadView';
+import { VideoCall } from './components/VideoCall';
+import { CallProvider, useCall, type CallUser } from './context/CallContext';
 import { useSocket } from './context/SocketContext';
 import {
 	type Channel as ApiChannel,
@@ -154,33 +157,33 @@ export default function App() {
 
 	return (
 		<Routes>
-			<Route path="/" element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ''} />} />
+			<Route path="/" element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />} />
 			<Route
 				path="/channel/:channelName"
-				element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
+				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
 			/>
 			<Route
 				path="/user/:userName"
-				element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
+				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
 			/>
 			<Route
 				path="/saved-items"
-				element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
+				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
 			/>
 			<Route
 				path="/mentions-reactions"
-				element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
+				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
 			/>
 			<Route
 				path="/threads"
-				element={<MainApp currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
+				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
 			/>
 			<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>
 	);
 }
 
-function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout: () => void; token: string }) {
+function MainApp({ currentUser, onLogout, token, onStartCall }: { currentUser: User; onLogout: () => void; token: string; onStartCall?: (channelId: string, remoteUser: CallUser, isVideo: boolean) => Promise<void> }) {
 	const location = useLocation();
 	// State for UI
 	const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
@@ -745,6 +748,16 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 						users={usersData}
 						isSidebarCollapsed={isSidebarCollapsed}
 						onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+						onStartCall={activeChannel.type === 'DM' && onStartCall ? (isVideo: boolean) => {
+							const otherUser = activeChannel.members?.find((m) => m.id !== currentUser.id);
+							if (otherUser) {
+								onStartCall(activeChannel.id, {
+									id: otherUser.id,
+									username: otherUser.username,
+									avatar: otherUser.avatar,
+								}, isVideo);
+							}
+						} : undefined}
 					/>
 				) : (
 					<div className="flex-1 flex items-center justify-center bg-gray-900 text-white">
@@ -783,7 +796,34 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 					message={messageToForward}
 					onForward={submitForwardMessage}
 				/>
-			)}
+				)}
 		</div>
+	);
+}
+
+// Wrapper component that provides call functionality
+function MainAppWithCall({ currentUser, onLogout, token }: { currentUser: User; onLogout: () => void; token: string }) {
+	return (
+		<CallProvider currentUser={{ id: currentUser.id, username: currentUser.username, avatar: currentUser.avatar }}>
+			<MainAppWithCallInner currentUser={currentUser} onLogout={onLogout} token={token} />
+		</CallProvider>
+	);
+}
+
+// Inner component that can use the useCall hook
+function MainAppWithCallInner({ currentUser, onLogout, token }: { currentUser: User; onLogout: () => void; token: string }) {
+	const { startCall } = useCall();
+	
+	return (
+		<>
+			<MainApp
+				currentUser={currentUser}
+				onLogout={onLogout}
+				token={token}
+				onStartCall={startCall}
+			/>
+			<VideoCall />
+			<CallNotification />
+		</>
 	);
 }

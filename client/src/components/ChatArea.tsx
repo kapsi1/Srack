@@ -1,4 +1,4 @@
-import { Hash, Info, PanelLeftOpen, Search, Star, Users } from 'lucide-react';
+import { Hash, Info, PanelLeftOpen, Phone, Search, Star, Users, Video } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { Channel, Message, User } from '../App';
 import type { Attachment } from '../lib/api';
@@ -20,6 +20,7 @@ interface ChatAreaProps {
 	isSidebarCollapsed: boolean;
 	onToggleSidebar: () => void;
 	onDelete?: (messageId: string) => void;
+	onStartCall?: (isVideo: boolean) => void;
 }
 
 export function ChatArea({
@@ -37,6 +38,7 @@ export function ChatArea({
 	isSidebarCollapsed,
 	onToggleSidebar,
 	onDelete,
+	onStartCall,
 }: ChatAreaProps) {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
@@ -107,12 +109,27 @@ export function ChatArea({
 					</button>
 				</div>
 				<div className="flex items-center gap-1">
-					{/* <button type="button" className="p-2 hover:bg-gray-800 rounded transition-colors" title="Start call">
-						<Phone className="w-4 h-4 text-gray-400" />
-					</button>
-					<button type="button" className="p-2 hover:bg-gray-800 rounded transition-colors" title="Start video call">
-						<Video className="w-4 h-4 text-gray-400" />
-					</button> */}
+					{/* Call buttons - only show for DMs */}
+					{isDM && onStartCall && (
+						<>
+							<button
+								type="button"
+								onClick={() => onStartCall(false)}
+								className="p-2 hover:bg-gray-800 rounded transition-colors"
+								title="Start voice call"
+							>
+								<Phone className="w-4 h-4 text-gray-400" />
+							</button>
+							<button
+								type="button"
+								onClick={() => onStartCall(true)}
+								className="p-2 hover:bg-gray-800 rounded transition-colors"
+								title="Start video call"
+							>
+								<Video className="w-4 h-4 text-gray-400" />
+							</button>
+						</>
+					)}
 					<button
 						type="button"
 						onClick={onToggleRightSidebar}
@@ -172,3 +189,4 @@ export function ChatArea({
 		</div>
 	);
 }
+
