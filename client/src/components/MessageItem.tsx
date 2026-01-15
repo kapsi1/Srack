@@ -104,7 +104,7 @@ export function MessageItem({
 		>
 			<div className="flex gap-2">
 				{/* Avatar */}
-				<div className="w-9 flex-shrink-0">
+				<div className="w-9 shrink-0">
 					{showAvatar && <img src={message.userAvatar} alt={message.userName} className="w-9 h-9 rounded" />}
 				</div>
 
@@ -377,7 +377,7 @@ export function MessageItem({
 			{showEmojiPicker &&
 				createPortal(
 					<div
-						className="fixed z-[9999]"
+						className="fixed z-9999"
 						style={{
 							top: `${pickerPosition.top}px`,
 							left: `${pickerPosition.left}px`,

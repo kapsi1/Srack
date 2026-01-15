@@ -491,6 +491,8 @@ function MainApp({ currentUser, onLogout, token, onStartCall }: { currentUser: U
 				timestamp: new Date(message.createdAt),
 				reactions: [],
 				threadCount: message.threadCount || 0,
+				type: message.type,
+				metadata: message.metadata,
 			};
 
 			const parentId = message.parentId; // Access parentId if present
