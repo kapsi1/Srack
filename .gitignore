@@ -4,5 +4,6 @@ client/.env
 client/build
 server/dist
 server/src/generated
-.test-results
+.test-results/
+.test-results/.last-run.json
 .agent/skills
