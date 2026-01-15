@@ -13,7 +13,16 @@ interface MessageListProps {
 	currentUser?: User | null;
 }
 
-export function MessageList({ channel, messages, onAddReaction, onToggleSave, onReply, onForward, onDelete, currentUser }: MessageListProps) {
+export function MessageList({
+	channel,
+	messages,
+	onAddReaction,
+	onToggleSave,
+	onReply,
+	onForward,
+	onDelete,
+	currentUser,
+}: MessageListProps) {
 	const bottomRef = useRef<HTMLDivElement>(null);
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -48,7 +57,7 @@ export function MessageList({ channel, messages, onAddReaction, onToggleSave, on
 				</div>
 			)}
 
-		{/* Messages */}
+			{/* Messages */}
 			<div className="px-4 py-2 pb-4">
 				{messages.map((message, index) => {
 					const prevMessage = index > 0 ? messages[index - 1] : null;

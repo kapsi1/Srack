@@ -1,42 +1,42 @@
 {
-    "name": "Snack",
-    "version": "0.1.0",
-    "private": true,
-    "dependencies": {
-        "@tanstack/react-query": "^5.90.16",
-        "@types/react": "^19.2.8",
-        "@uploadcare/react-uploader": "^1.11.2",
-        "@uploadcare/upload-client": "^6.18.2",
-        "axios": "^1.13.2",
-        "clsx": "^2.1.1",
-        "emoji-picker-react": "^4.16.1",
-        "lucide-react": "^0.562.0",
-        "react": "^19.2.3",
-        "react-dom": "^19.2.3",
-        "react-markdown": "^10.1.0",
-        "react-router-dom": "^7.12.0",
-        "remark-gfm": "^4.0.1",
-        "socket.io-client": "^4.8.3",
-        "tailwind-merge": "^3.4.0"
-    },
-    "devDependencies": {
-        "@tailwindcss/vite": "^4.1.18",
-        "@testing-library/dom": "^10.4.1",
-        "@testing-library/jest-dom": "^6.9.1",
-        "@testing-library/react": "^16.3.1",
-        "@testing-library/user-event": "^14.6.1",
-        "@types/node": "^25.0.8",
-        "@types/react-dom": "^19.2.3",
-        "@vitejs/plugin-react-swc": "^4.2.2",
-        "jsdom": "^27.4.0",
-        "rollup-plugin-visualizer": "^6.0.5",
-        "tailwindcss": "^4.1.18",
-        "vite": "7.3.1",
-        "vitest": "^4.0.17"
-    },
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build",
-        "test": "vitest"
-    }
+	"name": "Snack",
+	"version": "0.1.0",
+	"private": true,
+	"dependencies": {
+		"@tanstack/react-query": "^5.90.16",
+		"@types/react": "^19.2.8",
+		"@uploadcare/react-uploader": "^1.11.2",
+		"@uploadcare/upload-client": "^6.18.2",
+		"axios": "^1.13.2",
+		"clsx": "^2.1.1",
+		"emoji-picker-react": "^4.16.1",
+		"lucide-react": "^0.562.0",
+		"react": "^19.2.3",
+		"react-dom": "^19.2.3",
+		"react-markdown": "^10.1.0",
+		"react-router-dom": "^7.12.0",
+		"remark-gfm": "^4.0.1",
+		"socket.io-client": "^4.8.3",
+		"tailwind-merge": "^3.4.0"
+	},
+	"devDependencies": {
+		"@tailwindcss/vite": "^4.1.18",
+		"@testing-library/dom": "^10.4.1",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/react": "^16.3.1",
+		"@testing-library/user-event": "^14.6.1",
+		"@types/node": "^25.0.8",
+		"@types/react-dom": "^19.2.3",
+		"@vitejs/plugin-react-swc": "^4.2.2",
+		"jsdom": "^27.4.0",
+		"rollup-plugin-visualizer": "^6.0.5",
+		"tailwindcss": "^4.1.18",
+		"vite": "7.3.1",
+		"vitest": "^4.0.17"
+	},
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"test": "vitest"
+	}
 }

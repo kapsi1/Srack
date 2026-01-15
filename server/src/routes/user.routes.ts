@@ -1,10 +1,10 @@
-import { type Response, Router } from "express";
-import prisma from "../lib/prisma";
-import { type AuthRequest, authenticate } from "../middleware/auth.middleware";
+import { type Response, Router } from 'express';
+import prisma from '../lib/prisma';
+import { type AuthRequest, authenticate } from '../middleware/auth.middleware';
 
 const router = Router();
 
-router.get("/me", authenticate, async (req: AuthRequest, res: Response) => {
+router.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
 	try {
 		const user = await prisma.user.findUnique({
 			where: { id: req.userId },
@@ -18,16 +18,16 @@ router.get("/me", authenticate, async (req: AuthRequest, res: Response) => {
 		});
 
 		if (!user) {
-			return res.status(404).json({ error: "User not found" });
+			return res.status(404).json({ error: 'User not found' });
 		}
 
 		res.json(user);
 	} catch (_error) {
-		res.status(500).json({ error: "Error fetching user profile" });
+		res.status(500).json({ error: 'Error fetching user profile' });
 	}
 });
 
-router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
+router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
 	try {
 		const users = await prisma.user.findMany({
 			where: {
@@ -38,12 +38,12 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
 				username: true,
 				avatar: true,
 			},
-			orderBy: { username: "asc" },
+			orderBy: { username: 'asc' },
 		});
 
 		res.json(users);
 	} catch (_error) {
-		res.status(500).json({ error: "Error fetching users" });
+		res.status(500).json({ error: 'Error fetching users' });
 	}
 });
 

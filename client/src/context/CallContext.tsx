@@ -113,71 +113,66 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 	}, [localStream]);
 
 	// Create peer connection
-	const createPeerConnection = useCallback((targetUserId: string) => {
+	const createPeerConnection = useCallback(
+		(targetUserId: string) => {
+			// Store target user ID in ref for later use
+			targetUserIdRef.current = targetUserId;
 
-		
-		// Store target user ID in ref for later use
-		targetUserIdRef.current = targetUserId;
-		
-		// Create a new MediaStream for remote tracks
-		remoteStreamRef.current = new MediaStream();
-		
-		const pc = new RTCPeerConnection(ICE_SERVERS);
+			// Create a new MediaStream for remote tracks
+			remoteStreamRef.current = new MediaStream();
 
-		pc.onicecandidate = (event) => {
-			if (event.candidate && socket && targetUserIdRef.current) {
+			const pc = new RTCPeerConnection(ICE_SERVERS);
 
-				socket.emit('ice-candidate', {
-					candidate: event.candidate,
-					to: targetUserIdRef.current,
-				});
-			}
-		};
-
-		pc.ontrack = (event) => {
-			logger.info('[WebRTC] Received remote track:', { kind: event.track.kind, readyState: event.track.readyState });
-			
-			// Add the track to our remote stream
-			if (remoteStreamRef.current) {
-				// Check if track already exists to avoid duplicates
-				const existingTrack = remoteStreamRef.current.getTracks().find(t => t.id === event.track.id);
-				if (!existingTrack) {
-					remoteStreamRef.current.addTrack(event.track);
-					logger.info('[WebRTC] Added track to remote stream', { trackCount: remoteStreamRef.current.getTracks().length });
-					
-					// Create a new MediaStream with all the tracks to force React to detect the change
-					const newStream = new MediaStream(remoteStreamRef.current.getTracks());
-					remoteStreamRef.current = newStream;
-					setRemoteStream(newStream);
+			pc.onicecandidate = (event) => {
+				if (event.candidate && socket && targetUserIdRef.current) {
+					socket.emit('ice-candidate', {
+						candidate: event.candidate,
+						to: targetUserIdRef.current,
+					});
 				}
-			}
-			
-			// Also log if the event has streams (for debugging)
+			};
 
-		};
+			pc.ontrack = (event) => {
+				logger.info('[WebRTC] Received remote track:', { kind: event.track.kind, readyState: event.track.readyState });
 
-		pc.oniceconnectionstatechange = () => {
+				// Add the track to our remote stream
+				if (remoteStreamRef.current) {
+					// Check if track already exists to avoid duplicates
+					const existingTrack = remoteStreamRef.current.getTracks().find((t) => t.id === event.track.id);
+					if (!existingTrack) {
+						remoteStreamRef.current.addTrack(event.track);
+						logger.info('[WebRTC] Added track to remote stream', {
+							trackCount: remoteStreamRef.current.getTracks().length,
+						});
 
-			if (pc.iceConnectionState === 'connected') {
-				logger.info('[WebRTC] ICE connection established!');
-			}
-			if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
-				logger.warn('[WebRTC] Connection lost, cleaning up');
-				cleanup();
-			}
-		};
+						// Create a new MediaStream with all the tracks to force React to detect the change
+						const newStream = new MediaStream(remoteStreamRef.current.getTracks());
+						remoteStreamRef.current = newStream;
+						setRemoteStream(newStream);
+					}
+				}
 
+				// Also log if the event has streams (for debugging)
+			};
 
+			pc.oniceconnectionstatechange = () => {
+				if (pc.iceConnectionState === 'connected') {
+					logger.info('[WebRTC] ICE connection established!');
+				}
+				if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
+					logger.warn('[WebRTC] Connection lost, cleaning up');
+					cleanup();
+				}
+			};
 
-
-
-		peerConnectionRef.current = pc;
-		return pc;
-	}, [socket, cleanup]);
+			peerConnectionRef.current = pc;
+			return pc;
+		},
+		[socket, cleanup],
+	);
 
 	// Get user media
 	const getUserMedia = async (isVideo: boolean): Promise<MediaStream> => {
-
 		const stream = await navigator.mediaDevices.getUserMedia({
 			video: isVideo,
 			audio: true,
@@ -195,7 +190,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 		try {
 			logger.info('[WebRTC] Starting call to:', { username: remoteUser.username, video: isVideo });
-			
+
 			const stream = await getUserMedia(isVideo);
 			setLocalStream(stream);
 
@@ -214,7 +209,6 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 			// Add local stream tracks to peer connection
 			for (const track of stream.getTracks()) {
-
 				pc.addTrack(track, stream);
 			}
 
@@ -251,14 +245,13 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 		try {
 			logger.info('[WebRTC] Accepting call from:', { username: incomingCallData.from.username });
-			
+
 			const isVideo = incomingCallData.callType === 'video';
 			const stream = await getUserMedia(isVideo);
 			setLocalStream(stream);
 
 			// Add local stream tracks to peer connection
 			for (const track of stream.getTracks()) {
-
 				pc.addTrack(track, stream);
 			}
 
@@ -353,7 +346,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 			offer: RTCSessionDescriptionInit;
 		}) => {
 			logger.info('[WebRTC] Received call request from:', { username: data.from.username });
-			
+
 			// If already in a call, reject automatically
 			if (callState.isInCall || callState.isCalling) {
 				logger.info('[WebRTC] Already in call, rejecting');
@@ -390,7 +383,6 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 			await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
 
-
 			// Process any pending ICE candidates
 
 			for (const candidate of pendingIceCandidatesRef.current) {
@@ -407,7 +399,6 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 		// Handle ICE candidate
 		const handleIceCandidate = async (data: { candidate: RTCIceCandidateInit }) => {
-
 			const pc = peerConnectionRef.current;
 			if (pc?.remoteDescription) {
 				await pc.addIceCandidate(new RTCIceCandidate(data.candidate));

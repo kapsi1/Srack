@@ -10,7 +10,9 @@ export function CallNotification() {
 	useEffect(() => {
 		if (callState.isReceivingCall && incomingCallData) {
 			// Create a simple oscillating tone as ringtone
-			const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+			const audioContext = new (
+				window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+			)();
 			const oscillator = audioContext.createOscillator();
 			const gainNode = audioContext.createGain();
 
@@ -70,9 +72,7 @@ export function CallNotification() {
 							/>
 						</div>
 
-						<h3 className="text-xl font-bold text-white mb-1">
-							{incomingCallData.from.username}
-						</h3>
+						<h3 className="text-xl font-bold text-white mb-1">{incomingCallData.from.username}</h3>
 
 						<div className="flex items-center gap-2 text-gray-400 mb-6">
 							{isVideoCall ? (
@@ -92,11 +92,7 @@ export function CallNotification() {
 					{/* Action Buttons */}
 					<div className="flex justify-center gap-6">
 						{/* Reject */}
-						<button
-							type="button"
-							onClick={rejectCall}
-							className="flex flex-col items-center gap-2 group"
-						>
+						<button type="button" onClick={rejectCall} className="flex flex-col items-center gap-2 group">
 							<div className="p-4 rounded-full bg-red-500 hover:bg-red-600 transition-all shadow-lg group-hover:scale-110">
 								<PhoneOff className="w-6 h-6 text-white" />
 							</div>
@@ -104,17 +100,9 @@ export function CallNotification() {
 						</button>
 
 						{/* Accept */}
-						<button
-							type="button"
-							onClick={acceptCall}
-							className="flex flex-col items-center gap-2 group"
-						>
+						<button type="button" onClick={acceptCall} className="flex flex-col items-center gap-2 group">
 							<div className="p-4 rounded-full bg-green-500 hover:bg-green-600 transition-all shadow-lg group-hover:scale-110 animate-pulse">
-								{isVideoCall ? (
-									<Video className="w-6 h-6 text-white" />
-								) : (
-									<Phone className="w-6 h-6 text-white" />
-								)}
+								{isVideoCall ? <Video className="w-6 h-6 text-white" /> : <Phone className="w-6 h-6 text-white" />}
 							</div>
 							<span className="text-sm text-gray-400">Accept</span>
 						</button>

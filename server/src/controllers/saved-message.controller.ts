@@ -1,6 +1,6 @@
-import type { Response } from "express";
-import prisma from "../lib/prisma";
-import type { AuthRequest } from "../middleware/auth.middleware";
+import type { Response } from 'express';
+import prisma from '../lib/prisma';
+import type { AuthRequest } from '../middleware/auth.middleware';
 
 export const toggleSavedMessage = async (req: AuthRequest, res: Response) => {
 	try {
@@ -8,7 +8,7 @@ export const toggleSavedMessage = async (req: AuthRequest, res: Response) => {
 		const { messageId } = req.body;
 
 		if (!userId || !messageId) {
-			return res.status(400).json({ error: "Missing required fields" });
+			return res.status(400).json({ error: 'Missing required fields' });
 		}
 
 		const existing = await prisma.savedMessage.findUnique({
@@ -37,8 +37,8 @@ export const toggleSavedMessage = async (req: AuthRequest, res: Response) => {
 		});
 		return res.json({ saved: true });
 	} catch (error) {
-		console.error("Error toggling saved message:", error);
-		res.status(500).json({ error: "Error toggling saved message" });
+		console.error('Error toggling saved message:', error);
+		res.status(500).json({ error: 'Error toggling saved message' });
 	}
 };
 
@@ -47,7 +47,7 @@ export const getSavedMessages = async (req: AuthRequest, res: Response) => {
 		const userId = req.userId;
 
 		if (!userId) {
-			return res.status(401).json({ error: "Unauthorized" });
+			return res.status(401).json({ error: 'Unauthorized' });
 		}
 
 		const savedMessages = await prisma.savedMessage.findMany({
@@ -80,7 +80,7 @@ export const getSavedMessages = async (req: AuthRequest, res: Response) => {
 					},
 				},
 			},
-			orderBy: { createdAt: "desc" },
+			orderBy: { createdAt: 'desc' },
 		});
 
 		res.json(
@@ -90,7 +90,7 @@ export const getSavedMessages = async (req: AuthRequest, res: Response) => {
 			})),
 		);
 	} catch (error) {
-		console.error("Error fetching saved messages:", error);
-		res.status(500).json({ error: "Error fetching saved messages" });
+		console.error('Error fetching saved messages:', error);
+		res.status(500).json({ error: 'Error fetching saved messages' });
 	}
 };

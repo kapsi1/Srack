@@ -161,7 +161,10 @@ export default function App() {
 
 	return (
 		<Routes>
-			<Route path="/" element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />} />
+			<Route
+				path="/"
+				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
+			/>
 			<Route
 				path="/channel/:channelName"
 				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
@@ -187,7 +190,17 @@ export default function App() {
 	);
 }
 
-function MainApp({ currentUser, onLogout, token, onStartCall }: { currentUser: User; onLogout: () => void; token: string; onStartCall?: (channelId: string, remoteUser: CallUser, isVideo: boolean) => Promise<void> }) {
+function MainApp({
+	currentUser,
+	onLogout,
+	token,
+	onStartCall,
+}: {
+	currentUser: User;
+	onLogout: () => void;
+	token: string;
+	onStartCall?: (channelId: string, remoteUser: CallUser, isVideo: boolean) => Promise<void>;
+}) {
 	const location = useLocation();
 	// State for UI
 	const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
@@ -288,7 +301,7 @@ function MainApp({ currentUser, onLogout, token, onStartCall }: { currentUser: U
 			attachments?: Attachment[];
 		}) => sendMessage(channelId, content, tempId, parentId, attachments),
 		onMutate: async ({ channelId, content, tempId, parentId, attachments }) => {
-		if (parentId) {
+			if (parentId) {
 				// Optimistic update for thread
 				await queryClient.cancelQueries({ queryKey: ['thread-messages', parentId] });
 				// Add optimistic message to thread immediately
@@ -497,7 +510,7 @@ function MainApp({ currentUser, onLogout, token, onStartCall }: { currentUser: U
 
 			const parentId = message.parentId; // Access parentId if present
 
-		if (parentId) {
+			if (parentId) {
 				// Handle reply
 				if (activeThread && activeThread.id === parentId) {
 					setThreadMessages((prev) => {
@@ -635,7 +648,13 @@ function MainApp({ currentUser, onLogout, token, onStartCall }: { currentUser: U
 	const handleSendReply = (content: string, attachments?: Attachment[]) => {
 		if (!currentUser || !activeChannel || !activeThread) return;
 		const tempId = `temp-${Date.now()}`;
-		sendMessageMutation.mutate({ channelId: activeChannel.id, content, tempId, parentId: activeThread.id, attachments });
+		sendMessageMutation.mutate({
+			channelId: activeChannel.id,
+			content,
+			tempId,
+			parentId: activeThread.id,
+			attachments,
+		});
 	};
 
 	const handleCreateChannel = (name: string, isPrivate: boolean, description: string) => {
@@ -754,16 +773,24 @@ function MainApp({ currentUser, onLogout, token, onStartCall }: { currentUser: U
 						users={usersData}
 						isSidebarCollapsed={isSidebarCollapsed}
 						onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-						onStartCall={activeChannel.type === 'DM' && onStartCall ? (isVideo: boolean) => {
-							const otherUser = activeChannel.members?.find((m) => m.id !== currentUser.id);
-							if (otherUser) {
-								onStartCall(activeChannel.id, {
-									id: otherUser.id,
-									username: otherUser.username,
-									avatar: otherUser.avatar,
-								}, isVideo);
-							}
-						} : undefined}
+						onStartCall={
+							activeChannel.type === 'DM' && onStartCall
+								? (isVideo: boolean) => {
+										const otherUser = activeChannel.members?.find((m) => m.id !== currentUser.id);
+										if (otherUser) {
+											onStartCall(
+												activeChannel.id,
+												{
+													id: otherUser.id,
+													username: otherUser.username,
+													avatar: otherUser.avatar,
+												},
+												isVideo,
+											);
+										}
+									}
+								: undefined
+						}
 					/>
 				) : (
 					<div className="flex-1 flex items-center justify-center bg-gray-900 text-white">
@@ -802,7 +829,7 @@ function MainApp({ currentUser, onLogout, token, onStartCall }: { currentUser: U
 					message={messageToForward}
 					onForward={submitForwardMessage}
 				/>
-				)}
+			)}
 		</div>
 	);
 }
@@ -817,17 +844,20 @@ function MainAppWithCall({ currentUser, onLogout, token }: { currentUser: User; 
 }
 
 // Inner component that can use the useCall hook
-function MainAppWithCallInner({ currentUser, onLogout, token }: { currentUser: User; onLogout: () => void; token: string }) {
+function MainAppWithCallInner({
+	currentUser,
+	onLogout,
+	token,
+}: {
+	currentUser: User;
+	onLogout: () => void;
+	token: string;
+}) {
 	const { startCall } = useCall();
-	
+
 	return (
 		<>
-			<MainApp
-				currentUser={currentUser}
-				onLogout={onLogout}
-				token={token}
-				onStartCall={startCall}
-			/>
+			<MainApp currentUser={currentUser} onLogout={onLogout} token={token} onStartCall={startCall} />
 			<VideoCall />
 			<CallNotification />
 		</>

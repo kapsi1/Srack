@@ -77,9 +77,11 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 			mediaRecorder.onstop = async () => {
 				const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
 				chunksRef.current = [];
-				
+
 				// Stop all tracks
-				stream.getTracks().forEach(track => { track.stop(); });
+				stream.getTracks().forEach((track) => {
+					track.stop();
+				});
 
 				try {
 					const result = await uploadFile(blob, 'recording.webm');
@@ -118,7 +120,9 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 			// Stop but don't process
 			mediaRecorderRef.current.onstop = null; // Remove handler
 			mediaRecorderRef.current.stop();
-			mediaRecorderRef.current.stream.getTracks().forEach(track => { track.stop(); });
+			mediaRecorderRef.current.stream.getTracks().forEach((track) => {
+				track.stop();
+			});
 			setIsRecording(false);
 			if (timerRef.current) {
 				clearInterval(timerRef.current);
@@ -500,12 +504,15 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 					{attachments.length > 0 && (
 						<div className="flex flex-wrap gap-2 p-2 border-b border-gray-700 bg-[#1a1d21]">
 							{attachments.map((file) => (
-								<div key={file.uuid} className="flex items-center gap-2 bg-gray-800 px-2 py-1 rounded border border-gray-700 text-xs text-gray-300">
+								<div
+									key={file.uuid}
+									className="flex items-center gap-2 bg-gray-800 px-2 py-1 rounded border border-gray-700 text-xs text-gray-300"
+								>
 									<FileText className="w-3 h-3" />
 									<span className="truncate max-w-[150px] font-medium">{file.name}</span>
-									<button 
-										type="button" 
-										onClick={() => setAttachments(prev => prev.filter(a => a.uuid !== file.uuid))}
+									<button
+										type="button"
+										onClick={() => setAttachments((prev) => prev.filter((a) => a.uuid !== file.uuid))}
 										className="hover:text-red-400 transition-colors"
 										title="Remove attachment"
 									>

@@ -12,7 +12,7 @@ export interface UploadResult {
 
 export const uploadFile = async (file: File | Blob, fileName?: string): Promise<UploadResult> => {
 	const name = fileName || (file instanceof File ? file.name : 'recording.webm');
-	
+
 	const result = await uploadDirect(file, {
 		publicKey: UPLOADCARE_PUBKEY,
 		store: 'auto',

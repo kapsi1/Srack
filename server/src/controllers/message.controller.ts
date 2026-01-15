@@ -1,6 +1,6 @@
-import type { Response } from "express";
-import prisma from "../lib/prisma";
-import type { AuthRequest } from "../middleware/auth.middleware";
+import type { Response } from 'express';
+import prisma from '../lib/prisma';
+import type { AuthRequest } from '../middleware/auth.middleware';
 
 export const getChannelMessages = async (req: AuthRequest, res: Response) => {
 	try {
@@ -33,7 +33,7 @@ export const getChannelMessages = async (req: AuthRequest, res: Response) => {
 					select: { replies: true },
 				},
 			},
-			orderBy: { createdAt: "asc" },
+			orderBy: { createdAt: 'asc' },
 		});
 
 		res.json(
@@ -58,11 +58,7 @@ export const getChannelMessages = async (req: AuthRequest, res: Response) => {
 				include: { members: { where: { id: userId } } },
 			});
 
-			if (
-				channel &&
-				channel.type === "PUBLIC" &&
-				channel.members.length === 0
-			) {
+			if (channel && channel.type === 'PUBLIC' && channel.members.length === 0) {
 				await prisma.channel.update({
 					where: { id: channelId },
 					data: {
@@ -73,14 +69,14 @@ export const getChannelMessages = async (req: AuthRequest, res: Response) => {
 				});
 			}
 		} catch (e) {
-			console.error("Auto-join failed", e);
+			console.error('Auto-join failed', e);
 		}
 	} catch (_error) {
-		res.status(500).json({ error: "Error fetching messages" });
+		res.status(500).json({ error: 'Error fetching messages' });
 	}
 };
 
-import { broadcastMessage, broadcastMessageDeleted } from "../socket";
+import { broadcastMessage, broadcastMessageDeleted } from '../socket';
 
 export const createMessage = async (req: AuthRequest, res: Response) => {
 	try {
@@ -88,7 +84,7 @@ export const createMessage = async (req: AuthRequest, res: Response) => {
 		const userId = req.userId;
 
 		if (!content || !channelId || !userId) {
-			return res.status(400).json({ error: "Missing required fields" });
+			return res.status(400).json({ error: 'Missing required fields' });
 		}
 
 		const message = await prisma.message.create({
@@ -125,7 +121,7 @@ export const createMessage = async (req: AuthRequest, res: Response) => {
 
 		res.status(201).json(message);
 	} catch (_error) {
-		res.status(500).json({ error: "Error sending message" });
+		res.status(500).json({ error: 'Error sending message' });
 	}
 };
 
@@ -162,7 +158,7 @@ export const getThreadMessages = async (req: AuthRequest, res: Response) => {
 					select: { replies: true },
 				},
 			},
-			orderBy: { createdAt: "asc" },
+			orderBy: { createdAt: 'asc' },
 		});
 
 		res.json(
@@ -173,14 +169,14 @@ export const getThreadMessages = async (req: AuthRequest, res: Response) => {
 			})),
 		);
 	} catch (_error) {
-		res.status(500).json({ error: "Error fetching thread messages" });
+		res.status(500).json({ error: 'Error fetching thread messages' });
 	}
 };
 
 export const getUserThreads = async (req: AuthRequest, res: Response) => {
 	try {
 		const userId = req.userId;
-		if (!userId) return res.status(401).json({ error: "Unauthorized" });
+		if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
 		const messages = await prisma.message.findMany({
 			where: {
@@ -214,11 +210,11 @@ export const getUserThreads = async (req: AuthRequest, res: Response) => {
 					select: { replies: true },
 				},
 				replies: {
-					orderBy: { createdAt: "desc" },
+					orderBy: { createdAt: 'desc' },
 					take: 1,
 				},
 			},
-			orderBy: { updatedAt: "desc" }, // Most recent activity
+			orderBy: { updatedAt: 'desc' }, // Most recent activity
 		});
 
 		res.json(
@@ -229,8 +225,8 @@ export const getUserThreads = async (req: AuthRequest, res: Response) => {
 			})),
 		);
 	} catch (error) {
-		console.error("Error fetching user threads:", error);
-		res.status(500).json({ error: "Error fetching user threads" });
+		console.error('Error fetching user threads:', error);
+		res.status(500).json({ error: 'Error fetching user threads' });
 	}
 };
 
@@ -240,7 +236,7 @@ export const deleteMessage = async (req: AuthRequest, res: Response) => {
 		const userId = req.userId;
 
 		if (!messageId || !userId) {
-			return res.status(400).json({ error: "Missing required fields" });
+			return res.status(400).json({ error: 'Missing required fields' });
 		}
 
 		const message = await prisma.message.findUnique({
@@ -249,11 +245,11 @@ export const deleteMessage = async (req: AuthRequest, res: Response) => {
 		});
 
 		if (!message) {
-			return res.status(404).json({ error: "Message not found" });
+			return res.status(404).json({ error: 'Message not found' });
 		}
 
 		if (message.senderId !== userId) {
-			return res.status(403).json({ error: "Unauthorized" });
+			return res.status(403).json({ error: 'Unauthorized' });
 		}
 
 		// Delete the message (attachments cascading delete handled by DB schema if strict, otherwise Primate handles it or we might need manual cleanup if using external storage)
@@ -271,7 +267,7 @@ export const deleteMessage = async (req: AuthRequest, res: Response) => {
 
 		res.status(200).json({ success: true });
 	} catch (error) {
-		console.error("Error deleting message:", error);
-		res.status(500).json({ error: "Error deleting message" });
+		console.error('Error deleting message:', error);
+		res.status(500).json({ error: 'Error deleting message' });
 	}
 };

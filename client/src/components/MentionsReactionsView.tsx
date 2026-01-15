@@ -53,9 +53,7 @@ export function MentionsReactionsView({
 			</div>
 
 			{isLoading ? (
-				<div className="flex-1 flex items-center justify-center text-gray-400">
-					Loading activity...
-				</div>
+				<div className="flex-1 flex items-center justify-center text-gray-400">Loading activity...</div>
 			) : !activity || activity.length === 0 ? (
 				<div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-2">
 					<Menu className="w-12 h-12 opacity-50" />
@@ -74,14 +72,9 @@ export function MentionsReactionsView({
 							const channelName = message.channel?.name || 'unknown-channel';
 
 							return (
-								<div
-									key={`mention-${item.id}`}
-									className="bg-[#222529] rounded-lg p-3 border border-gray-700"
-								>
+								<div key={`mention-${item.id}`} className="bg-[#222529] rounded-lg p-3 border border-gray-700">
 									<div className="flex items-center gap-2 mb-2 text-sm text-gray-400">
-										<span className="text-blue-400 font-medium">
-											@{message.sender?.username}
-										</span>
+										<span className="text-blue-400 font-medium">@{message.sender?.username}</span>
 										<span>mentioned you in</span>
 										<span className="font-bold text-gray-300">#{channelName}</span>
 										<span className="text-xs ml-auto">
@@ -92,9 +85,7 @@ export function MentionsReactionsView({
 											})}
 										</span>
 									</div>
-									<div className="text-gray-200 bg-[#1a1d21] p-3 rounded border border-gray-800">
-										{message.content}
-									</div>
+									<div className="text-gray-200 bg-[#1a1d21] p-3 rounded border border-gray-800">{message.content}</div>
 								</div>
 							);
 						}
@@ -108,10 +99,7 @@ export function MentionsReactionsView({
 							const channelName = reaction.message?.channel?.name || 'unknown';
 
 							return (
-								<div
-									key={`reaction-${item.id}`}
-									className="bg-[#222529] rounded-lg p-3 border border-gray-700"
-								>
+								<div key={`reaction-${item.id}`} className="bg-[#222529] rounded-lg p-3 border border-gray-700">
 									<div className="flex items-center gap-2 mb-2 text-sm text-gray-400">
 										<span className="text-yellow-500 font-medium">{reactorName}</span>
 										<span>reacted to your message in</span>

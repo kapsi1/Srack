@@ -103,9 +103,7 @@ export function ChatArea({
 						title={channel.isStarred ? 'Unstar channel' : 'Star channel'}
 						onClick={() => onStarChannel?.(channel.id)}
 					>
-						<Star
-							className={`w-4 h-4 ${channel.isStarred ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'}`}
-						/>
+						<Star className={`w-4 h-4 ${channel.isStarred ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'}`} />
 					</button>
 				</div>
 				<div className="flex items-center gap-1">
@@ -189,4 +187,3 @@ export function ChatArea({
 		</div>
 	);
 }
-

@@ -1,33 +1,32 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import tailwindcss from '@tailwindcss/vite';
+import path from 'path';
+import { visualizer } from 'rollup-plugin-visualizer';
 
-  import { defineConfig } from 'vite';
-  import react from '@vitejs/plugin-react-swc';
-  import tailwindcss from '@tailwindcss/vite';
-  import path from 'path';
-  import { visualizer } from 'rollup-plugin-visualizer';
-
-  export default defineConfig({
-    plugins: [
-      react(),
-      tailwindcss(),
-      visualizer({
-        filename: './build/stats.html',
-        open: false,
-        gzipSize: true,
-        brotliSize: true,
-      }),
-    ],
-    resolve: {
-      extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
-      alias: {
-        '@': path.resolve(__dirname, './src'),
-      },
-    },
-    build: {
-      target: 'esnext',
-      outDir: 'build',
-    },
-    server: {
-      port: 3000,
-      open: true,
-    },
-  });
+export default defineConfig({
+	plugins: [
+		react(),
+		tailwindcss(),
+		visualizer({
+			filename: './build/stats.html',
+			open: false,
+			gzipSize: true,
+			brotliSize: true,
+		}),
+	],
+	resolve: {
+		extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+		alias: {
+			'@': path.resolve(__dirname, './src'),
+		},
+	},
+	build: {
+		target: 'esnext',
+		outDir: 'build',
+	},
+	server: {
+		port: 3000,
+		open: true,
+	},
+});

@@ -1,7 +1,19 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: Container handles mouse events for showing actions overlay */
 
 import EmojiPicker, { type EmojiClickData, Theme } from 'emoji-picker-react';
-import { Bookmark, FileText, MessageSquare, Share, Smile, Trash, Phone, Video, Clock, AlertCircle, CheckCircle2 } from 'lucide-react';
+import {
+	Bookmark,
+	FileText,
+	MessageSquare,
+	Share,
+	Smile,
+	Trash,
+	Phone,
+	Video,
+	Clock,
+	AlertCircle,
+	CheckCircle2,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import ReactMarkdown from 'react-markdown';
@@ -117,49 +129,49 @@ export function MessageItem({
 						</div>
 					)}
 					{message.type !== 'CALL' && (
-					<div className="text-gray-200 markdown-content">
-						<ReactMarkdown
-							remarkPlugins={[remarkGfm]}
-							components={{
-								p: ({ node, ...props }) => <p className="markdown-paragraph" {...props} />,
-								a: ({ node, href, ...props }) => {
-									if (href?.startsWith('/user/')) {
+						<div className="text-gray-200 markdown-content">
+							<ReactMarkdown
+								remarkPlugins={[remarkGfm]}
+								components={{
+									p: ({ node, ...props }) => <p className="markdown-paragraph" {...props} />,
+									a: ({ node, href, ...props }) => {
+										if (href?.startsWith('/user/')) {
+											return (
+												<span className="text-blue-400 bg-blue-500/10 px-1 rounded font-medium hover:bg-blue-500/20">
+													{props.children}
+												</span>
+											);
+										}
 										return (
-											<span className="text-blue-400 bg-blue-500/10 px-1 rounded font-medium hover:bg-blue-500/20">
-												{props.children}
-											</span>
+											<a className="markdown-link" target="_blank" rel="noopener noreferrer" href={href} {...props} />
 										);
-									}
-									return (
-										<a className="markdown-link" target="_blank" rel="noopener noreferrer" href={href} {...props} />
-									);
-								},
-								ul: ({ node, ...props }) => <ul className="markdown-list-unordered" {...props} />,
-								ol: ({ node, ...props }) => <ol className="markdown-list-ordered" {...props} />,
-								li: ({ node, ...props }) => <li className="markdown-list-item" {...props} />,
-								code: ({
-									node,
-									inline,
-									...props
-								}: {
-									node?: unknown;
-									inline?: boolean;
-								} & React.HTMLAttributes<HTMLElement>) =>
-									inline ? (
-										<code className="markdown-code-inline" {...props} />
-									) : (
-										<pre className="markdown-code-block">
-											<code {...props} />
-										</pre>
-									),
-								strong: ({ node, ...props }) => <strong className="markdown-strong" {...props} />,
-								em: ({ node, ...props }) => <em className="markdown-em" {...props} />,
-								del: ({ node, ...props }) => <del className="markdown-del" {...props} />,
-							}}
-						>
-							{formatMentions(message.content)}
-						</ReactMarkdown>
-					</div>
+									},
+									ul: ({ node, ...props }) => <ul className="markdown-list-unordered" {...props} />,
+									ol: ({ node, ...props }) => <ol className="markdown-list-ordered" {...props} />,
+									li: ({ node, ...props }) => <li className="markdown-list-item" {...props} />,
+									code: ({
+										node,
+										inline,
+										...props
+									}: {
+										node?: unknown;
+										inline?: boolean;
+									} & React.HTMLAttributes<HTMLElement>) =>
+										inline ? (
+											<code className="markdown-code-inline" {...props} />
+										) : (
+											<pre className="markdown-code-block">
+												<code {...props} />
+											</pre>
+										),
+									strong: ({ node, ...props }) => <strong className="markdown-strong" {...props} />,
+									em: ({ node, ...props }) => <em className="markdown-em" {...props} />,
+									del: ({ node, ...props }) => <del className="markdown-del" {...props} />,
+								}}
+							>
+								{formatMentions(message.content)}
+							</ReactMarkdown>
+						</div>
 					)}
 
 					{/* Call Info Card */}
@@ -185,9 +197,14 @@ export function MessageItem({
 								)}
 								<div className="flex items-center gap-2">
 									<Clock className="w-3 h-3" />
-									<span>Duration: {message.metadata.duration ? `${Math.floor(message.metadata.duration / 60)}m ${message.metadata.duration % 60}s` : '0s'}</span>
+									<span>
+										Duration:{' '}
+										{message.metadata.duration
+											? `${Math.floor(message.metadata.duration / 60)}m ${message.metadata.duration % 60}s`
+											: '0s'}
+									</span>
 								</div>
-								
+
 								{message.metadata.status === 'completed' ? (
 									<div className="flex items-center gap-2 text-green-400">
 										<CheckCircle2 className="w-3 h-3" />
@@ -202,7 +219,7 @@ export function MessageItem({
 							</div>
 						</div>
 					)}
-					
+
 					{/* Attachments */}
 					{message.attachments && message.attachments.length > 0 && (
 						<div className="flex flex-wrap gap-2 mt-2">
@@ -231,7 +248,10 @@ export function MessageItem({
 
 								if (isAudio) {
 									return (
-										<div key={attachment.uuid} className="rounded-lg overflow-hidden border border-gray-700 bg-[#1a1d21] p-2 min-w-[300px]">
+										<div
+											key={attachment.uuid}
+											className="rounded-lg overflow-hidden border border-gray-700 bg-[#1a1d21] p-2 min-w-[300px]"
+										>
 											<div className="flex items-center gap-2 mb-2 text-sm text-gray-300">
 												<FileText className="w-4 h-4" />
 												<span className="truncate">{attachment.name}</span>
@@ -244,7 +264,10 @@ export function MessageItem({
 
 								if (isVideo) {
 									return (
-										<div key={attachment.uuid} className="rounded-lg overflow-hidden border border-gray-700 bg-[#1a1d21] max-w-[400px]">
+										<div
+											key={attachment.uuid}
+											className="rounded-lg overflow-hidden border border-gray-700 bg-[#1a1d21] max-w-[400px]"
+										>
 											{/* biome-ignore lint/a11y/useMediaCaption: User uploaded content does not support captions yet */}
 											<video controls className="w-full max-h-[300px]" src={attachment.cdnUrl} />
 											<div className="p-2 border-t border-gray-800 text-xs text-gray-400 truncate">
@@ -266,7 +289,9 @@ export function MessageItem({
 											<FileText className="w-5 h-5 text-gray-400" />
 										</div>
 										<div className="flex flex-col min-w-0">
-											<span className="text-sm text-gray-200 font-medium truncate max-w-[200px]">{attachment.name}</span>
+											<span className="text-sm text-gray-200 font-medium truncate max-w-[200px]">
+												{attachment.name}
+											</span>
 											<span className="text-xs text-gray-500">{(attachment.size / 1024).toFixed(1)} KB</span>
 										</div>
 									</a>

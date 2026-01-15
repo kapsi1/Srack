@@ -1,7 +1,7 @@
-import { useRef } from "react";
-import { FileUploaderRegular } from "@uploadcare/react-uploader";
-import "@uploadcare/react-uploader/core.css";
-import type { Attachment } from "../lib/api";
+import { useRef } from 'react';
+import { FileUploaderRegular } from '@uploadcare/react-uploader';
+import '@uploadcare/react-uploader/core.css';
+import type { Attachment } from '../lib/api';
 
 interface FileUploaderProps {
 	onUploadComplete: (files: Attachment[]) => void;
@@ -26,7 +26,7 @@ export default function FileUploader({ onUploadComplete }: FileUploaderProps) {
 			const newFiles: Attachment[] = [];
 
 			for (const f of e.allEntries) {
-				if (f.status === "success" && !processedUuids.current.has(f.uuid)) {
+				if (f.status === 'success' && !processedUuids.current.has(f.uuid)) {
 					processedUuids.current.add(f.uuid);
 					newFiles.push({
 						uuid: f.uuid,
