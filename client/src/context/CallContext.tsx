@@ -1,7 +1,7 @@
 import type React from 'react';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSocket } from './SocketContext';
-import { logger } from '../lib/logger';
+import { localLogger as logger } from '../lib/logger';
 
 export interface CallUser {
 	id: string;

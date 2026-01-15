@@ -37,8 +37,7 @@ const consumeQueue = async () => {
 	}
 };
 
-export const logToServer = (level: string, message: string, details?: unknown) => {
-    // Also log to console
+const logToConsole = (level: string, message: string, details?: unknown) => {
     if (level === 'error') {
         console.error(message, details);
     } else if (level === 'warn') {
@@ -46,6 +45,11 @@ export const logToServer = (level: string, message: string, details?: unknown) =
     } else {
         console.log(message, details);
     }
+};
+
+export const logToServer = (level: string, message: string, details?: unknown) => {
+    // Also log to console
+    logToConsole(level, message, details);
 
     // Prepare log object
     const user = localStorage.getItem('user');
@@ -74,4 +78,11 @@ export const logger = {
     warn: (message: string, details?: unknown) => logToServer('warn', message, details),
     error: (message: string, details?: unknown) => logToServer('error', message, details),
     debug: (message: string, details?: unknown) => logToServer('debug', message, details),
+};
+
+export const localLogger = {
+    info: (message: string, details?: unknown) => logToConsole('info', message, details),
+    warn: (message: string, details?: unknown) => logToConsole('warn', message, details),
+    error: (message: string, details?: unknown) => logToConsole('error', message, details),
+    debug: (message: string, details?: unknown) => logToConsole('debug', message, details),
 };
