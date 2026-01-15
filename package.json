@@ -1,5 +1,5 @@
 {
-	"name": "Snack: a Slack-like Chat",
+	"name": "snack-workspace",
 	"private": true,
 	"scripts": {
 		"dev:client": "pnpm --filter client dev",
@@ -7,10 +7,14 @@
 		"dev": "pnpm run --parallel dev",
 		"test": "playwright test",
 		"test:cleanup": "pnpm --filter server run cleanup",
-		"format": "biome format --write ."
+		"format": "biome format --write .",
+		"lint": "biome check --write .",
+		"type-check": "pnpm --filter \"*\" run type-check",
+		"check": "pnpm run lint && pnpm run type-check"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.11",
-		"@playwright/test": "^1.57.0"
+		"@playwright/test": "^1.57.0",
+		"@types/node": "^22.19.7"
 	}
 }

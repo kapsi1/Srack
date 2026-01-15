@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import type { User } from '../lib/api';
 import { ThreadsListView } from './ThreadsListView';
 
 // Mock react-query
@@ -8,7 +9,7 @@ vi.mock('@tanstack/react-query', () => ({
 	useQuery: vi.fn(),
 }));
 
-const mockUser = {
+const mockUser: User = {
 	id: '1',
 	username: 'testuser',
 	email: 'test@example.com',
@@ -30,20 +31,23 @@ const mockThreads = [
 
 describe('ThreadsListView', () => {
 	it('renders loading state', () => {
+		// biome-ignore lint/suspicious/noExplicitAny: Mocking useQuery
 		vi.mocked(useQuery).mockReturnValue({ isLoading: true } as any);
-		render(<ThreadsListView isSidebarCollapsed={false} onToggleSidebar={() => {}} />);
+		render(<ThreadsListView currentUser={mockUser} isSidebarCollapsed={false} onToggleSidebar={() => {}} />);
 		expect(screen.getByText('Loading threads...')).toBeInTheDocument();
 	});
 
 	it('renders empty state', () => {
+		// biome-ignore lint/suspicious/noExplicitAny: Mocking useQuery
 		vi.mocked(useQuery).mockReturnValue({ isLoading: false, data: [] } as any);
-		render(<ThreadsListView isSidebarCollapsed={false} onToggleSidebar={() => {}} />);
+		render(<ThreadsListView currentUser={mockUser} isSidebarCollapsed={false} onToggleSidebar={() => {}} />);
 		expect(screen.getByText('No threads yet')).toBeInTheDocument();
 	});
 
 	it('renders list of threads', () => {
+		// biome-ignore lint/suspicious/noExplicitAny: Mocking useQuery
 		vi.mocked(useQuery).mockReturnValue({ isLoading: false, data: mockThreads } as any);
-		render(<ThreadsListView isSidebarCollapsed={false} onToggleSidebar={() => {}} />);
+		render(<ThreadsListView currentUser={mockUser} isSidebarCollapsed={false} onToggleSidebar={() => {}} />);
 		expect(screen.getByText('Parent message')).toBeInTheDocument();
 		expect(screen.getByText('#general')).toBeInTheDocument();
 		expect(screen.getByText('2 replies')).toBeInTheDocument();
@@ -52,8 +56,16 @@ describe('ThreadsListView', () => {
 
 	it('calls onOpenThread when a thread is clicked', () => {
 		const onOpenThread = vi.fn();
+		// biome-ignore lint/suspicious/noExplicitAny: Mocking useQuery
 		vi.mocked(useQuery).mockReturnValue({ isLoading: false, data: mockThreads } as any);
-		render(<ThreadsListView onOpenThread={onOpenThread} isSidebarCollapsed={false} onToggleSidebar={() => {}} />);
+		render(
+			<ThreadsListView
+				currentUser={mockUser}
+				onOpenThread={onOpenThread}
+				isSidebarCollapsed={false}
+				onToggleSidebar={() => {}}
+			/>,
+		);
 
 		fireEvent.click(screen.getByText('Parent message'));
 		expect(onOpenThread).toHaveBeenCalledWith(mockThreads[0]);

@@ -550,7 +550,7 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 								{showEmojiPicker &&
 									createPortal(
 										<div
-											className="fixed z-[9999]"
+											className="fixed z-9999"
 											style={{
 												top: `${pickerPosition.top}px`,
 												left: `${pickerPosition.left}px`,
@@ -583,7 +583,7 @@ export function MessageInput({ channelName, isDM, onSendMessage, placeholder, us
 								createPortal(
 									<div
 										id="mention-picker-portal"
-										className="fixed z-[9999] bg-[#1a1d21] border border-gray-700 rounded-lg shadow-xl overflow-hidden w-64"
+										className="fixed z-9999 bg-[#1a1d21] border border-gray-700 rounded-lg shadow-xl overflow-hidden w-64"
 										style={{
 											top: `${mentionPosition.top}px`,
 											left: `${mentionPosition.left}px`,

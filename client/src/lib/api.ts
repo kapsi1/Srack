@@ -91,7 +91,7 @@ export interface Message {
 	parentId?: string;
 	attachments?: Attachment[];
 	type?: 'TEXT' | 'CALL' | 'SYSTEM';
-	metadata?: any;
+	metadata?: Record<string, unknown>;
 }
 
 export const fetchCurrentUser = async (): Promise<User> => {

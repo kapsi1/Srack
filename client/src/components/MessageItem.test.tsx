@@ -6,6 +6,7 @@ import { MessageItem } from './MessageItem';
 const mockMessage: Message = {
 	id: '1',
 	content: 'Hello world',
+	userId: '1',
 	userName: 'Alice',
 	userAvatar: 'alice.png',
 	timestamp: new Date('2024-01-01T12:00:00Z'),

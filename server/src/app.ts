@@ -7,10 +7,10 @@ import prisma from './lib/prisma';
 import activityRoutes from './routes/activity.routes';
 import authRoutes from './routes/auth.routes';
 import channelRoutes from './routes/channel.routes';
+import logRoutes from './routes/logRoutes';
 import messageRoutes from './routes/message.routes';
 import savedMessageRoutes from './routes/saved-message.routes';
 import userRoutes from './routes/user.routes';
-import logRoutes from './routes/logRoutes';
 import { setupSocket } from './socket';
 
 dotenv.config();

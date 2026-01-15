@@ -1,5 +1,5 @@
-import { useRef } from 'react';
 import { FileUploaderRegular } from '@uploadcare/react-uploader';
+import { useRef } from 'react';
 import '@uploadcare/react-uploader/core.css';
 import type { Attachment } from '../lib/api';
 

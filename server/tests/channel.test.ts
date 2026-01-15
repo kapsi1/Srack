@@ -1,7 +1,7 @@
-import { describe, it, expect, afterAll } from 'vitest';
 import request from 'supertest';
+import { afterAll, describe, expect, it } from 'vitest';
 import { app } from '../src/app';
-import { TEST_PREFIX, cleanupTestData, getAuthToken } from './helpers';
+import { cleanupTestData, getAuthToken, TEST_PREFIX } from './helpers';
 
 describe('Channel Endpoints', () => {
 	afterAll(async () => {

@@ -1,7 +1,7 @@
-import { describe, it, expect, afterAll } from 'vitest';
 import request from 'supertest';
+import { afterAll, describe, expect, it } from 'vitest';
 import { app } from '../src/app';
-import { TEST_PREFIX, cleanupTestData } from './helpers';
+import { cleanupTestData, TEST_PREFIX } from './helpers';
 
 describe('Auth Endpoints', () => {
 	afterAll(async () => {

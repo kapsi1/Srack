@@ -53,7 +53,7 @@ export const logToServer = (level: string, message: string, details?: unknown) =
 
 	// Prepare log object
 	const user = localStorage.getItem('user');
-	let userId: string | undefined = undefined;
+	let userId: string | undefined;
 	if (user) {
 		try {
 			userId = JSON.parse(user).id;

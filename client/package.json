@@ -1,5 +1,5 @@
 {
-	"name": "Snack",
+	"name": "snack-client",
 	"version": "0.1.0",
 	"private": true,
 	"dependencies": {
@@ -31,12 +31,14 @@
 		"jsdom": "^27.4.0",
 		"rollup-plugin-visualizer": "^6.0.5",
 		"tailwindcss": "^4.1.18",
+		"typescript": "^5.7.3",
 		"vite": "7.3.1",
 		"vitest": "^4.0.17"
 	},
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
-		"test": "vitest"
+		"test": "vitest",
+		"type-check": "tsc --noEmit"
 	}
 }

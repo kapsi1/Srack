@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+
 const TEST_PREFIX = 'test__';
 
 test.describe('Messaging', () => {

@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execSync } from 'node:child_process';
 
 async function globalTeardown() {
 	console.log('E2E Teardown: Running cleanup script...');

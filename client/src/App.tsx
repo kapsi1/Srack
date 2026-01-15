@@ -13,14 +13,16 @@ import { Sidebar } from './components/Sidebar';
 import { ThreadsListView } from './components/ThreadsListView';
 import { ThreadView } from './components/ThreadView';
 import { VideoCall } from './components/VideoCall';
-import { CallProvider, useCall, type CallUser } from './context/CallContext';
+import { CallProvider, type CallUser, useCall } from './context/CallContext';
 import { useSocket } from './context/SocketContext';
 import {
 	type Channel as ApiChannel,
 	type Message as ApiMessage,
 	type User as ApiUser,
+	type Attachment,
 	createChannel,
 	createDM,
+	deleteMessage,
 	fetchChannels,
 	fetchCurrentUser,
 	fetchMessages,
@@ -31,8 +33,6 @@ import {
 	sendMessage,
 	toggleSavedMessage,
 	toggleStarChannel,
-	deleteMessage,
-	type Attachment,
 } from './lib/api';
 
 export type User = ApiUser;
@@ -57,7 +57,7 @@ export interface Message {
 	isSaved?: boolean;
 	attachments?: Attachment[];
 	type?: 'TEXT' | 'CALL' | 'SYSTEM';
-	metadata?: any;
+	metadata?: Record<string, unknown>;
 }
 
 export interface Channel {

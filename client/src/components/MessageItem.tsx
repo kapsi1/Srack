@@ -2,17 +2,17 @@
 
 import EmojiPicker, { type EmojiClickData, Theme } from 'emoji-picker-react';
 import {
+	AlertCircle,
 	Bookmark,
+	CheckCircle2,
+	Clock,
 	FileText,
 	MessageSquare,
+	Phone,
 	Share,
 	Smile,
 	Trash,
-	Phone,
 	Video,
-	Clock,
-	AlertCircle,
-	CheckCircle2,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -29,6 +29,15 @@ interface MessageItemProps {
 	onForward?: (message: Message) => void;
 	onDelete?: (messageId: string) => void;
 	currentUser?: User | null;
+}
+
+interface CallMetadata {
+	callType?: 'video' | 'audio';
+	startedAt?: string | number | Date;
+	endedAt?: string | number | Date;
+	duration?: number;
+	status?: 'completed' | 'failed' | 'missed' | 'rejected';
+	reason?: string;
 }
 
 export function MessageItem({
@@ -178,34 +187,44 @@ export function MessageItem({
 					{message.type === 'CALL' && message.metadata && (
 						<div className="mt-2 text-sm bg-gray-800 border border-gray-700 rounded-lg p-3 max-w-sm">
 							<div className="flex items-center gap-2 mb-2 font-medium text-gray-200">
-								{message.metadata.callType === 'video' ? <Video className="w-4 h-4" /> : <Phone className="w-4 h-4" />}
+								{(message.metadata as CallMetadata).callType === 'video' ? (
+									<Video className="w-4 h-4" />
+								) : (
+									<Phone className="w-4 h-4" />
+								)}
 								<span>{message.content}</span>
 							</div>
 
 							<div className="space-y-1 text-gray-400 text-xs">
-								{message.metadata.startedAt && (
+								{(message.metadata as CallMetadata).startedAt && (
 									<div className="flex items-center gap-2">
 										<Clock className="w-3 h-3" />
-										<span>Started: {new Date(message.metadata.startedAt).toLocaleTimeString()}</span>
+										<span>
+											Started: {new Date((message.metadata as CallMetadata).startedAt as string).toLocaleTimeString()}
+										</span>
 									</div>
 								)}
-								{message.metadata.endedAt && (
+								{(message.metadata as CallMetadata).endedAt && (
 									<div className="flex items-center gap-2">
 										<Clock className="w-3 h-3" />
-										<span>Ended: {new Date(message.metadata.endedAt).toLocaleTimeString()}</span>
+										<span>
+											Ended: {new Date((message.metadata as CallMetadata).endedAt as string).toLocaleTimeString()}
+										</span>
 									</div>
 								)}
 								<div className="flex items-center gap-2">
 									<Clock className="w-3 h-3" />
 									<span>
 										Duration:{' '}
-										{message.metadata.duration
-											? `${Math.floor(message.metadata.duration / 60)}m ${message.metadata.duration % 60}s`
+										{(message.metadata as CallMetadata).duration
+											? `${Math.floor((message.metadata as CallMetadata).duration! / 60)}m ${
+													(message.metadata as CallMetadata).duration! % 60
+												}s`
 											: '0s'}
 									</span>
 								</div>
 
-								{message.metadata.status === 'completed' ? (
+								{(message.metadata as CallMetadata).status === 'completed' ? (
 									<div className="flex items-center gap-2 text-green-400">
 										<CheckCircle2 className="w-3 h-3" />
 										<span>Completed</span>
@@ -213,7 +232,7 @@ export function MessageItem({
 								) : (
 									<div className="flex items-center gap-2 text-red-400">
 										<AlertCircle className="w-3 h-3" />
-										<span>{message.metadata.reason || 'Failed'}</span>
+										<span>{(message.metadata as CallMetadata).reason || 'Failed'}</span>
 									</div>
 								)}
 							</div>
@@ -256,7 +275,6 @@ export function MessageItem({
 												<FileText className="w-4 h-4" />
 												<span className="truncate">{attachment.name}</span>
 											</div>
-											{/* biome-ignore lint/a11y/useMediaCaption: User uploaded content does not support captions yet */}
 											<audio controls className="w-full h-8" src={attachment.cdnUrl} />
 										</div>
 									);
@@ -268,7 +286,6 @@ export function MessageItem({
 											key={attachment.uuid}
 											className="rounded-lg overflow-hidden border border-gray-700 bg-[#1a1d21] max-w-[400px]"
 										>
-											{/* biome-ignore lint/a11y/useMediaCaption: User uploaded content does not support captions yet */}
 											<video controls className="w-full max-h-[300px]" src={attachment.cdnUrl} />
 											<div className="p-2 border-t border-gray-800 text-xs text-gray-400 truncate">
 												{attachment.name}

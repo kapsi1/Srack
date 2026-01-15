@@ -11,12 +11,14 @@ interface ThreadsListViewProps {
 }
 
 export function ThreadsListView({
+	currentUser: _currentUser,
 	onToggleRightSidebar,
 	onOpenThread,
 	isSidebarCollapsed,
 	onToggleSidebar,
 }: ThreadsListViewProps) {
-	const { data: threads, isLoading } = useQuery({
+	const { data: threads, isLoading } = useQuery<ApiMessage[]>({
+		// Specify the type for the query data
 		queryKey: ['user-threads'],
 		queryFn: fetchUserThreads,
 		refetchInterval: 10000,
