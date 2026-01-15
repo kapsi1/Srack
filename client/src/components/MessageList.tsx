@@ -15,14 +15,24 @@ interface MessageListProps {
 
 export function MessageList({ channel, messages, onAddReaction, onToggleSave, onReply, onForward, onDelete, currentUser }: MessageListProps) {
 	const bottomRef = useRef<HTMLDivElement>(null);
+	const scrollContainerRef = useRef<HTMLDivElement>(null);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to scroll on every message update
 	useEffect(() => {
-		bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+		// Use a small timeout to ensure content (like images/videos) has started rendering
+		const timer = setTimeout(() => {
+			if (scrollContainerRef.current) {
+				scrollContainerRef.current.scrollTo({
+					top: scrollContainerRef.current.scrollHeight,
+					behavior: 'smooth',
+				});
+			}
+		}, 100);
+		return () => clearTimeout(timer);
 	}, [messages]);
 
 	return (
-		<div className="flex-1 overflow-y-auto">
+		<div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
 			{/* Channel Intro */}
 			{channel && (
 				<div className="p-6 border-b border-gray-800">
@@ -38,8 +48,8 @@ export function MessageList({ channel, messages, onAddReaction, onToggleSave, on
 				</div>
 			)}
 
-			{/* Messages */}
-			<div className="px-4 py-2">
+		{/* Messages */}
+			<div className="px-4 py-2 pb-4">
 				{messages.map((message, index) => {
 					const prevMessage = index > 0 ? messages[index - 1] : null;
 					const showAvatar =

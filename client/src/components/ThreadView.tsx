@@ -1,9 +1,9 @@
 import { X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import type { Message, User } from '../App';
 import type { Attachment } from '../lib/api';
 import { MessageInput } from './MessageInput';
 import { MessageItem } from './MessageItem';
-import { MessageList } from './MessageList';
 
 interface ThreadViewProps {
 	parentMessage: Message;
@@ -30,8 +30,15 @@ export function ThreadView({
 	onDelete,
 	currentUser,
 }: ThreadViewProps) {
+	const bottomRef = useRef<HTMLDivElement>(null);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to scroll on every replies update
+	useEffect(() => {
+		bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+	}, [replies]);
+
 	return (
-		<div className="w-[350px] flex flex-col border-l border-gray-800 bg-[#1a1d21]">
+		<div className="w-[350px] h-full flex flex-col border-l border-gray-800 bg-[#1a1d21]">
 			{/* Header */}
 			<div className="h-12 border-b border-gray-800 px-4 flex items-center justify-between">
 				<h3 className="text-white font-bold flex items-center gap-2">
@@ -46,7 +53,7 @@ export function ThreadView({
 			</div>
 
 			{/* Scrollable Content */}
-			<div className="flex-1 overflow-y-auto flex flex-col">
+			<div className="flex-1 min-h-0 overflow-y-auto">
 				{/* Parent Message */}
 				<div className="px-4 py-4 border-b border-gray-800">
 					<MessageItem
@@ -68,14 +75,29 @@ export function ThreadView({
 				</div>
 
 				{/* Replies */}
-				<MessageList
-					messages={replies}
-					onAddReaction={onAddReaction}
-					onToggleSave={onToggleSave}
-					onForward={onForward}
-					currentUser={currentUser}
-					onDelete={onDelete}
-				/>
+				<div className="px-4 py-2">
+					{replies.map((message, index) => {
+						const prevMessage = index > 0 ? replies[index - 1] : null;
+						const showAvatar =
+							!prevMessage ||
+							prevMessage.userId !== message.userId ||
+							message.timestamp.getTime() - prevMessage.timestamp.getTime() > 5 * 60 * 1000;
+
+						return (
+							<MessageItem
+								key={message.id}
+								message={message}
+								showAvatar={showAvatar}
+								onAddReaction={onAddReaction}
+								onToggleSave={onToggleSave}
+								onForward={onForward}
+								currentUser={currentUser}
+								onDelete={onDelete}
+							/>
+						);
+					})}
+					<div ref={bottomRef} />
+				</div>
 			</div>
 
 			{/* Input */}

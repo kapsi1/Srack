@@ -281,10 +281,24 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 			attachments?: Attachment[];
 		}) => sendMessage(channelId, content, tempId, parentId, attachments),
 		onMutate: async ({ channelId, content, tempId, parentId, attachments }) => {
-			if (parentId) {
+		if (parentId) {
 				// Optimistic update for thread
 				await queryClient.cancelQueries({ queryKey: ['thread-messages', parentId] });
-				// logic for optimistic thread update could go here, omitting for brevity/complexity
+				// Add optimistic message to thread immediately
+				if (currentUser) {
+					const optimisticMessage: Message = {
+						id: tempId,
+						userId: currentUser.id,
+						userName: currentUser.username,
+						userAvatar: currentUser.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`,
+						content,
+						timestamp: new Date(),
+						reactions: [],
+						threadCount: 0,
+						attachments,
+					};
+					setThreadMessages((prev) => [...prev, optimisticMessage]);
+				}
 				return;
 			}
 			await queryClient.cancelQueries({ queryKey: ['messages', channelId] });
@@ -474,10 +488,21 @@ function MainApp({ currentUser, onLogout, token }: { currentUser: User; onLogout
 
 			const parentId = message.parentId; // Access parentId if present
 
-			if (parentId) {
+		if (parentId) {
 				// Handle reply
 				if (activeThread && activeThread.id === parentId) {
-					setThreadMessages((prev) => [...prev, newMessage]);
+					setThreadMessages((prev) => {
+						const tempId = message.tempId;
+						// If we have an optimistic message with this tempId, replace it
+						if (tempId && prev.some((m) => m.id === tempId)) {
+							return prev.map((m) => (m.id === tempId ? newMessage : m));
+						}
+						// If we already have this real ID, don't append
+						if (prev.some((m) => m.id === message.id)) {
+							return prev;
+						}
+						return [...prev, newMessage];
+					});
 				}
 
 				// Update parent message thread count in main channel list
