@@ -1,11 +1,10 @@
 import prisma from '../src/lib/prisma';
 
 const TEST_PREFIX = 'test__';
-const LEGACY_PREFIXES = ['testuser_', 'loginuser_', 'msg_user_', 'helper_user_', 'test-channel-'];
 
 async function main() {
-	const allPrefixes = [TEST_PREFIX, ...LEGACY_PREFIXES];
-	console.log('Cleaning up test data with prefixes:', allPrefixes);
+	const allPrefixes = [TEST_PREFIX];
+	console.log('Cleaning up test data with prefix:', TEST_PREFIX);
 
 	try {
 		// 1. Find all users that match the prefixes
