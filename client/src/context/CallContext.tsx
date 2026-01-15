@@ -1,6 +1,7 @@
 import type React from 'react';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSocket } from './SocketContext';
+import { logger } from '../lib/logger';
 
 export interface CallUser {
 	id: string;
@@ -113,7 +114,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 	// Create peer connection
 	const createPeerConnection = useCallback((targetUserId: string) => {
-		console.log('[WebRTC] Creating peer connection for target:', targetUserId);
+		logger.debug('[WebRTC] Creating peer connection for target:', { targetUserId });
 		
 		// Store target user ID in ref for later use
 		targetUserIdRef.current = targetUserId;
@@ -125,7 +126,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 		pc.onicecandidate = (event) => {
 			if (event.candidate && socket && targetUserIdRef.current) {
-				console.log('[WebRTC] Sending ICE candidate to:', targetUserIdRef.current);
+				logger.debug('[WebRTC] Sending ICE candidate to:', { targetUserId: targetUserIdRef.current });
 				socket.emit('ice-candidate', {
 					candidate: event.candidate,
 					to: targetUserIdRef.current,
@@ -134,7 +135,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 		};
 
 		pc.ontrack = (event) => {
-			console.log('[WebRTC] Received remote track:', event.track.kind, 'readyState:', event.track.readyState);
+			logger.info('[WebRTC] Received remote track:', { kind: event.track.kind, readyState: event.track.readyState });
 			
 			// Add the track to our remote stream
 			if (remoteStreamRef.current) {
@@ -142,7 +143,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 				const existingTrack = remoteStreamRef.current.getTracks().find(t => t.id === event.track.id);
 				if (!existingTrack) {
 					remoteStreamRef.current.addTrack(event.track);
-					console.log('[WebRTC] Added track to remote stream, now has', remoteStreamRef.current.getTracks().length, 'tracks');
+					logger.info('[WebRTC] Added track to remote stream', { trackCount: remoteStreamRef.current.getTracks().length });
 					
 					// Create a new MediaStream with all the tracks to force React to detect the change
 					const newStream = new MediaStream(remoteStreamRef.current.getTracks());
@@ -153,27 +154,27 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 			
 			// Also log if the event has streams (for debugging)
 			if (event.streams.length > 0) {
-				console.log('[WebRTC] Event also has', event.streams.length, 'stream(s) with', event.streams[0].getTracks().length, 'tracks');
+				logger.debug('[WebRTC] Event also has streams', { count: event.streams.length });
 			}
 		};
 
 		pc.oniceconnectionstatechange = () => {
-			console.log('[WebRTC] ICE connection state:', pc.iceConnectionState);
+			logger.debug('[WebRTC] ICE connection state:', { state: pc.iceConnectionState });
 			if (pc.iceConnectionState === 'connected') {
-				console.log('[WebRTC] ICE connection established!');
+				logger.info('[WebRTC] ICE connection established!');
 			}
 			if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
-				console.log('[WebRTC] Connection lost, cleaning up');
+				logger.warn('[WebRTC] Connection lost, cleaning up');
 				cleanup();
 			}
 		};
 
 		pc.onconnectionstatechange = () => {
-			console.log('[WebRTC] Connection state:', pc.connectionState);
+			logger.debug('[WebRTC] Connection state:', { state: pc.connectionState });
 		};
 
 		pc.onsignalingstatechange = () => {
-			console.log('[WebRTC] Signaling state:', pc.signalingState);
+			logger.debug('[WebRTC] Signaling state:', { state: pc.signalingState });
 		};
 
 		peerConnectionRef.current = pc;
@@ -182,24 +183,24 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 	// Get user media
 	const getUserMedia = async (isVideo: boolean): Promise<MediaStream> => {
-		console.log('[WebRTC] Getting user media, video:', isVideo);
+		logger.debug('[WebRTC] Getting user media', { isVideo });
 		const stream = await navigator.mediaDevices.getUserMedia({
 			video: isVideo,
 			audio: true,
 		});
-		console.log('[WebRTC] Got local stream with', stream.getTracks().length, 'tracks');
+		logger.info('[WebRTC] Got local stream', { tracks: stream.getTracks().length });
 		return stream;
 	};
 
 	// Start a call (caller side)
 	const startCall = async (channelId: string, remoteUser: CallUser, isVideo: boolean) => {
 		if (!socket || !isConnected) {
-			console.error('[WebRTC] Socket not connected');
+			logger.error('[WebRTC] Socket not connected');
 			return;
 		}
 
 		try {
-			console.log('[WebRTC] Starting call to:', remoteUser.username, 'video:', isVideo);
+			logger.info('[WebRTC] Starting call to:', { username: remoteUser.username, video: isVideo });
 			
 			const stream = await getUserMedia(isVideo);
 			setLocalStream(stream);
@@ -219,14 +220,14 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 			// Add local stream tracks to peer connection
 			for (const track of stream.getTracks()) {
-				console.log('[WebRTC] Adding local track:', track.kind);
+				logger.debug('[WebRTC] Adding local track:', { kind: track.kind });
 				pc.addTrack(track, stream);
 			}
 
 			// Create and send offer
 			const offer = await pc.createOffer();
 			await pc.setLocalDescription(offer);
-			console.log('[WebRTC] Created offer, sending to:', remoteUser.id);
+			logger.info('[WebRTC] Created offer, sending to:', { userId: remoteUser.id });
 
 			socket.emit('call-request', {
 				to: remoteUser.id,
@@ -236,7 +237,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 				offer,
 			});
 		} catch (error) {
-			console.error('[WebRTC] Error starting call:', error);
+			logger.error('[WebRTC] Error starting call:', error);
 			cleanup();
 		}
 	};
@@ -244,18 +245,18 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 	// Accept an incoming call
 	const acceptCall = async () => {
 		if (!socket || !incomingCallData) {
-			console.error('[WebRTC] Cannot accept call - no socket or incoming call data');
+			logger.error('[WebRTC] Cannot accept call - no socket or incoming call data');
 			return;
 		}
 
 		const pc = peerConnectionRef.current;
 		if (!pc) {
-			console.error('[WebRTC] Cannot accept call - no peer connection');
+			logger.error('[WebRTC] Cannot accept call - no peer connection');
 			return;
 		}
 
 		try {
-			console.log('[WebRTC] Accepting call from:', incomingCallData.from.username);
+			logger.info('[WebRTC] Accepting call from:', { username: incomingCallData.from.username });
 			
 			const isVideo = incomingCallData.callType === 'video';
 			const stream = await getUserMedia(isVideo);
@@ -263,12 +264,12 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 			// Add local stream tracks to peer connection
 			for (const track of stream.getTracks()) {
-				console.log('[WebRTC] Adding local track:', track.kind);
+				logger.debug('[WebRTC] Adding local track:', { kind: track.kind });
 				pc.addTrack(track, stream);
 			}
 
 			// Process any pending ICE candidates
-			console.log('[WebRTC] Processing', pendingIceCandidatesRef.current.length, 'pending ICE candidates');
+			logger.debug('[WebRTC] Processing pending ICE candidates', { count: pendingIceCandidatesRef.current.length });
 			for (const candidate of pendingIceCandidatesRef.current) {
 				await pc.addIceCandidate(new RTCIceCandidate(candidate));
 			}
@@ -277,7 +278,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 			// Create and send answer
 			const answer = await pc.createAnswer();
 			await pc.setLocalDescription(answer);
-			console.log('[WebRTC] Created answer, sending to:', incomingCallData.from.id);
+			logger.info('[WebRTC] Created answer, sending to:', { userId: incomingCallData.from.id });
 
 			socket.emit('call-answer', {
 				to: incomingCallData.from.id,
@@ -297,7 +298,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 			setIncomingCallData(null);
 		} catch (error) {
-			console.error('[WebRTC] Error accepting call:', error);
+			logger.error('[WebRTC] Error accepting call:', error);
 			cleanup();
 		}
 	};
@@ -357,11 +358,11 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 			callType: 'audio' | 'video';
 			offer: RTCSessionDescriptionInit;
 		}) => {
-			console.log('[WebRTC] Received call request from:', data.from.username);
+			logger.info('[WebRTC] Received call request from:', { username: data.from.username });
 			
 			// If already in a call, reject automatically
 			if (callState.isInCall || callState.isCalling) {
-				console.log('[WebRTC] Already in call, rejecting');
+				logger.info('[WebRTC] Already in call, rejecting');
 				socket.emit('call-rejected', { to: data.from.id, reason: 'busy' });
 				return;
 			}
@@ -380,24 +381,24 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 			// Create peer connection and set remote description
 			const pc = createPeerConnection(data.from.id);
-			console.log('[WebRTC] Setting remote description from offer');
+			logger.debug('[WebRTC] Setting remote description from offer');
 			await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
 		};
 
 		// Handle call answer
 		const handleCallAnswer = async (data: { answer: RTCSessionDescriptionInit }) => {
-			console.log('[WebRTC] Received call answer');
+			logger.info('[WebRTC] Received call answer');
 			const pc = peerConnectionRef.current;
 			if (!pc) {
-				console.error('[WebRTC] No peer connection to set answer on');
+				logger.error('[WebRTC] No peer connection to set answer on');
 				return;
 			}
 
 			await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-			console.log('[WebRTC] Remote description set from answer');
+			logger.debug('[WebRTC] Remote description set from answer');
 
 			// Process any pending ICE candidates
-			console.log('[WebRTC] Processing', pendingIceCandidatesRef.current.length, 'pending ICE candidates');
+			logger.debug('[WebRTC] Processing pending ICE candidates', { count: pendingIceCandidatesRef.current.length });
 			for (const candidate of pendingIceCandidatesRef.current) {
 				await pc.addIceCandidate(new RTCIceCandidate(candidate));
 			}
@@ -412,27 +413,27 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 
 		// Handle ICE candidate
 		const handleIceCandidate = async (data: { candidate: RTCIceCandidateInit }) => {
-			console.log('[WebRTC] Received ICE candidate');
+			logger.debug('[WebRTC] Received ICE candidate');
 			const pc = peerConnectionRef.current;
 			if (pc?.remoteDescription) {
-				console.log('[WebRTC] Adding ICE candidate immediately');
+				logger.debug('[WebRTC] Adding ICE candidate immediately');
 				await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
 			} else {
 				// Queue the candidate if remote description isn't set yet
-				console.log('[WebRTC] Queuing ICE candidate (no remote description yet)');
+				logger.debug('[WebRTC] Queuing ICE candidate (no remote description yet)');
 				pendingIceCandidatesRef.current.push(data.candidate);
 			}
 		};
 
 		// Handle call rejection
 		const handleCallRejected = (data?: { reason?: string }) => {
-			console.log('[WebRTC] Call rejected:', data?.reason);
+			logger.info('[WebRTC] Call rejected:', { reason: data?.reason });
 			cleanup();
 		};
 
 		// Handle call ended
 		const handleCallEnded = () => {
-			console.log('[WebRTC] Call ended by remote user');
+			logger.info('[WebRTC] Call ended by remote user');
 			cleanup();
 		};
 

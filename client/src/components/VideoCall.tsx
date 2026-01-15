@@ -1,14 +1,7 @@
-import {
-	Mic,
-	MicOff,
-	PhoneOff,
-	Video,
-	VideoOff,
-	Maximize2,
-	Minimize2,
-} from 'lucide-react';
+import { Maximize2, Mic, MicOff, Minimize2, PhoneOff, Video, VideoOff } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useCall } from '../context/CallContext';
+import { logger } from '../lib/logger';
 
 export function VideoCall() {
 	const {
@@ -37,15 +30,15 @@ export function VideoCall() {
 		const videoEl = remoteVideoRef.current;
 		if (!videoEl || !remoteStream) return;
 		
-		console.log('[VideoCall] Setting remote stream with', remoteStream.getTracks().length, 'tracks');
+		logger.info('[VideoCall] Setting remote stream', { tracks: remoteStream.getTracks().length });
 		videoEl.srcObject = remoteStream;
 		
 		// Force play in case autoplay is blocked
-		videoEl.play().catch(e => console.log('[VideoCall] Autoplay blocked:', e));
+		videoEl.play().catch(e => logger.warn('[VideoCall] Autoplay blocked:', e));
 		
 		// Listen for new tracks being added to the stream
 		const handleTrackAdded = (event: MediaStreamTrackEvent) => {
-			console.log('[VideoCall] Track added to remote stream:', event.track.kind);
+			logger.info('[VideoCall] Track added to remote stream:', { kind: event.track.kind });
 			// Re-assign srcObject to ensure video element picks up the new track
 			videoEl.srcObject = remoteStream;
 		};

@@ -91,3 +91,12 @@ model StarredChannel {
 
   @@unique([userId, channelId])
 }
+
+model ClientLog {
+  id        String   @id @default(cuid())
+  level     String
+  message   String
+  details   Json?
+  userId    String?
+  timestamp DateTime @default(now())
+}
