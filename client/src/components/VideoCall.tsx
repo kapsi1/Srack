@@ -32,11 +32,29 @@ export function VideoCall() {
 		}
 	}, [localStream]);
 
-	// Attach remote stream to video element
+	// Attach remote stream to video element and listen for track changes
 	useEffect(() => {
-		if (remoteVideoRef.current && remoteStream) {
-			remoteVideoRef.current.srcObject = remoteStream;
-		}
+		const videoEl = remoteVideoRef.current;
+		if (!videoEl || !remoteStream) return;
+		
+		console.log('[VideoCall] Setting remote stream with', remoteStream.getTracks().length, 'tracks');
+		videoEl.srcObject = remoteStream;
+		
+		// Force play in case autoplay is blocked
+		videoEl.play().catch(e => console.log('[VideoCall] Autoplay blocked:', e));
+		
+		// Listen for new tracks being added to the stream
+		const handleTrackAdded = (event: MediaStreamTrackEvent) => {
+			console.log('[VideoCall] Track added to remote stream:', event.track.kind);
+			// Re-assign srcObject to ensure video element picks up the new track
+			videoEl.srcObject = remoteStream;
+		};
+		
+		remoteStream.addEventListener('addtrack', handleTrackAdded);
+		
+		return () => {
+			remoteStream.removeEventListener('addtrack', handleTrackAdded);
+		};
 	}, [remoteStream]);
 
 	const toggleFullscreen = async () => {

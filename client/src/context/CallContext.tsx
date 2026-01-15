@@ -86,6 +86,8 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 	const pendingIceCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
 	// Use a ref to track the target user ID for ICE candidates - this avoids stale closure issues
 	const targetUserIdRef = useRef<string | null>(null);
+	// Use a ref to accumulate remote tracks into a single MediaStream
+	const remoteStreamRef = useRef<MediaStream | null>(null);
 
 	// Cleanup function for ending calls
 	const cleanup = useCallback(() => {
@@ -102,6 +104,7 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 		}
 		pendingIceCandidatesRef.current = [];
 		targetUserIdRef.current = null;
+		remoteStreamRef.current = null;
 		setLocalStream(null);
 		setRemoteStream(null);
 		setCallState(initialCallState);
@@ -114,6 +117,9 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 		
 		// Store target user ID in ref for later use
 		targetUserIdRef.current = targetUserId;
+		
+		// Create a new MediaStream for remote tracks
+		remoteStreamRef.current = new MediaStream();
 		
 		const pc = new RTCPeerConnection(ICE_SERVERS);
 
@@ -128,11 +134,26 @@ export const CallProvider = ({ children, currentUser }: CallProviderProps) => {
 		};
 
 		pc.ontrack = (event) => {
-			console.log('[WebRTC] Received remote track:', event.track.kind);
-			const [stream] = event.streams;
-			if (stream) {
-				console.log('[WebRTC] Setting remote stream with', stream.getTracks().length, 'tracks');
-				setRemoteStream(stream);
+			console.log('[WebRTC] Received remote track:', event.track.kind, 'readyState:', event.track.readyState);
+			
+			// Add the track to our remote stream
+			if (remoteStreamRef.current) {
+				// Check if track already exists to avoid duplicates
+				const existingTrack = remoteStreamRef.current.getTracks().find(t => t.id === event.track.id);
+				if (!existingTrack) {
+					remoteStreamRef.current.addTrack(event.track);
+					console.log('[WebRTC] Added track to remote stream, now has', remoteStreamRef.current.getTracks().length, 'tracks');
+					
+					// Create a new MediaStream with all the tracks to force React to detect the change
+					const newStream = new MediaStream(remoteStreamRef.current.getTracks());
+					remoteStreamRef.current = newStream;
+					setRemoteStream(newStream);
+				}
+			}
+			
+			// Also log if the event has streams (for debugging)
+			if (event.streams.length > 0) {
+				console.log('[WebRTC] Event also has', event.streams.length, 'stream(s) with', event.streams[0].getTracks().length, 'tracks');
 			}
 		};
 
