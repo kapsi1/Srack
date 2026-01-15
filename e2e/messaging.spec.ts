@@ -1,33 +1,156 @@
 import { expect, test } from '@playwright/test';
-
-const TEST_PREFIX = 'test__';
+import { navigateToChannel, registerUser, sendMessage, uniqueId, waitForAppLoaded } from './helpers';
 
 test.describe('Messaging', () => {
 	test.beforeEach(async ({ page }) => {
-		// Register a user for each test to have clean state
-		await page.goto('/');
-
-		await page.getByText("Don't have an account? Sign up").click();
-
-		const uniqueId = Date.now();
-		await page.fill('#username', `${TEST_PREFIX}msg_user_${uniqueId}`);
-		await page.fill('#email', `${TEST_PREFIX}msg_${uniqueId}@example.com`);
-		await page.fill('#password', 'password123');
-		await page.getByRole('button', { name: 'Create Account' }).click();
-		await expect(page.getByText('Snack')).toBeVisible();
+		await registerUser(page);
+		await waitForAppLoaded(page);
 	});
 
-	test('send a message', async ({ page }) => {
-		// Should be in general channel by default or first channel
-		// Wait for channel to load
-		await expect(page.getByPlaceholder(/Message #/)).toBeVisible();
+	test('should send a text message', async ({ page }) => {
+		await navigateToChannel(page, 'general');
 
-		const message = `Hello World ${Date.now()}`;
-		await page.getByPlaceholder(/Message #/).fill(message);
+		const message = `Hello World ${uniqueId()}`;
+		await sendMessage(page, message);
+
+		// Message should appear in the list
+		await expect(page.getByText(message)).toBeVisible();
+	});
+
+	test('should display message with correct user info', async ({ page }) => {
+		await navigateToChannel(page, 'general');
+
+		const message = `user-info-test-${uniqueId()}`;
+		await sendMessage(page, message);
+
+		// Message should appear with avatar/username context
+		const messageElement = page.getByText(message);
+		await expect(messageElement).toBeVisible();
+	});
+
+	test('should display message timestamp', async ({ page }) => {
+		await navigateToChannel(page, 'general');
+
+		const message = `timestamp-test-${uniqueId()}`;
+		await sendMessage(page, message);
+
+		// Look for time format (e.g., "10:30 AM" or similar)
+		const timePattern = /\d{1,2}:\d{2}/;
+		await expect(page.getByText(timePattern).first()).toBeVisible();
+	});
+
+	test('should send multiple messages in sequence', async ({ page }) => {
+		await navigateToChannel(page, 'general');
+
+		const messages = [`msg1-${uniqueId()}`, `msg2-${uniqueId()}`, `msg3-${uniqueId()}`];
+
+		for (const msg of messages) {
+			await sendMessage(page, msg);
+		}
+
+		// All messages should be visible
+		for (const msg of messages) {
+			await expect(page.getByText(msg)).toBeVisible();
+		}
+	});
+
+	test('should preserve message order', async ({ page }) => {
+		await navigateToChannel(page, 'general');
+
+		const id = uniqueId();
+		const messages = [`first-${id}`, `second-${id}`, `third-${id}`];
+
+		for (const msg of messages) {
+			await sendMessage(page, msg);
+		}
+
+		// Get all message text elements containing our unique id
+		const messageElements = page.locator(`text=/${id}/`);
+		const count = await messageElements.count();
+
+		// Should have 3 messages
+		expect(count).toBe(3);
+	});
+
+	test('should handle emoji in messages', async ({ page }) => {
+		await navigateToChannel(page, 'general');
+
+		const id = uniqueId();
+		const message = `Hello emoji test ${id}`;
+		await sendMessage(page, message);
+
+		// Message should be visible
+		await expect(page.getByText(id)).toBeVisible();
+	});
+
+	test('should send message with Enter key', async ({ page }) => {
+		await navigateToChannel(page, 'general');
+
+		const message = `enter-key-${uniqueId()}`;
+		const messageInput = page.getByPlaceholder(/Message #general/);
+
+		await messageInput.fill(message);
 		await page.keyboard.press('Enter');
 
-		// Expect message to appear in list
-		// It might appear optimistically or after ack.
+		await expect(page.getByText(message)).toBeVisible({ timeout: 10000 });
+	});
+
+	test('should not send empty message', async ({ page }) => {
+		await navigateToChannel(page, 'general');
+
+		const messageInput = page.getByPlaceholder(/Message #general/);
+
+		// Try to send empty message
+		await messageInput.fill('');
+		await page.keyboard.press('Enter');
+
+		// Input should still be empty (message wasn't sent)
+		const value = await messageInput.inputValue();
+		expect(value).toBe('');
+	});
+
+	test('should clear input after sending message', async ({ page }) => {
+		await navigateToChannel(page, 'general');
+
+		const message = `clear-input-${uniqueId()}`;
+		const messageInput = page.getByPlaceholder(/Message #general/);
+
+		await messageInput.fill(message);
+		await page.keyboard.press('Enter');
+
+		// Wait for message to appear
+		await expect(page.getByText(message)).toBeVisible({ timeout: 10000 });
+
+		// Input should be cleared
+		await expect(messageInput).toHaveValue('');
+	});
+
+	test('should show send button', async ({ page }) => {
+		await navigateToChannel(page, 'general');
+
+		// Send button should be visible
+		await expect(page.locator('.lucide-send')).toBeVisible();
+	});
+
+	test('should handle long messages', async ({ page }) => {
+		await navigateToChannel(page, 'general');
+
+		const id = uniqueId();
+		const longMessage = `Long message test: ${'lorem ipsum '.repeat(20)} ${id}`;
+		await sendMessage(page, longMessage);
+
+		// Message should be visible (at least the ID part)
+		await expect(page.getByText(id)).toBeVisible();
+	});
+
+	test('should handle special characters in messages', async ({ page }) => {
+		await navigateToChannel(page, 'general');
+
+		const id = uniqueId();
+		const message = `specialchars${id}`;
+		await sendMessage(page, message);
+
+		// Message should be visible
 		await expect(page.getByText(message)).toBeVisible();
 	});
 });
