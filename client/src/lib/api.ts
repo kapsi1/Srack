@@ -90,6 +90,8 @@ export interface Message {
 	replies?: Message[]; // Recursive
 	parentId?: string;
 	attachments?: Attachment[];
+	type?: 'TEXT' | 'CALL' | 'SYSTEM';
+	metadata?: any;
 }
 
 export const fetchCurrentUser = async (): Promise<User> => {

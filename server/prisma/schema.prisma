@@ -54,8 +54,16 @@ model Message {
   reactions     Reaction[]
   savedMessages SavedMessage[]
   attachments   Json?
+  type          MessageType    @default(TEXT)
+  metadata      Json?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+}
+
+enum MessageType {
+  TEXT
+  CALL
+  SYSTEM
 }
 
 model Reaction {

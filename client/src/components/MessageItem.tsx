@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: Container handles mouse events for showing actions overlay */
 
 import EmojiPicker, { type EmojiClickData, Theme } from 'emoji-picker-react';
-import { Bookmark, FileText, MessageSquare, Share, Smile, Trash } from 'lucide-react';
+import { Bookmark, FileText, MessageSquare, Share, Smile, Trash, Phone, Video, Clock, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import ReactMarkdown from 'react-markdown';
@@ -116,6 +116,7 @@ export function MessageItem({
 							<span className="text-xs text-gray-500">{formatTime(message.timestamp)}</span>
 						</div>
 					)}
+					{message.type !== 'CALL' && (
 					<div className="text-gray-200 markdown-content">
 						<ReactMarkdown
 							remarkPlugins={[remarkGfm]}
@@ -159,6 +160,48 @@ export function MessageItem({
 							{formatMentions(message.content)}
 						</ReactMarkdown>
 					</div>
+					)}
+
+					{/* Call Info Card */}
+					{message.type === 'CALL' && message.metadata && (
+						<div className="mt-2 text-sm bg-gray-800 border border-gray-700 rounded-lg p-3 max-w-sm">
+							<div className="flex items-center gap-2 mb-2 font-medium text-gray-200">
+								{message.metadata.callType === 'video' ? <Video className="w-4 h-4" /> : <Phone className="w-4 h-4" />}
+								<span>{message.content}</span>
+							</div>
+
+							<div className="space-y-1 text-gray-400 text-xs">
+								{message.metadata.startedAt && (
+									<div className="flex items-center gap-2">
+										<Clock className="w-3 h-3" />
+										<span>Started: {new Date(message.metadata.startedAt).toLocaleTimeString()}</span>
+									</div>
+								)}
+								{message.metadata.endedAt && (
+									<div className="flex items-center gap-2">
+										<Clock className="w-3 h-3" />
+										<span>Ended: {new Date(message.metadata.endedAt).toLocaleTimeString()}</span>
+									</div>
+								)}
+								<div className="flex items-center gap-2">
+									<Clock className="w-3 h-3" />
+									<span>Duration: {message.metadata.duration ? `${Math.floor(message.metadata.duration / 60)}m ${message.metadata.duration % 60}s` : '0s'}</span>
+								</div>
+								
+								{message.metadata.status === 'completed' ? (
+									<div className="flex items-center gap-2 text-green-400">
+										<CheckCircle2 className="w-3 h-3" />
+										<span>Completed</span>
+									</div>
+								) : (
+									<div className="flex items-center gap-2 text-red-400">
+										<AlertCircle className="w-3 h-3" />
+										<span>{message.metadata.reason || 'Failed'}</span>
+									</div>
+								)}
+							</div>
+						</div>
+					)}
 					
 					{/* Attachments */}
 					{message.attachments && message.attachments.length > 0 && (
@@ -193,6 +236,7 @@ export function MessageItem({
 												<FileText className="w-4 h-4" />
 												<span className="truncate">{attachment.name}</span>
 											</div>
+											{/* biome-ignore lint/a11y/useMediaCaption: User uploaded content does not support captions yet */}
 											<audio controls className="w-full h-8" src={attachment.cdnUrl} />
 										</div>
 									);
@@ -201,6 +245,7 @@ export function MessageItem({
 								if (isVideo) {
 									return (
 										<div key={attachment.uuid} className="rounded-lg overflow-hidden border border-gray-700 bg-[#1a1d21] max-w-[400px]">
+											{/* biome-ignore lint/a11y/useMediaCaption: User uploaded content does not support captions yet */}
 											<video controls className="w-full max-h-[300px]" src={attachment.cdnUrl} />
 											<div className="p-2 border-t border-gray-800 text-xs text-gray-400 truncate">
 												{attachment.name}

@@ -56,6 +56,8 @@ export interface Message {
 	threadCount?: number;
 	isSaved?: boolean;
 	attachments?: Attachment[];
+	type?: 'TEXT' | 'CALL' | 'SYSTEM';
+	metadata?: any;
 }
 
 export interface Channel {
@@ -99,6 +101,8 @@ function mapApiMessagesToMessages(apiMessages: ApiMessage[]): Message[] {
 			isSaved: msg.isSaved,
 			threadCount: msg.threadCount,
 			attachments: msg.attachments,
+			type: msg.type,
+			metadata: msg.metadata,
 		};
 	});
 }
