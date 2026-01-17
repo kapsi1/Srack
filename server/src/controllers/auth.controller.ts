@@ -9,6 +9,15 @@ if (!JWT_SECRET) {
 	throw new Error('JWT_SECRET environment variable must be set');
 }
 
+// Cookie options for JWT
+const getCookieOptions = () => ({
+	httpOnly: true, // Not accessible to JavaScript
+	secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+	sameSite: 'strict' as const, // CSRF protection
+	maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+	path: '/',
+});
+
 export const register = async (req: Request, res: Response) => {
 	try {
 		const { email, username, password } = req.body;
@@ -47,6 +56,9 @@ export const register = async (req: Request, res: Response) => {
 			expiresIn: '7d',
 		});
 
+		// Set token in HttpOnly cookie
+		res.cookie('token', token, getCookieOptions());
+
 		res.status(201).json({
 			user: {
 				id: user.id,
@@ -54,7 +66,6 @@ export const register = async (req: Request, res: Response) => {
 				username: user.username,
 				avatar: user.avatar,
 			},
-			token,
 		});
 	} catch (_error) {
 		res.status(500).json({ error: 'Error registering user' });
@@ -85,6 +96,9 @@ export const login = async (req: Request, res: Response) => {
 			expiresIn: '7d',
 		});
 
+		// Set token in HttpOnly cookie
+		res.cookie('token', token, getCookieOptions());
+
 		res.json({
 			user: {
 				id: user.id,
@@ -92,9 +106,21 @@ export const login = async (req: Request, res: Response) => {
 				username: user.username,
 				avatar: user.avatar,
 			},
-			token,
 		});
 	} catch (_error) {
 		res.status(500).json({ error: 'Error logging in' });
 	}
+};
+
+export const logout = async (_req: Request, res: Response) => {
+	// Clear the token cookie
+	res.cookie('token', '', {
+		httpOnly: true,
+		secure: process.env.NODE_ENV === 'production',
+		sameSite: 'strict',
+		maxAge: 0, // Expire immediately
+		path: '/',
+	});
+
+	res.json({ message: 'Logged out successfully' });
 };

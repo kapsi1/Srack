@@ -12,13 +12,21 @@ export interface AuthRequest extends Request {
 }
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
-	const authHeader = req.headers.authorization;
+	// Try to get token from HttpOnly cookie first, then fallback to Authorization header
+	let token: string | undefined;
 
-	if (!authHeader || !authHeader.startsWith('Bearer ')) {
-		return res.status(401).json({ error: 'Unauthorized' });
+	// Check cookie first (primary method)
+	if (req.cookies?.token) {
+		token = req.cookies.token;
+	}
+	// Fallback to Authorization header (for backwards compatibility)
+	else if (req.headers.authorization?.startsWith('Bearer ')) {
+		token = req.headers.authorization.split(' ')[1];
 	}
 
-	const token = authHeader.split(' ')[1];
+	if (!token) {
+		return res.status(401).json({ error: 'Unauthorized' });
+	}
 
 	try {
 		const payload = jwt.verify(token, JWT_SECRET) as { userId: string };

@@ -22,7 +22,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 	useEffect(() => {
 		const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
 		console.log('Final SOCKET_URL configured as:', SOCKET_URL);
-		const socketInstance = io(SOCKET_URL);
+		const socketInstance = io(SOCKET_URL, {
+			withCredentials: true, // Send cookies for authentication
+		});
 
 		socketInstance.on('connect', () => {
 			setIsConnected(true);

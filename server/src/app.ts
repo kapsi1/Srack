@@ -1,4 +1,5 @@
 import http from 'node:http';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
@@ -27,10 +28,12 @@ const io = new Server(server, {
 	cors: {
 		origin: CORS_ORIGIN,
 		methods: ['GET', 'POST'],
+		credentials: true, // Allow cookies
 	},
 });
 
-app.use(cors({ origin: CORS_ORIGIN }));
+app.use(cors({ origin: CORS_ORIGIN, credentials: true }));
+app.use(cookieParser());
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);

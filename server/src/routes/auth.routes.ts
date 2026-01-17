@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { login, register } from '../controllers/auth.controller';
+import { login, logout, register } from '../controllers/auth.controller';
 
 const router = Router();
 
@@ -23,5 +23,6 @@ const registerLimiter = rateLimit({
 
 router.post('/register', registerLimiter, register);
 router.post('/login', loginLimiter, login);
+router.post('/logout', logout);
 
 export default router;

@@ -37,7 +37,20 @@ export const setupSocket = (io: Server) => {
 
 	// Socket.io JWT authentication middleware
 	io.use((socket: AuthenticatedSocket, next) => {
-		const token = socket.handshake.auth.token || socket.handshake.query.token;
+		// Try to get token from auth, query, or cookies
+		let token = socket.handshake.auth.token || socket.handshake.query.token;
+
+		// Also check cookies (requires credentials: true on client and server)
+		if (!token && socket.handshake.headers.cookie) {
+			const cookies = socket.handshake.headers.cookie.split(';');
+			for (const cookie of cookies) {
+				const [name, value] = cookie.trim().split('=');
+				if (name === 'token') {
+					token = value;
+					break;
+				}
+			}
+		}
 
 		if (!token) {
 			return next(new Error('Authentication required'));

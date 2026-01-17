@@ -6,14 +6,11 @@ console.log('Final API_URL configured as:', API_URL);
 
 const api = axios.create({
 	baseURL: API_URL,
+	withCredentials: true, // Send cookies with requests
 });
 
 api.interceptors.request.use(
 	(config) => {
-		const token = localStorage.getItem('token');
-		if (token) {
-			config.headers.Authorization = `Bearer ${token}`;
-		}
 		console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, config.data || '');
 		return config;
 	},

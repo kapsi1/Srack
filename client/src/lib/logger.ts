@@ -22,8 +22,8 @@ const consumeQueue = async () => {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					Authorization: `Bearer ${localStorage.getItem('token')}`,
 				},
+				credentials: 'include', // Send cookies for auth
 				body: JSON.stringify(log),
 			});
 		}
@@ -51,22 +51,11 @@ export const logToServer = (level: string, message: string, details?: unknown) =
 	// Also log to console
 	logToConsole(level, message, details);
 
-	// Prepare log object
-	const user = localStorage.getItem('user');
-	let userId: string | undefined;
-	if (user) {
-		try {
-			userId = JSON.parse(user).id;
-		} catch (_e) {
-			// ignore
-		}
-	}
-
+	// Prepare log object - userId will be determined server-side from auth cookie
 	const logEntry: LogEntry = {
 		level,
 		message,
 		details: details ? JSON.stringify(details) : undefined,
-		userId,
 	};
 
 	LOG_Queue.push(logEntry);

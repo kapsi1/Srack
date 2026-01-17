@@ -10,7 +10,7 @@ interface User {
 }
 
 interface AuthPageProps {
-	onLogin: (user: User, token: string) => void;
+	onLogin: (user: User) => void; // Token is now set as HttpOnly cookie by server
 }
 
 export function AuthPage({ onLogin }: AuthPageProps) {
@@ -31,8 +31,8 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 			const data = isLogin ? { email, password } : { email, username, password };
 
 			const response = await api.post(endpoint, data);
-			const { user, token } = response.data;
-			onLogin(user, token);
+			const { user } = response.data; // Token is set in HttpOnly cookie by server
+			onLogin(user);
 		} catch (err) {
 			const axiosError = err as AxiosError<{ error: string }>;
 			console.error('Auth error:', axiosError);

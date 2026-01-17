@@ -109,43 +109,42 @@ function mapApiMessagesToMessages(apiMessages: ApiMessage[]): Message[] {
 
 export default function App() {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
-	const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
-	const [isLoading, setIsLoading] = useState(!!localStorage.getItem('token'));
+	const [isLoading, setIsLoading] = useState(true); // Always check auth on mount
 	const navigate = useNavigate();
 
-	const handleLogout = useCallback(() => {
+	const handleLogout = useCallback(async () => {
+		try {
+			// Call logout endpoint to clear the cookie
+			await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/logout`, {
+				method: 'POST',
+				credentials: 'include',
+			});
+		} catch (error) {
+			console.error('Logout error:', error);
+		}
 		setCurrentUser(null);
-		setToken(null);
-		localStorage.removeItem('token');
-		localStorage.removeItem('user');
 		navigate('/', { replace: true });
 	}, [navigate]);
 
-	const handleLogin = (user: User, token: string) => {
+	const handleLogin = (user: User) => {
+		// Token is now set as HttpOnly cookie by the server
 		setCurrentUser(user);
-		setToken(token);
-		localStorage.setItem('token', token);
-		localStorage.setItem('user', JSON.stringify(user));
 	};
 
 	useEffect(() => {
-		const savedToken = localStorage.getItem('token');
-		if (savedToken) {
-			fetchCurrentUser()
-				.then((user) => {
-					setCurrentUser(user);
-					setToken(savedToken);
-				})
-				.catch(() => {
-					handleLogout();
-				})
-				.finally(() => {
-					setIsLoading(false);
-				});
-		} else {
-			setIsLoading(false);
-		}
-	}, [handleLogout]);
+		// Check if we're authenticated by trying to fetch current user
+		// The cookie will be sent automatically
+		fetchCurrentUser()
+			.then((user) => {
+				setCurrentUser(user);
+			})
+			.catch(() => {
+				setCurrentUser(null);
+			})
+			.finally(() => {
+				setIsLoading(false);
+			});
+	}, []);
 
 	if (isLoading) {
 		return (
@@ -163,27 +162,27 @@ export default function App() {
 		<Routes>
 			<Route
 				path="/"
-				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
+				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />}
 			/>
 			<Route
 				path="/channel/:channelName"
-				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
+				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />}
 			/>
 			<Route
 				path="/user/:userName"
-				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
+				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />}
 			/>
 			<Route
 				path="/saved-items"
-				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
+				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />}
 			/>
 			<Route
 				path="/mentions-reactions"
-				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
+				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />}
 			/>
 			<Route
 				path="/threads"
-				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} token={token || ''} />}
+				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />}
 			/>
 			<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>
@@ -193,12 +192,10 @@ export default function App() {
 function MainApp({
 	currentUser,
 	onLogout,
-	token,
 	onStartCall,
 }: {
 	currentUser: User;
 	onLogout: () => void;
-	token: string;
 	onStartCall?: (channelId: string, remoteUser: CallUser, isVideo: boolean) => Promise<void>;
 }) {
 	const location = useLocation();
@@ -223,31 +220,31 @@ function MainApp({
 	const { data: channelsData } = useQuery({
 		queryKey: ['channels'],
 		queryFn: fetchChannels,
-		enabled: !!token,
+		enabled: !!currentUser,
 	});
 
 	const { data: usersData } = useQuery({
 		queryKey: ['users'],
 		queryFn: fetchUsers,
-		enabled: !!token,
+		enabled: !!currentUser,
 	});
 
 	const { data: messagesData } = useQuery({
 		queryKey: ['messages', activeChannel?.id],
 		queryFn: () => (activeChannel ? fetchMessages(activeChannel.id) : Promise.resolve([])),
-		enabled: !!token && !!activeChannel,
+		enabled: !!currentUser && !!activeChannel,
 	});
 
 	const { data: savedMessagesData } = useQuery({
 		queryKey: ['saved-messages'],
 		queryFn: fetchSavedMessages,
-		enabled: !!token,
+		enabled: !!currentUser,
 	});
 
 	const { data: threadMessagesData } = useQuery({
 		queryKey: ['thread-messages', activeThread?.id],
 		queryFn: () => (activeThread ? fetchThreadMessages(activeThread.id) : Promise.resolve([])),
-		enabled: !!token && !!activeThread,
+		enabled: !!currentUser && !!activeThread,
 	});
 
 	// Mutations
@@ -835,10 +832,10 @@ function MainApp({
 }
 
 // Wrapper component that provides call functionality
-function MainAppWithCall({ currentUser, onLogout, token }: { currentUser: User; onLogout: () => void; token: string }) {
+function MainAppWithCall({ currentUser, onLogout }: { currentUser: User; onLogout: () => void }) {
 	return (
 		<CallProvider currentUser={{ id: currentUser.id, username: currentUser.username, avatar: currentUser.avatar }}>
-			<MainAppWithCallInner currentUser={currentUser} onLogout={onLogout} token={token} />
+			<MainAppWithCallInner currentUser={currentUser} onLogout={onLogout} />
 		</CallProvider>
 	);
 }
@@ -847,17 +844,15 @@ function MainAppWithCall({ currentUser, onLogout, token }: { currentUser: User; 
 function MainAppWithCallInner({
 	currentUser,
 	onLogout,
-	token,
 }: {
 	currentUser: User;
 	onLogout: () => void;
-	token: string;
 }) {
 	const { startCall } = useCall();
 
 	return (
 		<>
-			<MainApp currentUser={currentUser} onLogout={onLogout} token={token} onStartCall={startCall} />
+			<MainApp currentUser={currentUser} onLogout={onLogout} onStartCall={startCall} />
 			<VideoCall />
 			<CallNotification />
 		</>
