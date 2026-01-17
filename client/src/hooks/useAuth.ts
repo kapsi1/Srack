@@ -18,7 +18,7 @@ export function useAuth(): UseAuthReturn {
 	const handleLogout = useCallback(async () => {
 		try {
 			// Call logout endpoint to clear the cookie
-			await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/logout`, {
+			await fetch(`${import.meta.env.VITE_API_URL || '/api'}/auth/logout`, {
 				method: 'POST',
 				credentials: 'include',
 			});

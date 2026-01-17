@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// In production, use relative URL (proxied by Vercel) for same-origin requests
+// In development, VITE_API_URL can override to point to local backend
+export const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 console.log('Final API_URL configured as:', API_URL);
 

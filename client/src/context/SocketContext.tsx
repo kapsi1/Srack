@@ -20,7 +20,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 	const [isConnected, setIsConnected] = useState(false);
 
 	useEffect(() => {
-		const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+		// In production, use current origin (proxied by Vercel) for same-origin requests
+		// In development, VITE_SOCKET_URL can override to point to local backend
+		const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || window.location.origin;
 		console.log('Final SOCKET_URL configured as:', SOCKET_URL);
 		const socketInstance = io(SOCKET_URL, {
 			withCredentials: true, // Send cookies for authentication

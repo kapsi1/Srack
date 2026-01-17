@@ -10,10 +10,12 @@ if (!JWT_SECRET) {
 }
 
 // Cookie options for JWT
+// In production: Secure=true (HTTPS), SameSite=lax (works with Vercel proxy)
+// In development: Secure=false (HTTP), SameSite=lax
 const getCookieOptions = () => ({
 	httpOnly: true, // Not accessible to JavaScript
-	secure: true, // MUST be True for SameSite: 'none'
-	sameSite: 'none' as const, // Clear for cross-site requests (Vercel -> Koyeb)
+	secure: process.env.NODE_ENV === 'production',
+	sameSite: 'lax' as const, // Works for same-site (proxied) requests
 	maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
 	path: '/',
 });
@@ -116,8 +118,8 @@ export const logout = async (_req: Request, res: Response) => {
 	// Clear the token cookie
 	res.cookie('token', '', {
 		httpOnly: true,
-		secure: true,
-		sameSite: 'none',
+		secure: process.env.NODE_ENV === 'production',
+		sameSite: 'lax',
 		maxAge: 0, // Expire immediately
 		path: '/',
 	});

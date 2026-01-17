@@ -75,7 +75,7 @@ describe('Auth Endpoints', () => {
 		expect(res.status).toBe(401); // Invalid credentials
 	});
 
-	it('should have SameSite=None and Secure attributes in token cookie', async () => {
+	it('should have SameSite=Lax and HttpOnly attributes in token cookie', async () => {
 		const uniqueSuffix = Date.now() + 3;
 		const userData = {
 			username: `${TEST_PREFIX}cookie_${uniqueSuffix}`,
@@ -89,7 +89,7 @@ describe('Auth Endpoints', () => {
 		const cookies = res.headers['set-cookie'] as unknown as string[];
 		const tokenCookie = cookies.find((c: string) => c.startsWith('token='));
 
-		expect(tokenCookie).toContain('SameSite=None');
-		expect(tokenCookie).toContain('Secure');
+		expect(tokenCookie).toContain('SameSite=Lax');
+		expect(tokenCookie).toContain('HttpOnly');
 	});
 });
