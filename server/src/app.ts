@@ -24,6 +24,11 @@ if (!CORS_ORIGIN) {
 }
 
 const app = express();
+
+// Trust first proxy (e.g., Koyeb, Railway) for correct client IP detection
+// Required for express-rate-limit to work correctly behind a reverse proxy
+app.set('trust proxy', 1);
+
 const server = http.createServer(app);
 const io = new Server(server, {
 	cors: {
