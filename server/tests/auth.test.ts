@@ -19,7 +19,12 @@ describe('Auth Endpoints', () => {
 			});
 
 		expect(res.status).toBe(201);
-		expect(res.body).toHaveProperty('token');
+		// Token should be in cookie, not body
+		expect(res.headers['set-cookie']).toBeDefined();
+		const cookies = res.headers['set-cookie'] as unknown as string[];
+		const tokenCookie = cookies.find((c: string) => c.startsWith('token='));
+		expect(tokenCookie).toBeDefined();
+
 		expect(res.body.user).toHaveProperty('id');
 		expect(res.body.user.username).toBe(`${TEST_PREFIX}user_${uniqueSuffix}`);
 	});
@@ -42,7 +47,12 @@ describe('Auth Endpoints', () => {
 		});
 
 		expect(res.status).toBe(200);
-		expect(res.body).toHaveProperty('token');
+		// Token should be in cookie
+		expect(res.headers['set-cookie']).toBeDefined();
+		const cookies = res.headers['set-cookie'] as unknown as string[];
+		const tokenCookie = cookies.find((c: string) => c.startsWith('token='));
+		expect(tokenCookie).toBeDefined();
+		
 		expect(res.body.user.email).toBe(userData.email);
 	});
 

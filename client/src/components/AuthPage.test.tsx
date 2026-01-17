@@ -57,7 +57,7 @@ describe('AuthPage', () => {
 				email: 'test@example.com',
 				password: 'password123',
 			});
-			expect(onLogin).toHaveBeenCalledWith(mockResponse.data.user, mockResponse.data.token);
+			expect(onLogin).toHaveBeenCalledWith(mockResponse.data.user);
 		});
 	});
 

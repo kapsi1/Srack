@@ -4,20 +4,24 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-	const hashedPassword = await bcrypt.hash('password123', 10);
+	// Only seed the demo user in non-production environments
+	if (process.env.NODE_ENV !== 'production') {
+		const hashedPassword = await bcrypt.hash('password123', 10);
 
-	const user = await prisma.user.upsert({
-		where: { email: 'demo@example.com' },
-		update: {},
-		create: {
-			email: 'demo@example.com',
-			username: 'DemoUser',
-			password: hashedPassword,
-			avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DemoUser',
-		},
-	});
-
-	console.log('Dummy user created:', user.email);
+		const user = await prisma.user.upsert({
+			where: { email: 'demo@example.com' },
+			update: {},
+			create: {
+				email: 'demo@example.com',
+				username: 'DemoUser',
+				password: hashedPassword,
+				avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DemoUser',
+			}, 
+		});
+		console.log('Dummy user created:', user.email);
+	} else {
+		console.log('Skipping DemoUser creation in production environment.');
+	}
 
 	// Create a default channel
 	const general = await prisma.channel.upsert({

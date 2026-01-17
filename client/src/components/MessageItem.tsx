@@ -17,6 +17,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import ReactMarkdown from 'react-markdown';
+import rehypeSanitize from 'rehype-sanitize';
 import remarkGfm from 'remark-gfm';
 import type { Message, User } from '../App';
 
@@ -141,6 +142,7 @@ export function MessageItem({
 						<div className="text-gray-200 markdown-content">
 							<ReactMarkdown
 								remarkPlugins={[remarkGfm]}
+								rehypePlugins={[rehypeSanitize]}
 								components={{
 									p: ({ node, ...props }) => <p className="markdown-paragraph" {...props} />,
 									a: ({ node, href, ...props }) => {

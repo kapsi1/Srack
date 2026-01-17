@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
+import helmet from 'helmet';
 import { Server } from 'socket.io';
 import prisma from './lib/prisma';
 import activityRoutes from './routes/activity.routes';
@@ -33,6 +34,7 @@ const io = new Server(server, {
 });
 
 app.use(cors({ origin: CORS_ORIGIN, credentials: true }));
+app.use(helmet());
 app.use(cookieParser());
 app.use(express.json());
 

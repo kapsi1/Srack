@@ -13,8 +13,20 @@ export const getAuthToken = async () => {
 	};
 
 	const res = await request(app).post('/api/auth/register').send(user);
+	
+	const cookies = res.headers['set-cookie'] as unknown as string[];
+	if (!cookies) {
+		throw new Error('No cookies set after registration');
+	}
 
-	return res.body.token;
+	const tokenCookie = cookies.find((c: string) => c.startsWith('token='));
+	if (!tokenCookie) {
+		throw new Error('Token cookie not found');
+	}
+
+	// Extract token value: token=...; Path=/; ...
+	const token = tokenCookie.split(';')[0].split('=')[1];
+	return token;
 };
 
 export const cleanupTestData = async () => {
