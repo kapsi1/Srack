@@ -1,5 +1,17 @@
+import jwt from 'jsonwebtoken';
 import type { Server, Socket } from 'socket.io';
 import prisma from './lib/prisma';
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+	throw new Error('JWT_SECRET environment variable must be set');
+}
+
+// Extend Socket type to include authenticated userId
+interface AuthenticatedSocket extends Socket {
+	userId?: string;
+}
 
 // Store io instance locally
 let ioInstance: Server;
@@ -22,14 +34,43 @@ const activeCalls = new Map<string, CallSession>();
 
 export const setupSocket = (io: Server) => {
 	ioInstance = io;
-	io.on('connection', (socket: Socket) => {
-		console.log('User connected:', socket.id);
 
-		// Register user for call routing
+	// Socket.io JWT authentication middleware
+	io.use((socket: AuthenticatedSocket, next) => {
+		const token = socket.handshake.auth.token || socket.handshake.query.token;
+
+		if (!token) {
+			return next(new Error('Authentication required'));
+		}
+
+		try {
+			const payload = jwt.verify(token, JWT_SECRET) as { userId: string };
+			socket.userId = payload.userId;
+			next();
+		} catch (_error) {
+			next(new Error('Invalid or expired token'));
+		}
+	});
+
+	io.on('connection', (socket: AuthenticatedSocket) => {
+		const userId = socket.userId;
+		console.log('User connected:', socket.id, 'userId:', userId);
+
+		// Automatically register authenticated user for call routing
+		if (userId) {
+			userSocketMap.set(userId, socket.id);
+			socketUserMap.set(socket.id, userId);
+			console.log(`User ${userId} registered with socket ${socket.id}`);
+		}
+
+		// Keep register-user for backwards compatibility, but verify it matches authenticated user
 		socket.on('register-user', (data: { userId: string }) => {
-			userSocketMap.set(data.userId, socket.id);
-			socketUserMap.set(socket.id, data.userId);
-			console.log(`User ${data.userId} registered with socket ${socket.id}`);
+			if (data.userId !== userId) {
+				socket.emit('error', { message: 'User ID mismatch' });
+				return;
+			}
+			// Already registered above, just log
+			console.log(`User ${data.userId} re-registered with socket ${socket.id}`);
 		});
 
 		socket.on('join_channel', (channelId: string) => {
@@ -42,17 +83,21 @@ export const setupSocket = (io: Server) => {
 			console.log(`User ${socket.id} left channel ${channelId}`);
 		});
 
-		// Keeping these for backward compatibility or if we decide to use sockets for sending later
-		// The controller will also use broadcastMessage
-		socket.on('send_message', async (data: { content: string; channelId: string; senderId: string }) => {
+		// Socket message sending - now uses authenticated userId
+		socket.on('send_message', async (data: { content: string; channelId: string }) => {
+			if (!userId) {
+				socket.emit('error', { message: 'Not authenticated' });
+				return;
+			}
+
 			try {
-				const { content, channelId, senderId } = data;
+				const { content, channelId } = data;
 
 				const message = await prisma.message.create({
 					data: {
 						content,
 						channelId,
-						senderId,
+						senderId: userId, // Use authenticated userId
 						type: 'TEXT',
 					},
 					include: {
@@ -74,9 +119,14 @@ export const setupSocket = (io: Server) => {
 			}
 		});
 
-		socket.on('add_reaction', async (data: { messageId: string; emoji: string; userId: string; channelId: string }) => {
+		socket.on('add_reaction', async (data: { messageId: string; emoji: string; channelId: string }) => {
+			if (!userId) {
+				socket.emit('error', { message: 'Not authenticated' });
+				return;
+			}
+
 			try {
-				const { messageId, emoji, userId, channelId } = data;
+				const { messageId, emoji, channelId } = data;
 
 				const reaction = await prisma.reaction.create({
 					data: {

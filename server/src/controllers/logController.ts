@@ -1,9 +1,11 @@
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import prisma from '../lib/prisma';
+import type { AuthRequest } from '../middleware/auth.middleware';
 
-export const createLog = async (req: Request, res: Response) => {
+export const createLog = async (req: AuthRequest, res: Response) => {
 	try {
-		const { level, message, details, userId } = req.body;
+		const { level, message, details } = req.body;
+		const userId = req.userId; // Use authenticated userId
 
 		const log = await prisma.clientLog.create({
 			data: {

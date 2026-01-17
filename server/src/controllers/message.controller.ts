@@ -5,6 +5,22 @@ import type { AuthRequest } from '../middleware/auth.middleware';
 export const getChannelMessages = async (req: AuthRequest, res: Response) => {
 	try {
 		const channelId = req.params.channelId as string;
+		const userId = req.userId;
+
+		// Authorization check: verify user has access to this channel
+		const channel = await prisma.channel.findUnique({
+			where: { id: channelId },
+			include: { members: { where: { id: userId } } },
+		});
+
+		if (!channel) {
+			return res.status(404).json({ error: 'Channel not found' });
+		}
+
+		// For private and DM channels, user must be a member
+		if (channel.type !== 'PUBLIC' && channel.members.length === 0) {
+			return res.status(403).json({ error: 'Access denied to this channel' });
+		}
 
 		const messages = await prisma.message.findMany({
 			where: { channelId, parentId: null },
@@ -45,7 +61,7 @@ export const getChannelMessages = async (req: AuthRequest, res: Response) => {
 		);
 
 		// Auto-join public channel if not already a member
-		const userId = req.userId;
+		// Note: userId is already defined at the top of this function
 		// Optimization: Run this in background, don't await blocking response?
 		// Or just let it run. But we already sent response.
 		// To be safe, we should await before sending response or just ignore.
@@ -85,6 +101,11 @@ export const createMessage = async (req: AuthRequest, res: Response) => {
 
 		if (!content || !channelId || !userId) {
 			return res.status(400).json({ error: 'Missing required fields' });
+		}
+
+		// Input validation: limit message length to prevent DoS
+		if (typeof content !== 'string' || content.length > 10000) {
+			return res.status(400).json({ error: 'Message content too long (max 10,000 characters)' });
 		}
 
 		const message = await prisma.message.create({

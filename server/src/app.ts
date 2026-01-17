@@ -15,16 +15,22 @@ import { setupSocket } from './socket';
 
 dotenv.config();
 
+const CORS_ORIGIN = process.env.CORS_ORIGIN;
+
+if (!CORS_ORIGIN) {
+	throw new Error('CORS_ORIGIN environment variable must be set');
+}
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
 	cors: {
-		origin: process.env.CORS_ORIGIN || '*',
+		origin: CORS_ORIGIN,
 		methods: ['GET', 'POST'],
 	},
 });
 
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+app.use(cors({ origin: CORS_ORIGIN }));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);

@@ -3,7 +3,11 @@ import type { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import prisma from '../lib/prisma';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-fallback-secret';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+	throw new Error('JWT_SECRET environment variable must be set');
+}
 
 export const register = async (req: Request, res: Response) => {
 	try {
