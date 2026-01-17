@@ -24,7 +24,9 @@ export interface UseChannelsReturn {
 	setActiveChannel: (channel: Channel | null) => void;
 	unreadCounts: Record<string, number>;
 	setUnreadCounts: React.Dispatch<React.SetStateAction<Record<string, number>>>;
-	createChannelMutation: ReturnType<typeof useMutation<ApiChannel, Error, { name: string; isPrivate: boolean; description?: string }>>;
+	createChannelMutation: ReturnType<
+		typeof useMutation<ApiChannel, Error, { name: string; isPrivate: boolean; description?: string }>
+	>;
 	dmMutation: ReturnType<typeof useMutation<ApiChannel, Error, string>>;
 	toggleStarChannelMutation: ReturnType<typeof useMutation<{ starred: boolean; channelId: string }, Error, string>>;
 	handleStarChannel: (channelId: string) => void;

@@ -70,19 +70,19 @@ describe('MessageItem', () => {
 			content: '<img src=x onerror=alert("xss") /> <script>alert("xss")</script> [link](javascript:alert("xss"))',
 		};
 		render(<MessageItem message={dangerousMessage} showAvatar={true} onAddReaction={() => {}} />);
-		
+
 		// The img tag should be stripped or rendered as text (depending on rehype setup, usually stripped)
 		// But definitively the onerror handler should be gone.
 		// React testing library renders what's in the DOM.
 		// If sanitized, the script tag should be gone or safe.
-		
+
 		expect(screen.queryByText('xss')).not.toBeInTheDocument();
 		// If it renders as text, it might verify basic text presence but importantly check attribute absence if possible.
 		// But simpler: just ensure the raw dangerous string isn't "executed" (hard to test execution in jsdom).
 		// We can check that the "onerror" attribute is failing or missing.
-		
+
 		const images = screen.queryAllByRole('img');
-		images.forEach(img => {
+		images.forEach((img) => {
 			expect(img).not.toHaveAttribute('onerror');
 		});
 	});

@@ -5,7 +5,7 @@ import { app } from '../src/app';
 describe('Security Headers', () => {
 	it('should have basic security headers', async () => {
 		const res = await request(app).get('/health');
-		
+
 		expect(res.headers['x-dns-prefetch-control']).toBeDefined();
 		expect(res.headers['x-frame-options']).toBeDefined();
 		expect(res.headers['strict-transport-security']).toBeDefined();

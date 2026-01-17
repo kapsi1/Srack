@@ -16,7 +16,7 @@ async function main() {
 				username: 'DemoUser',
 				password: hashedPassword,
 				avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DemoUser',
-			}, 
+			},
 		});
 		console.log('Dummy user created:', user.email);
 	} else {

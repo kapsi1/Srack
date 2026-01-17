@@ -1,9 +1,4 @@
-import {
-	type Message as ApiMessage,
-	type MessageReaction,
-	type User as ApiUser,
-	type Attachment,
-} from './lib/api';
+import type { Message as ApiMessage, User as ApiUser, Attachment, MessageReaction } from './lib/api';
 
 // Re-export User from API
 export type User = ApiUser;

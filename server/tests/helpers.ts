@@ -13,7 +13,7 @@ export const getAuthToken = async () => {
 	};
 
 	const res = await request(app).post('/api/auth/register').send(user);
-	
+
 	const cookies = res.headers['set-cookie'] as unknown as string[];
 	if (!cookies) {
 		throw new Error('No cookies set after registration');

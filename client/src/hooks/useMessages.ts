@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import {
-	type Attachment,
 	type Message as ApiMessage,
+	type Attachment,
 	deleteMessage,
 	fetchMessages,
 	fetchSavedMessages,
@@ -10,7 +10,7 @@ import {
 	sendMessage,
 	toggleSavedMessage,
 } from '../lib/api';
-import { mapApiMessagesToMessages, type Channel, type Message, type User } from '../types';
+import { type Channel, type Message, mapApiMessagesToMessages, type User } from '../types';
 
 export interface UseMessagesOptions {
 	currentUser: User | null;
@@ -25,7 +25,13 @@ export interface UseMessagesReturn {
 	setThreadMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 	savedMessagesData: ApiMessage[] | undefined;
 	sendMessageMutation: {
-		mutate: (params: { channelId: string; content: string; tempId: string; parentId?: string; attachments?: Attachment[] }) => void;
+		mutate: (params: {
+			channelId: string;
+			content: string;
+			tempId: string;
+			parentId?: string;
+			attachments?: Attachment[];
+		}) => void;
 		isPending: boolean;
 	};
 	handleSendMessage: (content: string, attachments?: Attachment[]) => void;

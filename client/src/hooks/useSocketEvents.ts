@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import type { Socket } from 'socket.io-client';
-import type { Message as ApiMessage, Channel as ApiChannel, MessageReaction } from '../lib/api';
+import type { Channel as ApiChannel, Message as ApiMessage, MessageReaction } from '../lib/api';
 import type { Channel, Message, User } from '../types';
 
 export interface UseSocketEventsOptions {
@@ -176,5 +176,14 @@ export function useSocketEvents({
 			socket.off('reaction_added', handleReactionAdded);
 			socket.off('message_deleted', handleMessageDeleted);
 		};
-	}, [socket, activeChannel, currentUser, activeThread, setMessages, setThreadMessages, setUnreadCounts, setActiveThread]);
+	}, [
+		socket,
+		activeChannel,
+		currentUser,
+		activeThread,
+		setMessages,
+		setThreadMessages,
+		setUnreadCounts,
+		setActiveThread,
+	]);
 }

@@ -15,11 +15,10 @@ import { VideoCall } from './components/VideoCall';
 import { CallProvider, type CallUser, useCall } from './context/CallContext';
 import { useSocket } from './context/SocketContext';
 import { useAuth, useChannels, useMessages, useSocketEvents } from './hooks';
-import { mapApiMessagesToMessages, type Channel, type Message, type User } from './types';
+import { type Message, mapApiMessagesToMessages, type User } from './types';
 
 // Re-export types for backwards compatibility
-export type { User, Message, Channel } from './types';
-export type { DirectMessage } from './types';
+export type { Channel, DirectMessage, Message, User } from './types';
 
 export default function App() {
 	const { currentUser, isLoading, handleLogin, handleLogout } = useAuth();
@@ -38,30 +37,18 @@ export default function App() {
 
 	return (
 		<Routes>
-			<Route
-				path="/"
-				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />}
-			/>
+			<Route path="/" element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />} />
 			<Route
 				path="/channel/:channelName"
 				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />}
 			/>
-			<Route
-				path="/user/:userName"
-				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />}
-			/>
-			<Route
-				path="/saved-items"
-				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />}
-			/>
+			<Route path="/user/:userName" element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />} />
+			<Route path="/saved-items" element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />} />
 			<Route
 				path="/mentions-reactions"
 				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />}
 			/>
-			<Route
-				path="/threads"
-				element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />}
-			/>
+			<Route path="/threads" element={<MainAppWithCall currentUser={currentUser} onLogout={handleLogout} />} />
 			<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>
 	);
@@ -161,7 +148,17 @@ function MainApp({
 				navigate(`/channel/${channelsData[0].name}`, { replace: true });
 			}
 		}
-	}, [channelsData, usersData, channelName, userName, activeChannel, navigate, dmMutation, location.pathname, setActiveChannel]);
+	}, [
+		channelsData,
+		usersData,
+		channelName,
+		userName,
+		activeChannel,
+		navigate,
+		dmMutation,
+		location.pathname,
+		setActiveChannel,
+	]);
 
 	// Clear unreads when changing active channel
 	useEffect(() => {
@@ -338,13 +335,7 @@ function MainAppWithCall({ currentUser, onLogout }: { currentUser: User; onLogou
 }
 
 // Inner component that can use the useCall hook
-function MainAppWithCallInner({
-	currentUser,
-	onLogout,
-}: {
-	currentUser: User;
-	onLogout: () => void;
-}) {
+function MainAppWithCallInner({ currentUser, onLogout }: { currentUser: User; onLogout: () => void }) {
 	const { startCall } = useCall();
 
 	return (

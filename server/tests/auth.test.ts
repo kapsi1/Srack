@@ -52,7 +52,7 @@ describe('Auth Endpoints', () => {
 		const cookies = res.headers['set-cookie'] as unknown as string[];
 		const tokenCookie = cookies.find((c: string) => c.startsWith('token='));
 		expect(tokenCookie).toBeDefined();
-		
+
 		expect(res.body.user.email).toBe(userData.email);
 	});
 
@@ -73,5 +73,23 @@ describe('Auth Endpoints', () => {
 		});
 
 		expect(res.status).toBe(401); // Invalid credentials
+	});
+
+	it('should have SameSite=None and Secure attributes in token cookie', async () => {
+		const uniqueSuffix = Date.now() + 3;
+		const userData = {
+			username: `${TEST_PREFIX}cookie_${uniqueSuffix}`,
+			email: `${TEST_PREFIX}cookie_${uniqueSuffix}@example.com`,
+			password: 'password123',
+		};
+
+		const res = await request(app).post('/api/auth/register').send(userData);
+
+		expect(res.status).toBe(201);
+		const cookies = res.headers['set-cookie'] as unknown as string[];
+		const tokenCookie = cookies.find((c: string) => c.startsWith('token='));
+
+		expect(tokenCookie).toContain('SameSite=None');
+		expect(tokenCookie).toContain('Secure');
 	});
 });
