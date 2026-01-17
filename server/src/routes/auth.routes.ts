@@ -11,6 +11,7 @@ const loginLimiter = rateLimit({
 	message: { error: 'Too many login attempts, please try again later' },
 	standardHeaders: true,
 	legacyHeaders: false,
+	skip: () => process.env.NODE_ENV === 'test',
 });
 
 const registerLimiter = rateLimit({
@@ -19,6 +20,7 @@ const registerLimiter = rateLimit({
 	message: { error: 'Too many registration attempts, please try again later' },
 	standardHeaders: true,
 	legacyHeaders: false,
+	skip: () => process.env.NODE_ENV === 'test',
 });
 
 router.post('/register', registerLimiter, register);
