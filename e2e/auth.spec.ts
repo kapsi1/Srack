@@ -14,7 +14,6 @@ test.describe('Authentication', () => {
 		// Fill registration form
 		const id = uniqueId();
 		await page.fill('#username', `${TEST_PREFIX}register_${id}`);
-		await page.fill('#email', `${TEST_PREFIX}register_${id}@example.com`);
 		await page.fill('#password', 'password123');
 
 		// Submit
@@ -32,7 +31,7 @@ test.describe('Authentication', () => {
 		await logoutUser(page);
 
 		// Login with the same credentials
-		await loginUser(page, credentials.email, credentials.password);
+		await loginUser(page, credentials.username, credentials.password);
 
 		// Should be logged in
 		await expect(page.getByText('Snack')).toBeVisible({ timeout: 30000 });
@@ -56,7 +55,7 @@ test.describe('Authentication', () => {
 		await page.goto('/');
 
 		// Try to login with invalid credentials
-		await page.fill('#email', 'invalid@example.com');
+		await page.fill('#username', 'invaliduser');
 		await page.fill('#password', 'wrongpassword');
 		await page.getByRole('button', { name: 'Sign In' }).click();
 
@@ -79,7 +78,6 @@ test.describe('Authentication', () => {
 		// Should now show register form
 		await expect(page.getByText('Create your account')).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Create Account' })).toBeVisible();
-		await expect(page.locator('#username')).toBeVisible();
 
 		// Click to switch back to login
 		await page.getByText('Already have an account? Sign in').click();
@@ -121,7 +119,6 @@ test.describe('Authentication', () => {
 		// Fill form
 		const id = uniqueId();
 		await page.fill('#username', `${TEST_PREFIX}loading_${id}`);
-		await page.fill('#email', `${TEST_PREFIX}loading_${id}@example.com`);
 		await page.fill('#password', 'password123');
 
 		// Click submit

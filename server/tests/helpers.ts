@@ -8,7 +8,6 @@ export const getAuthToken = async () => {
 	const uniqueSuffix = Date.now() + Math.floor(Math.random() * 1000);
 	const user = {
 		username: `${TEST_PREFIX}helper_${uniqueSuffix}`,
-		email: `${TEST_PREFIX}helper_${uniqueSuffix}@example.com`,
 		password: 'password123',
 	};
 
@@ -33,7 +32,7 @@ export const cleanupTestData = async () => {
 	// 1. Find all users with TEST_PREFIX
 	const testUsers = await prisma.user.findMany({
 		where: {
-			OR: [{ username: { startsWith: TEST_PREFIX } }, { email: { startsWith: TEST_PREFIX } }],
+			username: { startsWith: TEST_PREFIX },
 		},
 		select: { id: true },
 	});

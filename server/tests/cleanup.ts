@@ -10,7 +10,7 @@ async function main() {
 		// 1. Find all users that match the prefixes
 		const testUsers = await prisma.user.findMany({
 			where: {
-				OR: allPrefixes.flatMap((p) => [{ username: { startsWith: p } }, { email: { startsWith: p } }]),
+				OR: allPrefixes.map((p) => ({ username: { startsWith: p } })),
 			},
 			select: { id: true },
 		});

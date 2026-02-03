@@ -22,18 +22,18 @@ const getCookieOptions = () => ({
 
 export const register = async (req: Request, res: Response) => {
 	try {
-		const { email, username, password } = req.body;
+		const { username, password } = req.body;
 
-		if (!email || !username || !password) {
+		if (!username || !password) {
 			return res.status(400).json({ error: 'Missing required fields' });
 		}
 
 		const existingUser = await prisma.user.findUnique({
-			where: { email },
+			where: { username },
 		});
 
 		if (existingUser) {
-			return res.status(400).json({ error: 'User already exists' });
+			return res.status(400).json({ error: 'Username already taken' });
 		}
 
 		const hashedPassword = await bcrypt.hash(password, 10);
@@ -45,7 +45,6 @@ export const register = async (req: Request, res: Response) => {
 
 		const user = await prisma.user.create({
 			data: {
-				email,
 				username,
 				password: hashedPassword,
 				channels: {
@@ -64,7 +63,6 @@ export const register = async (req: Request, res: Response) => {
 		res.status(201).json({
 			user: {
 				id: user.id,
-				email: user.email,
 				username: user.username,
 				avatar: user.avatar,
 			},
@@ -75,16 +73,16 @@ export const register = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-	console.log(`[Auth] Login attempt for email: ${req.body.email}`);
+	console.log(`[Auth] Login attempt for username: ${req.body.username}`);
 	try {
-		const { email, password } = req.body;
+		const { username, password } = req.body;
 
 		const user = await prisma.user.findUnique({
-			where: { email },
+			where: { username },
 		});
 
 		if (!user) {
-			console.log(`[Auth] User not found: ${email}`);
+			console.log(`[Auth] User not found: ${username}`);
 			return res.status(401).json({ error: 'Invalid credentials' });
 		}
 
@@ -104,7 +102,6 @@ export const login = async (req: Request, res: Response) => {
 		res.json({
 			user: {
 				id: user.id,
-				email: user.email,
 				username: user.username,
 				avatar: user.avatar,
 			},

@@ -102,7 +102,7 @@ The PostgreSQL database is managed with **Prisma ORM** and includes the followin
 
 | Model | Description |
 |-------|-------------|
-| `User` | User accounts with email, username, password, and avatar |
+| `User` | User accounts with username, password, and avatar |
 | `Channel` | Public, private, and DM channels |
 | `Message` | Messages with content, attachments, and thread support |
 | `Reaction` | Emoji reactions on messages |

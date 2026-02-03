@@ -9,16 +9,15 @@ async function main() {
 		const hashedPassword = await bcrypt.hash('password123', 10);
 
 		const user = await prisma.user.upsert({
-			where: { email: 'demo@example.com' },
+			where: { username: 'DemoUser' },
 			update: {},
 			create: {
-				email: 'demo@example.com',
 				username: 'DemoUser',
 				password: hashedPassword,
 				avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DemoUser',
 			},
 		});
-		console.log('Dummy user created:', user.email);
+		console.log('Dummy user created:', user.username);
 	} else {
 		console.log('Skipping DemoUser creation in production environment.');
 	}

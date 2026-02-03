@@ -15,9 +15,8 @@ describe('AuthPage', () => {
 		render(<AuthPage onLogin={() => {}} />);
 		expect(screen.getByText(/Welcome to/i)).toBeInTheDocument();
 		expect(screen.getByText(/Snack/i)).toBeInTheDocument();
-		expect(screen.getByPlaceholderText('name@example.com')).toBeInTheDocument();
+		expect(screen.getByPlaceholderText('Enter your username')).toBeInTheDocument();
 		expect(screen.getByPlaceholderText('Enter your password')).toBeInTheDocument();
-		expect(screen.queryByPlaceholderText('Enter your username')).not.toBeInTheDocument();
 		expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument();
 	});
 
@@ -27,7 +26,6 @@ describe('AuthPage', () => {
 		fireEvent.click(toggleButton);
 
 		expect(screen.getByText('Create your account')).toBeInTheDocument();
-		expect(screen.getByPlaceholderText('Enter your username')).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: 'Create Account' })).toBeInTheDocument();
 	});
 
@@ -35,7 +33,7 @@ describe('AuthPage', () => {
 		const onLogin = vi.fn();
 		const mockResponse = {
 			data: {
-				user: { id: '1', username: 'testuser', email: 'test@example.com' },
+				user: { id: '1', username: 'testuser' },
 				token: 'fake-token',
 			},
 		};
@@ -43,8 +41,8 @@ describe('AuthPage', () => {
 
 		render(<AuthPage onLogin={onLogin} />);
 
-		fireEvent.change(screen.getByPlaceholderText('name@example.com'), {
-			target: { value: 'test@example.com' },
+		fireEvent.change(screen.getByPlaceholderText('Enter your username'), {
+			target: { value: 'testuser' },
 		});
 		fireEvent.change(screen.getByPlaceholderText('Enter your password'), {
 			target: { value: 'password123' },
@@ -54,7 +52,7 @@ describe('AuthPage', () => {
 
 		await waitFor(() => {
 			expect(api.post).toHaveBeenCalledWith('/auth/login', {
-				email: 'test@example.com',
+				username: 'testuser',
 				password: 'password123',
 			});
 			expect(onLogin).toHaveBeenCalledWith(mockResponse.data.user);
@@ -70,8 +68,8 @@ describe('AuthPage', () => {
 
 		render(<AuthPage onLogin={() => {}} />);
 
-		fireEvent.change(screen.getByPlaceholderText('name@example.com'), {
-			target: { value: 'test@example.com' },
+		fireEvent.change(screen.getByPlaceholderText('Enter your username'), {
+			target: { value: 'testuser' },
 		});
 		fireEvent.change(screen.getByPlaceholderText('Enter your password'), {
 			target: { value: 'wrong' },

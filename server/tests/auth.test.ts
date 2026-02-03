@@ -14,7 +14,6 @@ describe('Auth Endpoints', () => {
 			.post('/api/auth/register')
 			.send({
 				username: `${TEST_PREFIX}user_${uniqueSuffix}`,
-				email: `${TEST_PREFIX}user_${uniqueSuffix}@example.com`,
 				password: 'password123',
 			});
 
@@ -34,7 +33,6 @@ describe('Auth Endpoints', () => {
 		const uniqueSuffix = Date.now() + 1;
 		const userData = {
 			username: `${TEST_PREFIX}login_${uniqueSuffix}`,
-			email: `${TEST_PREFIX}login_${uniqueSuffix}@example.com`,
 			password: 'password123',
 		};
 
@@ -42,7 +40,7 @@ describe('Auth Endpoints', () => {
 
 		// Then try to login
 		const res = await request(app).post('/api/auth/login').send({
-			email: userData.email,
+			username: userData.username,
 			password: userData.password,
 		});
 
@@ -53,7 +51,7 @@ describe('Auth Endpoints', () => {
 		const tokenCookie = cookies.find((c: string) => c.startsWith('token='));
 		expect(tokenCookie).toBeDefined();
 
-		expect(res.body.user.email).toBe(userData.email);
+		expect(res.body.user.username).toBe(userData.username);
 	});
 
 	it('should fail login with wrong password', async () => {
@@ -61,14 +59,13 @@ describe('Auth Endpoints', () => {
 		const uniqueSuffix = Date.now() + 2;
 		const userData = {
 			username: `${TEST_PREFIX}wrongpass_${uniqueSuffix}`,
-			email: `${TEST_PREFIX}wrongpass_${uniqueSuffix}@example.com`,
 			password: 'password123',
 		};
 
 		await request(app).post('/api/auth/register').send(userData);
 
 		const res = await request(app).post('/api/auth/login').send({
-			email: userData.email,
+			username: userData.username,
 			password: 'wrongpassword',
 		});
 
@@ -79,7 +76,6 @@ describe('Auth Endpoints', () => {
 		const uniqueSuffix = Date.now() + 3;
 		const userData = {
 			username: `${TEST_PREFIX}cookie_${uniqueSuffix}`,
-			email: `${TEST_PREFIX}cookie_${uniqueSuffix}@example.com`,
 			password: 'password123',
 		};
 

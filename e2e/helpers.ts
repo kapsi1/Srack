@@ -13,28 +13,26 @@ export const uniqueId = () => Date.now().toString(36) + Math.random().toString(3
 export async function registerUser(page: Page, prefix = 'user') {
 	const id = uniqueId();
 	const username = `${TEST_PREFIX}${prefix}_${id}`;
-	const email = `${TEST_PREFIX}${prefix}_${id}@example.com`;
 	const password = 'password123';
 
 	await page.goto('/');
 	await page.getByText("Don't have an account? Sign up").click();
 	await page.fill('#username', username);
-	await page.fill('#email', email);
 	await page.fill('#password', password);
 	await page.getByRole('button', { name: 'Create Account' }).click();
 
 	// Wait for successful login - should see Snack in sidebar
 	await expect(page.getByText('Snack')).toBeVisible({ timeout: 30000 });
 
-	return { username, email, password };
+	return { username, password };
 }
 
 /**
  * Login with existing credentials
  */
-export async function loginUser(page: Page, email: string, password: string) {
+export async function loginUser(page: Page, username: string, password: string) {
 	await page.goto('/');
-	await page.fill('#email', email);
+	await page.fill('#username', username);
 	await page.fill('#password', password);
 	await page.getByRole('button', { name: 'Sign In' }).click();
 

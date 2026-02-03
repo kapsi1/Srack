@@ -4,7 +4,6 @@ import api from '@/lib/api';
 
 interface User {
 	id: string;
-	email: string;
 	username: string;
 	avatar?: string;
 }
@@ -16,7 +15,6 @@ interface AuthPageProps {
 export function AuthPage({ onLogin }: AuthPageProps) {
 	const [isLogin, setIsLogin] = useState(true);
 	const [username, setUsername] = useState('');
-	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
 	const [loading, setLoading] = useState(false);
@@ -28,7 +26,7 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 
 		try {
 			const endpoint = isLogin ? '/auth/login' : '/auth/register';
-			const data = isLogin ? { email, password } : { email, username, password };
+			const data = { username, password };
 
 			const response = await api.post(endpoint, data);
 			const { user } = response.data; // Token is set in HttpOnly cookie by server
@@ -78,34 +76,17 @@ export function AuthPage({ onLogin }: AuthPageProps) {
 					)}
 
 					<form onSubmit={handleSubmit} className="space-y-5">
-						{!isLogin && (
-							<div>
-								<label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
-									Username
-								</label>
-								<input
-									id="username"
-									type="text"
-									value={username}
-									onChange={(e) => setUsername(e.target.value)}
-									className="w-full px-4 py-3 bg-[#0d0c0f] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#611f69] focus:border-transparent transition-all"
-									placeholder="Enter your username"
-									required={!isLogin}
-								/>
-							</div>
-						)}
-
 						<div>
-							<label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-								Email address
+							<label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
+								Username
 							</label>
 							<input
-								id="email"
-								type="email"
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
+								id="username"
+								type="text"
+								value={username}
+								onChange={(e) => setUsername(e.target.value)}
 								className="w-full px-4 py-3 bg-[#0d0c0f] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#611f69] focus:border-transparent transition-all"
-								placeholder="name@example.com"
+								placeholder="Enter your username"
 								required
 							/>
 						</div>

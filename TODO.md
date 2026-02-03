@@ -13,7 +13,7 @@ This document outlines the tasks required to convert the existing Figma-based Re
 - [x] Install dependencies: `express`, `cors`, `dotenv`, `prisma`, `@prisma/client`, `socket.io`.
 - [x] Initialize Prisma with PostgreSQL provider.
 - [x] Define Database Schema:
-    - [x] `User` model (id, email, password, username, avatar).
+    - [x] `User` model (id, password, username, avatar).
     - [x] `Channel` model (id, name, isPrivate).
     - [x] `Message` model (id, content, senderId, channelId, createdAt).
     - [x] `Reaction` model (id, emoji, messageId, userId).
