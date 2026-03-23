@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 import express from 'express';
 import helmet from 'helmet';
 import { Server } from 'socket.io';
-import prisma from './lib/prisma';
 import activityRoutes from './routes/activity.routes';
 import authRoutes from './routes/auth.routes';
 import channelRoutes from './routes/channel.routes';
@@ -13,6 +12,7 @@ import logRoutes from './routes/logRoutes';
 import messageRoutes from './routes/message.routes';
 import savedMessageRoutes from './routes/saved-message.routes';
 import userRoutes from './routes/user.routes';
+import healthRoutes from './routes/health.routes';
 import { setupSocket } from './socket';
 
 dotenv.config();
@@ -50,15 +50,9 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/saved-messages', savedMessageRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/logs', logRoutes);
+app.use('/api/health', healthRoutes);
+app.use('/health', healthRoutes);
 
-app.get('/health', async (_req: express.Request, res: express.Response) => {
-	try {
-		await prisma.$queryRaw`SELECT 1`;
-		res.json({ status: 'ok', database: 'connected' });
-	} catch (error) {
-		res.status(500).json({ status: 'error', database: 'disconnected', error });
-	}
-});
 
 setupSocket(io);
 
